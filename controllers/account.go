@@ -35,8 +35,25 @@ func (base *BaseController) AccountManage(w http.ResponseWriter, req *http.Reque
     err = base.Session.Save(req, w)
 	if err != nil {
 		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while getting town list", http.StatusBadRequest)
+		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
 		return
 	}
     template.Renderer.ExecuteTemplate(w, "manage.html", response)
+}
+
+// AccountLogout logs the user out
+func (base *BaseController) AccountLogout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {   
+    account := models.GetAccountByToken(base.Session.GetString("key"))
+    if account == nil {
+        http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
+        return
+    }
+    base.Session.Delete("key")
+    err := base.Session.Save(req, w)
+    if err != nil {
+		util.HandleError("Error saving the current session", err)
+		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
+		return
+	}
+    http.Redirect(w, req, "/account/login", http.StatusMovedPermanently)
 }

@@ -28,6 +28,7 @@ func registerRoutes(router *httprouter.Router) {
 	router.GET("/account/login", route(base.Login, base, guest))
 	router.POST("/account/login", route(base.SignIn, base, guest))
 	router.GET("/account/manage", route(base.AccountManage, base, logged))
+	router.POST("/account/logout", route(base.AccountLogout, base, logged))
 }
 
 func route(controller func(w http.ResponseWriter, req *http.Request, ps httprouter.Params), base *controllers.BaseController, mode ...int) func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {

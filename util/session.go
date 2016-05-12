@@ -47,6 +47,12 @@ func (s *Session) Set(key string, val interface{}) {
 	s.store.Values[key] = val
 }
 
+// Delete deletes a session value
+func (s *Session) Delete(key string) {
+	delete(s.store.Values, key)
+	s.store.Options.MaxAge = -1
+}
+
 // AddFlash adds a flash string to the session
 func (s *Session) AddFlash(msg, key string) {
 	s.store.AddFlash(msg, key)
