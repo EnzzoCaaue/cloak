@@ -137,6 +137,6 @@ func (account *CloakaAccount) UpdateRecoveryKey(key string) error {
 
 // EnableTwoFactor enables the two-factor google auth system on a given account
 func (account *CloakaAccount) EnableTwoFactor(secret string) error {
-    _, err := database.Connection.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ?", secret, account.Account.ID)
+    _, err := database.Connection.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ? AND b.account = a.id", secret, account.Account.ID)
     return err
 }
