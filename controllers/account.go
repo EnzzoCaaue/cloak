@@ -18,6 +18,10 @@ type manage struct {
 // AccountManage shows the account manage page
 func (base *BaseController) AccountManage(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
     account := models.GetAccountByToken(base.Session.GetString("key"))
+    if account == nil {
+        http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
+        return
+    }
     characters, err := account.GetCharacters()
     if err != nil {
         http.Error(w, "Oops! Something wrong happened while getting your character list", http.StatusBadRequest)

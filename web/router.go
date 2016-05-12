@@ -49,11 +49,11 @@ func route(controller func(w http.ResponseWriter, req *http.Request, ps httprout
 
 			}
 			if mode[i] == logged && session.GetInt("logged") == 0 {
-				base.DisplayError(w, req, nil)
+				http.Redirect(w, req, "/account/login", http.StatusMovedPermanently)
 				return
 			}
 			if mode[i] == guest && session.GetInt("logged") == 1 {
-				base.DisplayError(w, req, nil)
+				http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
 				return
 			}
 		}

@@ -89,6 +89,9 @@ func (account *CloakaAccount) EmailExists() bool {
 
 // GetAccountByToken gets an account with the given cookie token
 func GetAccountByToken(token string) *CloakaAccount {
+    if !TokenExists(token) {
+        return nil
+    }
     account := NewAccount()
     row := database.Connection.QueryRow("SELECT a.id, a.name, a.password, a.email, a.premdays, b.points, b.admin FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND b.token = ?", token)
     row.Scan(&account.Account.ID, &account.Account.Name, &account.Account.Password, &account.Account.Email, &account.Account.Premdays, &account.Points, &account.Admin)
