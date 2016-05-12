@@ -33,6 +33,7 @@ func main() {
 	log.Println("Config values parsed")
 	log.Println("Template renderer registered")
 	util.SetMode(*mode)
+	util.SetTemplate(*tpl)
 	if *mode == 0 {
 		log.Println("Running Cloaka on DEBUG mode")
 	} else {

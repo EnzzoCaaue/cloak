@@ -97,3 +97,8 @@ type Config struct {
 		Description string
 	}
 }
+
+// SetTemplate sets the AAC template path
+func SetTemplate(path string) {
+	Parser.Style.Template = path
+}

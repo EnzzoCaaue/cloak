@@ -1,5 +1,10 @@
 package util
 
+import (
+	"time"
+	"fmt"
+)
+
 const (
 	novoc = iota
 	sorcerer
@@ -49,4 +54,32 @@ func Vocation(voc string) int {
 // Gender gets the gender id from a given string
 func Gender(gender string) int {
 	return genderList[gender]
+}
+
+// GetGender gets the gender string from a id
+func GetGender(gender int) string {
+	if gender == 0 {
+		return "Female"
+	}
+	return "Male"
+}
+
+// GetVocation gets the vocation string from a id
+func GetVocation(voc int) string {
+	for i, v := range vocationList {
+		if v == voc {
+			return i
+		}
+	}
+	return "Sorcerer"
+}
+
+// UnixToString converts a int64 to a string date
+func UnixToString(unix int64) string {
+	if unix == 0 {
+		return "Never"
+	}
+	timeDate := time.Unix(unix, 0)
+	timeString := fmt.Sprintf("%v %v %v, %v:%v:%v", timeDate.Month().String()[:3], timeDate.Day(), timeDate.Year(), timeDate.Hour(), timeDate.Minute(), timeDate.Second())
+	return timeString
 }

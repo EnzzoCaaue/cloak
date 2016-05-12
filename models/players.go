@@ -35,7 +35,10 @@ type Player struct {
 	SkillFish int
 	Experience int
 	Balance int
+	Premdays int
 	LastLogin int64
+	GuildName string
+	GuildRank string
 	Cloaka *CloakaPlayer
 }
 
@@ -68,6 +71,18 @@ func NewPlayer() *Player {
 	player := &Player{}
 	player.Cloaka = &CloakaPlayer{}
 	player.Town = &Town{}
+	return player
+}
+
+// GetPlayerByName gets a character by its name
+func GetPlayerByName(name string) *Player {
+	player := NewPlayer()
+	player.Name = name
+	if !player.Exists() {
+		return nil
+	}
+	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, d.name, e.name FROM players a, accounts b, cloaka_towns c, guilds d, guild_ranks e, guild_membership f WHERE d.id = f.guild_id AND f.player_id = a.id AND e.id = f.rank_id AND a.account_id = b.id AND a.town_id = c.id AND a.name = ?", player.Name)
+	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.GuildName, &player.GuildRank)
 	return player
 }
 
