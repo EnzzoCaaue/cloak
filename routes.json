@@ -1,0 +1,10 @@
+{
+    "routes": [
+        {
+            "path": "/lua/test",
+            "method": "GET",
+            "file": "test.lua",
+            "mode": "logged"
+        }
+    ]
+}
