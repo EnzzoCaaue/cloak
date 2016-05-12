@@ -47,9 +47,8 @@ func (s *Session) Set(key string, val interface{}) {
 	s.store.Values[key] = val
 }
 
-// Delete deletes a session value
+// Delete deletes the whole session
 func (s *Session) Delete(key string) {
-	delete(s.store.Values, key)
 	s.store.Options.MaxAge = -1
 }
 
