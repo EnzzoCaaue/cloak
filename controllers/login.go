@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
     "github.com/Cloakaac/cloak/template"
 	"github.com/dchest/uniuri"
+    "github.com/dgryski/dgoogauth"
 	"github.com/Cloakaac/cloak/util"
     "github.com/Cloakaac/cloak/models"
 	"fmt"
@@ -66,6 +67,20 @@ func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ h
         base.Session.Save(req, w)
         http.Redirect(w, req, "/account/login", 301)
         return
+    }
+    if account.TwoFactor > 0 {
+        otpConfig := &dgoogauth.OTPConfig{
+            Secret:      account.Account.SecretKey,
+		    WindowSize:  3,
+		    HotpCounter: 0,
+        }
+        success, _ := otpConfig.Authenticate(req.FormValue("logincode"))
+        if !success {
+            base.Session.AddFlash("Wrong two-factor code", "errors")
+            base.Session.Save(req, w)
+            http.Redirect(w, req, "/account/login", 301)
+            return
+        }
     }
     key := uniuri.New()
     for models.TokenExists(key) {

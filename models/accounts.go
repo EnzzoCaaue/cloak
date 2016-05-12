@@ -14,6 +14,7 @@ type Account struct {
     Premdays int
     Lastday int64
     Email string
+    SecretKey string
 }
 
 // CloakaAccount struct for cloaka_account tables
@@ -36,6 +37,7 @@ func NewAccount() *CloakaAccount {
         0,
         0,
         0,
+        "",
         "",
     }
     cloakaAccount := &CloakaAccount{
@@ -124,8 +126,8 @@ func (account *CloakaAccount) SignIn() bool {
     if !success {
         return false
     }
-    row = database.Connection.QueryRow("SELECT id FROM accounts WHERE name = ?", account.Account.Name)
-    row.Scan(&account.Account.ID)
+    row = database.Connection.QueryRow("SELECT a.id, a.secret, b.twofactor FROM accounts a, cloaka_accounts b WHERE a.name = ? AND a.id = b.account", account.Account.Name)
+    row.Scan(&account.Account.ID, &account.Account.SecretKey, &account.TwoFactor)
     return true
 }
 
