@@ -22,7 +22,9 @@ type CloakaAccount struct {
 	Account *Account 
 	Token   string 
 	Points  int    
-	Admin   int    
+	Admin   int
+    TwoFactor int
+    RecoveryKey string    
 }
 
 // NewAccount creates and return a new cloaka account
@@ -42,6 +44,8 @@ func NewAccount() *CloakaAccount {
         "",
         0,
         0,
+        0,
+        "",
     }
     return cloakaAccount
 }
@@ -67,7 +71,7 @@ func (account *Account) Save() error {
 
 // Save registers a cloaka account
 func (account *CloakaAccount) Save() error {
-    _, err := database.Connection.Exec("INSERT INTO cloaka_accounts (account, token, admin) VALUES (?, ?, ?)", account.Account.ID, account.Token, account.Admin)
+    _, err := database.Connection.Exec("INSERT INTO cloaka_accounts (account, token, admin, twofactor, recovery) VALUES (?, ?, ?, ?, ?)", account.Account.ID, account.Token, account.Admin, 0, "")
 	return err
 }
 
@@ -93,8 +97,8 @@ func GetAccountByToken(token string) *CloakaAccount {
         return nil
     }
     account := NewAccount()
-    row := database.Connection.QueryRow("SELECT a.id, a.name, a.password, a.email, a.premdays, b.points, b.admin FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND b.token = ?", token)
-    row.Scan(&account.Account.ID, &account.Account.Name, &account.Account.Password, &account.Account.Email, &account.Account.Premdays, &account.Points, &account.Admin)
+    row := database.Connection.QueryRow("SELECT a.id, a.name, a.password, a.email, a.premdays, b.points, b.admin, b.twofactor, b.recovery FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND b.token = ?", token)
+    row.Scan(&account.Account.ID, &account.Account.Name, &account.Account.Password, &account.Account.Email, &account.Account.Premdays, &account.Points, &account.Admin, &account.TwoFactor, &account.RecoveryKey)
     return account
 }
 
@@ -123,4 +127,16 @@ func (account *CloakaAccount) SignIn() bool {
     row = database.Connection.QueryRow("SELECT id FROM accounts WHERE name = ?", account.Account.Name)
     row.Scan(&account.Account.ID)
     return true
+}
+
+// UpdateRecoveryKey sets an account recovery key
+func (account *CloakaAccount) UpdateRecoveryKey(key string) error {
+    _, err := database.Connection.Exec("UPDATE cloaka_accounts SET recovery = ? WHERE account = ?", key, account.Account.ID)
+    return err
+}
+
+// EnableTwoFactor enables the two-factor google auth system on a given account
+func (account *CloakaAccount) EnableTwoFactor(secret string) error {
+    _, err := database.Connection.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ?", secret, account.Account.ID)
+    return err
 }

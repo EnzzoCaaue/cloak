@@ -39,6 +39,18 @@ func NewRender(path string) error {
 
 func createFuncs() template.FuncMap {
 	funcMap := template.FuncMap{
+		"rawHTML": func(msg string) template.HTML {
+			return template.HTML(msg)	
+		},
+		"accountSecurity": func(twofactor int, key string) bool {
+			if twofactor != 0 && len(key) > 0 {
+				return true
+			}
+			return false
+		},
+		"hasRecoveryKey": func(key string) bool {
+			return len(key) > 0	
+		},
 		"unixToNews": func(unix int64) string {
 			t := time.Unix(unix, 0)
 			return fmt.Sprintf("%v %v %v -", t.Month().String()[:3], t.Day(), t.Year())

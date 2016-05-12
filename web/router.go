@@ -28,9 +28,12 @@ func registerRoutes(router *httprouter.Router) {
 	router.GET("/account/login", route(base.Login, base, guest))
 	router.POST("/account/login", route(base.SignIn, base, guest))
 	router.GET("/account/manage", route(base.AccountManage, base, logged))
-	router.POST("/account/logout", route(base.AccountLogout, base, logged))
+	router.GET("/account/logout", route(base.AccountLogout, base, logged))
 	router.GET("/character/view/:name", route(base.CharacterView, base, pass))
 	router.GET("/character/signature/:name", route(base.SignatureView, base, pass))
+	router.GET("/account/manage/recovery", route(base.AccountSetRecovery, base, logged))
+	router.GET("/account/manage/twofactor", route(base.AccountTwoFactor, base, logged))
+	router.POST("/account/manage/twofactor", route(base.AccountSetTwoFactor, base, logged))
 }
 
 func route(controller func(w http.ResponseWriter, req *http.Request, ps httprouter.Params), base *controllers.BaseController, mode ...int) func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
