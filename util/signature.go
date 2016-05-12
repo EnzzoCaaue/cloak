@@ -11,6 +11,7 @@ import (
 	_ "image/png"
     "bytes"
     "io/ioutil"
+    "strconv"
 )
 
 // CreateSignature creates a player signature image
@@ -59,7 +60,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
         HandleError("Error while drawing vocation text", err)
         return nil, err
     }
-    _, err = signatureTextDrawer.DrawString("Level: 1", freetype.Pt(20, 90))
+    _, err = signatureTextDrawer.DrawString("Level: " + strconv.Itoa(level), freetype.Pt(20, 90))
     if err != nil {
         HandleError("Error while drawing level text", err)
         return nil, err
