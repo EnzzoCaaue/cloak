@@ -43,7 +43,7 @@ func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
     return 0
 }
 
-// Used ONLY for querys that expect multiple rows result
+// Used ONLY for querys that expect multiple rows result sql.Rows
 func (l *luaInterface) query(luaVM *lua.LState) int {
     query := luaVM.ToString(1)
     rows, err := database.Connection.Query(query)
