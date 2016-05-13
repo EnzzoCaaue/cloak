@@ -5,7 +5,6 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
-	"log"
 )
 
 const (
@@ -36,11 +35,7 @@ func registerRoutes(router *httprouter.Router) {
 	router.GET("/account/manage/twofactor", route(base.AccountTwoFactor, base, logged))
 	router.POST("/account/manage/twofactor", route(base.AccountSetTwoFactor, base, logged))
 	// LUA ROUTES
-	luaRoutes, err := util.RegisterLuaRoutes()
-	if err != nil {
-		log.Fatal("Cannot parse routes.json")
-	}
-	for _, route := range luaRoutes.Routes {
+	for _, route := range util.Parser.Routes {
 		if route.Method == "GET" {
 			router.GET(route.Path, luaRoute(route.File, route.Mode))
 		} else {

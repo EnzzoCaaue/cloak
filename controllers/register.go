@@ -127,27 +127,27 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	player.Vocation = util.Vocation(form.CharacterVocation)
 	player.Gender = util.Gender(form.CharacterSex)
 	if player.Gender == 0 { // female
-		player.LookBody = util.Parser.Femalelooktype.Lookbody
-		player.LookFeet = util.Parser.Femalelooktype.Lookfeet
-		player.LookHead = util.Parser.Femalelooktype.Lookhead
-		player.LookType = util.Parser.Femalelooktype.Looktype
-		player.LookAddons = util.Parser.Femalelooktype.Lookaddons
+		player.LookBody = util.Parser.Register.Female.Lookbody
+		player.LookFeet = util.Parser.Register.Female.Lookfeet
+		player.LookHead = util.Parser.Register.Female.Lookhead
+		player.LookType = util.Parser.Register.Female.Looktype
+		player.LookAddons = util.Parser.Register.Female.Lookaddons
 	} else {
-		player.LookBody = util.Parser.Malelooktype.Lookbody
-		player.LookFeet = util.Parser.Malelooktype.Lookfeet
-		player.LookHead = util.Parser.Malelooktype.Lookhead
-		player.LookType = util.Parser.Malelooktype.Looktype
-		player.LookAddons = util.Parser.Malelooktype.Lookaddons
+		player.LookBody = util.Parser.Register.Male.Lookbody
+		player.LookFeet = util.Parser.Register.Male.Lookfeet
+		player.LookHead = util.Parser.Register.Male.Lookhead
+		player.LookType = util.Parser.Register.Male.Looktype
+		player.LookAddons = util.Parser.Register.Male.Lookaddons
 	}
 	player.Town = town.Get()
 	player.Stamina = util.Parser.Register.Stamina
-	player.SkillAxe = util.Parser.Skills.Axe
-	player.SkillSword = util.Parser.Skills.Sword
-	player.SkillClub = util.Parser.Skills.Club
-	player.SkillDist = util.Parser.Skills.Dist
-	player.SkillFish = util.Parser.Skills.Fish
-	player.SkillFist = util.Parser.Skills.Fist
-	player.SkillShield = util.Parser.Skills.Shield
+	player.SkillAxe = util.Parser.Register.Skills.Axe
+	player.SkillSword = util.Parser.Register.Skills.Sword
+	player.SkillClub = util.Parser.Register.Skills.Club
+	player.SkillDist = util.Parser.Register.Skills.Dist
+	player.SkillFish = util.Parser.Register.Skills.Fish
+	player.SkillFist = util.Parser.Register.Skills.Fist
+	player.SkillShield = util.Parser.Register.Skills.Shield
 	player.Experience = util.Parser.Register.Experience
 	err = player.Save()
 	if err != nil {

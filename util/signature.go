@@ -16,7 +16,7 @@ import (
 
 // CreateSignature creates a player signature image
 func CreateSignature(name string, gender, vocation, level int, lastlogin int64) ([]byte, error) {
-    background, err := os.Open(Parser.Style.Template + "/public/images/signature.png")
+    background, err := os.Open(Parser.Template + "/public/images/signature.png")
     if err != nil {
         HandleError("Cannot open signature background image", err)
         return nil, err
@@ -28,7 +28,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
         return nil, err
     }
     draw.Draw(backgroundRGBA, backgroundRGBA.Bounds(), backgroundDecoded, image.ZP, draw.Src)
-    fontBytes, err := ioutil.ReadFile(Parser.Style.Template + "/public/fonts/Aller_Bd.ttf")
+    fontBytes, err := ioutil.ReadFile(Parser.Template + "/public/fonts/Aller_Bd.ttf")
     if err != nil {
         HandleError("Cannot open signature font file", err)
         return nil, err
@@ -76,7 +76,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
         HandleError("Error writing to output buffer", err)
         return nil, err
     }
-    signatureFile, err := os.Create(Parser.Style.Template + "/public/signatures/" + name + ".png")
+    signatureFile, err := os.Create(Parser.Template + "/public/signatures/" + name + ".png")
     defer signatureFile.Close()
     signatureFile.Write(buffer.Bytes())
     return buffer.Bytes(), nil   

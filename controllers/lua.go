@@ -7,7 +7,6 @@ import (
     "github.com/julienschmidt/httprouter"
     "github.com/Cloakaac/cloak/template"
     "github.com/Cloakaac/cloak/database"
-	"log"
 )
 
 type luaInterface struct {
@@ -25,7 +24,7 @@ func LuaController(file string, w http.ResponseWriter, req *http.Request, params
     defer luaVM.Close()
     luaVM.SetGlobal("renderTemplate", luaVM.NewFunction(l.renderTemplate))
     luaVM.SetGlobal("query", luaVM.NewFunction(l.query))
-    err := luaVM.DoFile(util.Parser.Style.Template + "/pages/" + file)
+    err := luaVM.DoFile(util.Parser.Template + "/pages/" + file)
     if err != nil {
         util.HandleError("Cannot run lua " + file + " file", err)
         http.Error(w, "Error executing " + file + " lua file", 500)
@@ -38,7 +37,6 @@ func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
     args := luaVM.ToTable(2)
     resultMap := make(map[string]interface{})
     m := util.LuaTableToMap(args, nil, resultMap)
-    log.Println(resultMap)
     template.Renderer.ExecuteTemplate(l.w, tpl, m)
     return 0
 }

@@ -1,104 +1,91 @@
 package util
 
+import (
+	"io/ioutil"
+	"encoding/json"
+)
+
 // Parser stores the database config values
 var Parser = &Config{}
 
-// Config is the struct that stores all the database config values
+// Config is the main config structure of the AAC
 type Config struct {
-	General struct {
-		Path       string
-		Port       string
-		Secret     string
-		Logosize   int
-		Daemons    bool
-		DaemonsInt int
-	}
-	Mysql struct {
-		User     string
-		Password string
-		Database string
-	}
-	Captcha struct {
-		Key    string
-		Secret string
-	}
-	Highscores struct {
-		Per int
-	}
-	Character struct {
-		Max int
-	}
-	Register struct {
-		Premdays   int
-		Level      int
-		Health     int
-		Healthmax  int
-		Mana       int
-		Manamax    int
-		Experience int
-		Cap        int
-		Maglevel   int
-		Stamina    int
-	}
-	Skills struct {
-		Fist   int
-		Club   int
-		Sword  int
-		Axe    int
-		Dist   int
-		Shield int
-		Fish   int
-	}
-	Spawn struct {
-		Name string
-		Town int
-		Posx int
-		Posy int
-		Posz int
-	}
-	Malelooktype struct {
-		Looktype   int
-		Lookhead   int
-		Lookbody   int
-		Looklegs   int
-		Lookfeet   int
-		Lookaddons int
-	}
-	Femalelooktype struct {
-		Looktype   int
-		Lookhead   int
-		Lookbody   int
-		Looklegs   int
-		Lookfeet   int
-		Lookaddons int
-	}
-	Style struct {
-		Template string
-	}
-	Paypal struct {
-		Public      string
-		Private     string
-		Type        string
-		Currency    string
-		Points      int
-		Min         int
-		Max         int
-		Promo       int
-		Description string
-	}
-	Paygol struct {
-		Serviceid   int
-		Type        string
-		Currency    string
-		Points      int
-		Min         int
-		Max         int
-		Promo       int
-		Description string
-	}
+	Captcha *cptcha
+	Port string
+	Mode int
+	Database *connection
+	Template string
+	Routes []*luaRoute
+	Register *register
 }
 
-// SetTemplate sets the AAC template path
-func SetTemplate(path string) {
-	Parser.Style.Template = path
+type register struct {
+	Level int
+	Premdays int
+	Stamina int
+	Experience int
+	Health int
+	Healthmax int
+	Mana int
+	Manamax int
+	Male *registerMale
+	Female *registerFemale
+	Skills *registerSkills
+}
+
+type registerSkills struct {
+	Axe int
+	Sword int
+	Club int
+	Dist int
+	Fish int
+	Fist int
+	Shield int
+}
+
+type registerMale struct {
+	Lookbody int
+	Lookfeet int
+	Lookhead int
+	Looktype int
+	Lookaddons int
+}
+
+type registerFemale struct {
+	Lookbody int
+	Lookfeet int
+	Lookhead int
+	Looktype int
+	Lookaddons int
+}
+
+type cptcha struct {
+	Public string
+	Secret string
+}
+
+type connection struct {
+	User string
+	Password string
+	Database string
+}
+
+type luaRoute struct {
+	Path string
+    Method string
+    File string
+    Mode string
+}
+
+// LoadConfig loads and parsers a config.json file
+func LoadConfig() error {
+	f, err := ioutil.ReadFile("config.json")
+    if err != nil {
+        return err
+    }
+    err = json.Unmarshal(f, Parser)
+    if err != nil {
+        return err
+    }
+    return nil
 }

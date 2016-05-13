@@ -131,7 +131,7 @@ func createFuncs() template.FuncMap {
 			return true
 		},
 		"getCaptchaKey": func() string {
-			return util.Parser.Captcha.Key
+			return util.Parser.Captcha.Public
 		},
 		"parseComment": func(comment string) []string {
 			return strings.Split(comment, "\n")

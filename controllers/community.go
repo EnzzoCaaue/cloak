@@ -30,7 +30,7 @@ func (base *BaseController) SignatureView(w http.ResponseWriter, req *http.Reque
         http.Error(w, "Oops! Unknown character name", 500)
 	    return
     }
-	signatureFile, err := os.Open(util.Parser.Style.Template + "/public/signatures/" + player.Name + ".png")
+	signatureFile, err := os.Open(util.Parser.Template + "/public/signatures/" + player.Name + ".png")
 	if err != nil { // No signature
 		signature, err := util.CreateSignature(player.Name, player.Gender, player.Vocation, player.Level, player.LastLogin)
 		if err != nil {

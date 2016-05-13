@@ -1,0 +1,55 @@
+{
+    "port": "8080",
+    "mode": 0,
+    "template": "G:/Workspace/Go/src/github.com/Cloakaac/template-default",
+    "routes": [
+        {
+            "path": "/lua/test",
+            "method": "GET",
+            "file": "test.lua",
+            "mode": "logged"
+        }
+    ],
+    "database": {
+        "user": "root",
+        "password": "admin",
+        "database": "cloaka"
+    },
+    "captcha": {
+        "public": "",
+        "private": ""
+    },
+    "register": {
+        "premdays": 100,
+        "experience": 4200,
+        "stamina": 4200,
+        "level": 8,
+        "health": 42,
+        "healthMax": 42,
+        "mana": 0,
+        "manaMax": 0,
+        "male": {
+            "lookbody": 10,
+            "lookfeet": 10,
+            "lookhead": 10,
+            "looktype": 10,
+            "lookaddons": 10
+        },
+        "female": {
+            "lookbody": 10,
+            "lookfeet": 10,
+            "lookhead": 10,
+            "looktype": 10,
+            "lookaddons": 10
+        },
+        "skills": {
+            "axe": 10,
+            "sword": 10,
+            "club": 10,
+            "dist": 10,
+            "fish": 10,
+            "fist": 10,
+            "shield": 10    
+        }
+    }
+}
