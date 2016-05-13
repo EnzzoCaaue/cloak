@@ -6,7 +6,7 @@ import (
     "github.com/yuin/gopher-lua"
     "github.com/julienschmidt/httprouter"
     "github.com/Cloakaac/cloak/template"
-    //"github.com/Cloakaac/cloak/database"
+    "github.com/Cloakaac/cloak/database"
 )
 
 type luaInterface struct {
@@ -23,6 +23,7 @@ func LuaController(file string, w http.ResponseWriter, req *http.Request, params
     luaVM := lua.NewState()
     defer luaVM.Close()
     luaVM.SetGlobal("renderTemplate", luaVM.NewFunction(l.renderTemplate))
+    luaVM.SetGlobal("query", luaVM.NewFunction(l.query))
     err := luaVM.DoFile(util.Parser.Style.Template + "/pages/" + file)
     if err != nil {
         util.HandleError("Cannot run lua " + file + " file", err)
@@ -35,4 +36,32 @@ func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
     tpl := luaVM.ToString(1)
     template.Renderer.ExecuteTemplate(l.w, tpl, nil)
     return 0
+}
+
+// Used ONLY for querys that expect multiple rows result
+func (l *luaInterface) query(luaVM *lua.LState) int {
+    query := luaVM.ToString(1)
+    rows, err := database.Connection.Query(query)
+    if err != nil {
+        luaVM.Push(lua.LBool(false))
+        return 1
+    }
+    columnNames, err := rows.Columns()
+    if err != nil {
+        luaVM.Push(lua.LBool(false))
+        return 1
+    }
+    var results [][]interface{}
+    for rows.Next() {
+        columns := make([]interface{}, len(columnNames))
+        columnPointers := make([]interface{}, len(columnNames))
+        for i := range columnNames {
+            columnPointers[i] = &columns[i]
+        }
+        rows.Scan(columnPointers...)
+        results = append(results, columns)
+    }
+    r := util.QueryToTable(results)
+    luaVM.Push(r)
+    return 1
 }

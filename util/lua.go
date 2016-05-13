@@ -3,6 +3,7 @@ package util
 import (
     "io/ioutil"
     "encoding/json"
+    "github.com/yuin/gopher-lua"
 )
 
 // LuaFile saves all the lua routes
@@ -31,4 +32,18 @@ func RegisterLuaRoutes() (*LuaFile, error) {
         return nil, err
     }
     return luaRoutes, nil
+}
+
+// QueryToTable converts an slice of interfaces to a lua table
+func QueryToTable(r [][]interface{}) *lua.LTable {
+    resultTable := &lua.LTable{}
+    for i := range r {
+        t := &lua.LTable{}
+        for x := range r[i] {
+            log.Println(x)
+            t.RawSetInt(x, lua.LString(string(r[i][x].([]uint8))))
+        }
+        resultTable.RawSetInt(i, t)
+    }
+    return resultTable
 }
