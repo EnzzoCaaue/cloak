@@ -34,16 +34,61 @@ func RegisterLuaRoutes() (*LuaFile, error) {
     return luaRoutes, nil
 }
 
-// QueryToTable converts an slice of interfaces to a lua table
+// QueryToTable converts a slice of interfaces to a lua table
 func QueryToTable(r [][]interface{}) *lua.LTable {
     resultTable := &lua.LTable{}
     for i := range r {
         t := &lua.LTable{}
         for x := range r[i] {
-            log.Println(x)
             t.RawSetInt(x, lua.LString(string(r[i][x].([]uint8))))
         }
         resultTable.RawSetInt(i, t)
     }
     return resultTable
 }
+
+// LuaTableToMap converts a lua table to a Go map
+func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
+    switch r.Type() {
+        case lua.LTTable:
+            if index != nil {
+                result[index.String()] = make(map[string]interface{})
+                r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
+                    result[index.String()] = LuaTableToMap(v, i, result[index.String()].(map[string]interface{}))
+                })
+            } else {
+                r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
+                    result = LuaTableToMap(v, i, result)
+                })
+            }
+        case lua.LTString:
+            result[index.String()] = r.String()
+        case lua.LTNumber:
+            
+    }
+    return result
+}
+
+/*switch value.Type() {
+	case lua.LTTable:
+		if index != nil {
+			luaInterface[index.String()] = make(map[string]interface{})
+			value.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
+				luaInterface[index.String()] = parseLuaValue(i, v, luaInterface[index.String()].(map[string]interface{}))
+			})
+		} else {
+			value.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
+				luaInterface = parseLuaValue(i, v, luaInterface)
+			})
+		}
+	case lua.LTString:
+		luaInterface[index.String()] = value.String()
+	case lua.LTNumber:
+		luaN, err := strconv.Atoi(value.String())
+		if err != nil {
+			luaInterface[index.String()] = err.Error()
+		} else {
+			luaInterface[index.String()] = luaN
+		}
+	}
+	return luaInterface*/

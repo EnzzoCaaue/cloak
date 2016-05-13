@@ -7,6 +7,7 @@ import (
     "github.com/julienschmidt/httprouter"
     "github.com/Cloakaac/cloak/template"
     "github.com/Cloakaac/cloak/database"
+	"log"
 )
 
 type luaInterface struct {
@@ -34,7 +35,11 @@ func LuaController(file string, w http.ResponseWriter, req *http.Request, params
 
 func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
     tpl := luaVM.ToString(1)
-    template.Renderer.ExecuteTemplate(l.w, tpl, nil)
+    args := luaVM.ToTable(2)
+    resultMap := make(map[string]interface{})
+    m := util.LuaTableToMap(args, nil, resultMap)
+    log.Println(resultMap)
+    template.Renderer.ExecuteTemplate(l.w, tpl, m)
     return 0
 }
 
