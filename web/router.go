@@ -22,7 +22,8 @@ func newRouter() *httprouter.Router {
 
 func registerRoutes(router *httprouter.Router) {
 	base := &controllers.BaseController{}
-	router.GET("/", route(base.Home, base, pass))
+	router.GET("/", route(base.Home, base, logged))
+	router.GET("/guilds/list", route(base.GuildList, base, pass))
 	router.GET("/account/create", route(base.Register, base, guest))
 	router.POST("/account/create", route(base.CreateAccount, base, guest))
 	router.GET("/account/login", route(base.Login, base, guest))
@@ -34,7 +35,6 @@ func registerRoutes(router *httprouter.Router) {
 	router.GET("/account/manage/recovery", route(base.AccountSetRecovery, base, logged))
 	router.GET("/account/manage/twofactor", route(base.AccountTwoFactor, base, logged))
 	router.POST("/account/manage/twofactor", route(base.AccountSetTwoFactor, base, logged))
-	// LUA ROUTES
 	for _, route := range util.Parser.Routes {
 		if route.Method == "GET" {
 			router.GET(route.Path, luaRoute(route.File, route.Mode))
