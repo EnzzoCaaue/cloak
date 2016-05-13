@@ -24,12 +24,26 @@ func LuaController(file string, w http.ResponseWriter, req *http.Request, params
     defer luaVM.Close()
     luaVM.SetGlobal("renderTemplate", luaVM.NewFunction(l.renderTemplate))
     luaVM.SetGlobal("query", luaVM.NewFunction(l.query))
+    luaVM.SetGlobal("toInt", luaVM.NewFunction(l.toInt))
+    luaVM.SetGlobal("httpRedirect", luaVM.NewFunction(l.httpRedirect))
     err := luaVM.DoFile(util.Parser.Template + "/pages/" + file)
     if err != nil {
         util.HandleError("Cannot run lua " + file + " file", err)
         http.Error(w, "Error executing " + file + " lua file", 500)
         return
     }
+}
+
+func (l *luaInterface) toInt(luaVM *lua.LState) int {
+    arg := luaVM.ToInt(1)
+    luaVM.Push(lua.LNumber(arg))
+    return 1
+}
+
+func (l *luaInterface) httpRedirect(luaVM *lua.LState) int {
+    to := luaVM.ToString(1)
+    http.Redirect(l.w, l.req, to, http.StatusMovedPermanently)
+    return 0
 }
 
 func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
@@ -41,7 +55,6 @@ func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
     return 0
 }
 
-// Used ONLY for querys that expect multiple rows result sql.Rows
 func (l *luaInterface) query(luaVM *lua.LState) int {
     query := luaVM.ToString(1)
     rows, err := database.Connection.Query(query)

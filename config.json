@@ -16,8 +16,8 @@
         "database": "cloaka"
     },
     "captcha": {
-        "public": "",
-        "private": ""
+        "public": "6LfCbB4TAAAAAPeX_YA_QbD_RJSOMQmcRB_Kaouf",
+        "private": "6LfCbB4TAAAAADAdpHgXluLWbqSKtHyxnn9znQeS"
     },
     "register": {
         "premdays": 100,
