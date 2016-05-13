@@ -68,27 +68,3 @@ func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}
     }
     return result
 }
-
-/*switch value.Type() {
-	case lua.LTTable:
-		if index != nil {
-			luaInterface[index.String()] = make(map[string]interface{})
-			value.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				luaInterface[index.String()] = parseLuaValue(i, v, luaInterface[index.String()].(map[string]interface{}))
-			})
-		} else {
-			value.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				luaInterface = parseLuaValue(i, v, luaInterface)
-			})
-		}
-	case lua.LTString:
-		luaInterface[index.String()] = value.String()
-	case lua.LTNumber:
-		luaN, err := strconv.Atoi(value.String())
-		if err != nil {
-			luaInterface[index.String()] = err.Error()
-		} else {
-			luaInterface[index.String()] = luaN
-		}
-	}
-	return luaInterface*/
