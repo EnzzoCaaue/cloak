@@ -142,3 +142,19 @@ func (account *CloakaAccount) EnableTwoFactor(secret string) error {
     _, err := database.Connection.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ? AND b.account = a.id", secret, account.Account.ID)
     return err
 }
+
+// HasCharacter checks if an account got a player
+func (account *CloakaAccount) HasCharacter(name string) bool {
+    row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ? AND account_id = ?)", name, account.Account.ID)
+    exists := false
+    row.Scan(&exists)
+    return exists
+}
+
+// GetCharacter returns an account character
+func (account *CloakaAccount) GetCharacter(name string) *Player {
+    if !account.HasCharacter(name) {
+        return nil
+    }
+    return GetPlayerByName(name)
+}

@@ -81,8 +81,8 @@ func GetPlayerByName(name string) *Player {
 	if !player.Exists() {
 		return nil
 	}
-	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, d.name, e.name FROM players a, accounts b, cloaka_towns c, guilds d, guild_ranks e, guild_membership f WHERE d.id = f.guild_id AND f.player_id = a.id AND e.id = f.rank_id AND a.account_id = b.id AND a.town_id = c.id AND a.name = ?", player.Name)
-	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.GuildName, &player.GuildRank)
+	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, d.name, e.name, g.deleted FROM players a, accounts b, cloaka_towns c, guilds d, guild_ranks e, guild_membership f, cloaka_players g WHERE d.id = f.guild_id AND f.player_id = a.id AND e.id = f.rank_id AND a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
+	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.GuildName, &player.GuildRank, &player.Cloaka.Deleted)
 	return player
 }
 
@@ -160,4 +160,10 @@ func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
 		characters = append(characters, player)
 	}
 	return characters, nil
+}
+
+// Delete deletes a character
+func (player *Player) Delete(del int64) error {
+	_, err := database.Connection.Exec("UPDATE players a, cloaka_players b SET a.deletion = ?, b.deleted = 1 WHERE b.player_id = a.id AND a.id = ?", del, player.ID)
+	return err
 }

@@ -7,9 +7,12 @@ import (
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
+	"crypto/sha1"
+	"time"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
+	"net/url"
 )
 
 type manage struct {
@@ -22,6 +25,17 @@ type manage struct {
 type twof struct {
 	QR string
     Errors []string
+}
+
+type deletion struct {
+	Token string
+	Errors []string
+	Name string
+}
+
+type deletionForm struct {
+	Password string
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
 // AccountManage shows the account manage page
@@ -156,4 +170,77 @@ func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http
     base.Session.AddFlash("Two Factor authenticator activated. Enjoy your new security level", "success")
     base.Session.Save(req, w)
     http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+}
+
+// AccountDeleteCharacter shows the form to delete a character
+func (base *BaseController) AccountDeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	account := models.GetAccountByToken(base.Session.GetString("key"))
+	if account == nil {
+		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
+		return
+	}
+	characterName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		http.Error(w, "Oops! Something while reading character name!", http.StatusBadRequest)
+		return
+	}
+	player := account.GetCharacter(characterName)
+	if player.Cloaka.Deleted == 1 {
+		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	}
+	token := uniuri.New()
+	response := &deletion{
+		token,
+		base.Session.GetFlashes("errors"),
+		player.Name,
+	}
+	template.Renderer.ExecuteTemplate(w, "delete_character.html", response)
+}
+
+// DeleteCharacter deletes an account character
+func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	account := models.GetAccountByToken(base.Session.GetString("key"))
+	if account == nil {
+		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
+		return
+	}
+	characterName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		http.Error(w, "Oops! Something while reading character name!", http.StatusBadRequest)
+		return
+	}
+	player := account.GetCharacter(characterName)
+	if player.Cloaka.Deleted == 1 {
+		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	}
+	form := &deletionForm{
+		req.FormValue("password"),
+		req.FormValue("g-recaptcha-response"),	
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for i := range errs {
+			base.Session.AddFlash(errs[i].Error(), "errors")
+		}
+		base.Session.Save(req, w)
+		http.Redirect(w, req, "/account/manage/delete/" + ps.ByName("name"), http.StatusMovedPermanently)
+		return
+	}
+	password := fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
+	if account.Account.Password != password {
+		base.Session.AddFlash("Wrong password", "errors")
+		base.Session.Save(req, w)
+		http.Redirect(w, req, "/account/manage/delete/" + ps.ByName("name"), http.StatusMovedPermanently)
+		return
+	}
+	deletion := time.Now().Unix() + ((3600 * 24) * 7)
+	err = player.Delete(deletion)
+	if err != nil {
+		util.HandleError("Error setting a deletion date", err)
+		http.Error(w, "Error setting your character deletion date", 500)
+		return
+	}
+	deletionDate := time.Unix(deletion, 0)
+	base.Session.AddFlash(fmt.Sprintf("Character set for deletion at: <b>%v-%v-%v</b>", deletionDate.Month().String()[:3], deletionDate.Day(), deletionDate.Year()), "success")
+	base.Session.Save(req, w)
+	http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
 }

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/Cloakaac/cloak/models"
-	//"github.com/Cloakaac/cloak/template"
 	"io/ioutil"
 	"net/http"
 	"net/url"
