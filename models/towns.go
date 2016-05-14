@@ -14,6 +14,7 @@ type Town struct {
 // GetTowns gets all towns
 func GetTowns() ([]*Town, error) {
 	rows, err := database.Connection.Query("SELECT name, town_id FROM cloaka_towns ORDER BY id DESC")
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}

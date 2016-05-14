@@ -28,6 +28,7 @@ func NewGuild() *Guild {
 func GetGuildList() ([]*Guild, error) {
     list := []*Guild{}
     rows, err := database.Connection.Query("SELECT a.name, a.creationdata, a.motd, b.name FROM guilds a, players b WHERE a.ownerid = b.id ORDER BY a.creationdata DESC")
+    defer rows.Close()
     if err != nil {
         return nil, err
     }

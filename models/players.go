@@ -149,6 +149,7 @@ func (player *Player) Exists() bool {
 // GetCharacters gets all account characters
 func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
 	rows, err := database.Connection.Query("SELECT a.id, a.name, a.vocation, a.level, a.lastlogin, a.balance, a.sex, b.deleted, c.name FROM players a, cloaka_players b, cloaka_towns c WHERE a.account_id = ? AND b.player_id = a.id AND a.town_id = c.town_id ORDER BY a.id DESC", account.Account.ID)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
