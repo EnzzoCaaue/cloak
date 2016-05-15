@@ -39,6 +39,7 @@ func registerRoutes(router *httprouter.Router) {
 	router.POST("/account/manage/delete/:name", route(base.DeleteCharacter, base, logged))
 	router.GET("/account/manage/create", route(base.AccountCreateCharacter, base, logged))
 	router.POST("/account/manage/create", route(base.CreateCharacter, base, logged))
+	router.POST("/character/search", route(base.SearchCharacter, base, pass))
 	for _, route := range util.Parser.Routes {
 		if route.Method == "GET" {
 			router.GET(route.Path, luaRoute(route.File, route.Mode))

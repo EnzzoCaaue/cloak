@@ -189,3 +189,19 @@ func (player *Player) GetDeaths() ([]*Death, error) {
 	}
 	return deaths, nil
 }
+
+// SearchPlayers searchs for player with name LIKE
+func SearchPlayers(name string) ([]*Player, error) {
+	rows, err := database.Connection.Query("SELECT name FROM players WHERE name LIKE ?", "%" + name + "%")
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	players := []*Player{}
+	for rows.Next() {
+		player := NewPlayer()
+		rows.Scan(&player.Name)
+		players = append(players, player)
+	}
+	return players, nil
+}

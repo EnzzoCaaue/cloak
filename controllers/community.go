@@ -18,6 +18,11 @@ type characterView struct {
 	Deaths []*models.Death
 }
 
+type characterSearch struct {
+	Current string
+	Characters []*models.Player
+}
+
 // CharacterView shows a character
 func (base *BaseController) CharacterView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	name, err := url.QueryUnescape(p.ByName("name"))
@@ -93,4 +98,19 @@ func (base *BaseController) SignatureView(w http.ResponseWriter, req *http.Reque
 	w.Header().Set("Content-type", "image/png")
 	w.Write(signature)
 	return
+}
+
+// SearchCharacter searchs for names LIKE
+func (base *BaseController) SearchCharacter(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	players, err := models.SearchPlayers(req.FormValue("name"))
+	if err != nil {
+		util.HandleError("Error while searching for characters", err)
+		http.Error(w, "Something happened while searching for a character", 500)
+		return
+	}
+	response := &characterSearch{
+		req.FormValue("name"),
+		players,
+	}
+	template.Renderer.ExecuteTemplate(w, "character_search.html", response)
 }
