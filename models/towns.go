@@ -45,11 +45,17 @@ func (t *Town) Get() *Town {
 
 // Exists checks if a town exists
 func (t *Town) Exists() bool {
-	row := database.Connection.QueryRow("SELECT id FROM cloaka_towns WHERE name = ?", t.Name)
-	id := -1
-	row.Scan(&id)
-	if id == -1 {
-		return false
+	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM cloaka_towns WHERE name = ?)", t.Name)
+	exists := false
+	row.Scan(&exists)
+	return exists
+}
+
+// GetTownByName gets a town by its name
+func GetTownByName(name string) *Town {
+	town := NewTown(name)
+	if !town.Exists() {
+		return nil
 	}
-	return true
+	return town.Get()
 }
