@@ -39,6 +39,12 @@ func NewRender(path string) error {
 
 func createFuncs() template.FuncMap {
 	funcMap := template.FuncMap{
+		"gender": func(gender int) string {
+			return util.GetGender(gender)
+		},
+		"vocation": func(vocation int) string {
+			return util.GetVocation(vocation)
+		},
 		"rawHTML": func(msg string) template.HTML {
 			return template.HTML(msg)	
 		},

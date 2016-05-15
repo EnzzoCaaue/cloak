@@ -81,9 +81,15 @@ func GetPlayerByName(name string) *Player {
 	if !player.Exists() {
 		return nil
 	}
-	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, d.name, e.name, g.deleted FROM players a, accounts b, cloaka_towns c, guilds d, guild_ranks e, guild_membership f, cloaka_players g WHERE d.id = f.guild_id AND f.player_id = a.id AND e.id = f.rank_id AND a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
-	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.GuildName, &player.GuildRank, &player.Cloaka.Deleted)
+	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
+	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.Cloaka.Deleted)
 	return player
+}
+
+// GetGuild gets a character guild
+func (player *Player) GetGuild() {
+	row := database.Connection.QueryRow("SELECT a.name, b.name FROM guilds a, guild_ranks b, guild_membership c WHERE a.id = c.guild_id AND c.player_id = ? AND b.id = c.rank_id", player.ID)
+	row.Scan(&player.GuildName, &player.GuildRank)
 }
 
 // Save saves a player into a database

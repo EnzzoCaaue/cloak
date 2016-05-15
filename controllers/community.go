@@ -26,14 +26,15 @@ func (base *BaseController) CharacterView(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	player := models.GetPlayerByName(name)
+	if player == nil {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		return
+	}
+	player.GetGuild()
 	deaths, err := player.GetDeaths()
 	if err != nil {
 		util.HandleError("Cannot get character death list", err)
 		http.Error(w, "Oops! Something wrong happened while getting the death list", 500)
-		return
-	}
-	if player == nil {
-		http.Redirect(w, req, "/", http.StatusMovedPermanently)
 		return
 	}
 	response := &characterView{
