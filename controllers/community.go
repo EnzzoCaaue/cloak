@@ -10,11 +10,37 @@ import (
 
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
+	"github.com/Cloakaac/cloak/template"
 )
+
+type characterView struct {
+	Info *models.Player
+	Deaths []*models.Death
+}
 
 // CharacterView shows a character
 func (base *BaseController) CharacterView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-
+	name, err := url.QueryUnescape(p.ByName("name"))
+	if err != nil {
+		http.Error(w, "Oops! Invalid character name", 500)
+		return
+	}
+	player := models.GetPlayerByName(name)
+	deaths, err := player.GetDeaths()
+	if err != nil {
+		util.HandleError("Cannot get character death list", err)
+		http.Error(w, "Oops! Something wrong happened while getting the death list", 500)
+		return
+	}
+	if player == nil {
+		http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		return
+	}
+	response := &characterView{
+		player,
+		deaths,
+	}
+	template.Renderer.ExecuteTemplate(w, "character_view.html", response)
 }
 
 // SignatureView shows a signature

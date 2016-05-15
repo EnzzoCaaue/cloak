@@ -167,3 +167,19 @@ func (player *Player) Delete(del int64) error {
 	_, err := database.Connection.Exec("UPDATE players a, cloaka_players b SET a.deletion = ?, b.deleted = 1 WHERE b.player_id = a.id AND a.id = ?", del, player.ID)
 	return err
 }
+
+// GetDeaths returns a slice with a character deaths
+func (player *Player) GetDeaths() ([]*Death, error) {
+	rows, err := database.Connection.Query("SELECT a.time, a.level, a.killed_by, a.is_player, a.mostdamage_by, a.mostdamage_is_player, a.unjustified, a.mostdamage_unjustified FROM player_deaths a, players b WHERE a.player_id = b.id AND b.name = ?", player.Name)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	deaths := []*Death{}
+	for rows.Next() {
+		death := &Death{}
+		rows.Scan(&death.Time, &death.Level, &death.KilledBy, &death.IsPlayer, &death.MostDamageBy, &death.MostDamageIsPlayer, &death.Unjustified, &death.MostDamageUnjustified)
+		deaths = append(deaths, death)
+	}
+	return deaths, nil
+}

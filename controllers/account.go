@@ -199,6 +199,10 @@ func (base *BaseController) AccountDeleteCharacter(w http.ResponseWriter, req *h
 		return
 	}
 	player := account.GetCharacter(characterName)
+	if player == nil {
+		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		return
+	}
 	if player.Cloaka.Deleted == 1 {
 		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
 	}
@@ -225,6 +229,10 @@ func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Req
 		return
 	}
 	player := account.GetCharacter(characterName)
+	if player == nil {
+		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		return
+	}
 	if player.Cloaka.Deleted == 1 {
 		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
 	}
