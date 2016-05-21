@@ -39,3 +39,17 @@ func GetGuildList() ([]*Guild, error) {
     }
     return list, nil
 }
+
+// GuildExists checks if a guild exists
+func GuildExists(name string) bool {
+    row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM guilds WHERE name = ?)", name)
+    exists := false
+    row.Scan(&exists)
+    return exists
+}
+
+// Create creates a guild
+func (guild *Guild) Create() error {
+    _, err := database.Connection.Exec("INSERT INTO guilds (name, ownerid, creationdata, motd) VALUES(?, ?, ?, ?)", guild.Name, guild.Owner.ID, guild.Creation, guild.Motd)
+    return err
+}

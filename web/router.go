@@ -22,8 +22,9 @@ func newRouter() *httprouter.Router {
 
 func registerRoutes(router *httprouter.Router) {
 	base := &controllers.BaseController{}
-	router.GET("/", route(base.Home, base, logged))
+	router.GET("/", route(base.Home, base, pass))
 	router.GET("/guilds/list", route(base.GuildList, base, pass))
+	router.POST("/guilds/create", route(base.CreateGuild, base, logged))
 	router.GET("/account/create", route(base.Register, base, guest))
 	router.POST("/account/create", route(base.CreateAccount, base, guest))
 	router.GET("/account/login", route(base.Login, base, guest))

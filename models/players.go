@@ -205,3 +205,11 @@ func SearchPlayers(name string) ([]*Player, error) {
 	}
 	return players, nil
 }
+
+// IsInGuild checks if a player is in a guild
+func (player *Player) IsInGuild() bool {
+	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM guild_membership WHERE player_id = ?)", player.ID)
+	exists := false
+	row.Scan(&exists)
+	return exists
+}
