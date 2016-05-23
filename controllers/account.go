@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
 	"crypto/sha1"
 	"time"
@@ -15,33 +14,13 @@ import (
 	"net/url"
 )
 
-type manage struct {
-	Success    []string
-	Characters []*models.Player
-	Account    *models.CloakaAccount
-	Token      string
-}
-
-type twof struct {
-	QR string
-    Errors []string
-}
-
-type deletion struct {
-	Token string
-	Errors []string
-	Name string
+type AccountController struct {
+	*BaseController
 }
 
 type deletionForm struct {
 	Password string
 	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
-}
-
-type creation struct {
-	Token string
-	Errors []string
-	Towns []*models.Town
 }
 
 type creationForm struct {
@@ -54,112 +33,56 @@ type creationForm struct {
 
 // AccountManage shows the account manage page
 func (base *BaseController) AccountManage(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
-	characters, err := account.GetCharacters()
+	characters, err := base.Account.GetCharacters()
 	if err != nil {
-		http.Error(w, "Oops! Something wrong happened while getting your character list", http.StatusBadRequest)
+		base.Error = "Error while getting your character list"
 		return
 	}
-	response := &manage{
-		base.Session.GetFlashes("success"),
-		characters,
-		account,
-		uniuri.New(),
-	}
-	err = base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
-		return
-	}
-	template.Renderer.ExecuteTemplate(w, "manage.html", response)
+	base.Data["Success"] = base.Session.GetFlashes("success")
+	base.Data["Characters"] = characters
+	base.Data["Account"] = base.Account
+	base.Template = "manage.html"
 }
 
 // AccountLogout logs the user out
 func (base *BaseController) AccountLogout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
 	base.Session.Delete("key")
-	err := base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
-		return
-	}
-	http.Redirect(w, req, "/account/login", http.StatusMovedPermanently)
+	base.Redirect = "/account/login"
 }
 
 // AccountSetRecovery sets an account recovery key
 func (base *BaseController) AccountSetRecovery(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
-	if account.RecoveryKey != "" {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	if base.Account.RecoveryKey != "" {
+		base.Redirect = "/account/manage"
 		return
 	}
 	key := uniuri.New()
-	err := account.UpdateRecoveryKey(key)
+	err := base.Account.UpdateRecoveryKey(key)
 	if err != nil {
-		util.HandleError("Error while updating account recovery key", err)
-		http.Error(w, "Oops! Something wrong happened while updating your recovery key!", http.StatusBadRequest)
+		base.Error = "Error while updating your recovery key"
 		return
 	}
 	base.Session.AddFlash("Your recovery key is <b>"+key+"</b>. Please write it down!", "success")
-	err = base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
-		return
-	}
-	http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	base.Redirect = "/account/manage"
 }
 
 //AccountTwoFactor the form to set-up a two factor auth
 func (base *BaseController) AccountTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
-	if account.TwoFactor > 0 {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
-		return
+	if base.Account.TwoFactor > 0 {
+		base.Redirect = "/account/manage"
 	}
 	secretKey := uniuri.NewLenChars(16, []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"))
-	codeURL := fmt.Sprintf("otpauth://totp/%v:%v?secret=%v&issuer=%v", "MyServer", account.Account.Name, secretKey, "MyServer")
-	response := &twof{
-		"http://chart.apis.google.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=" + codeURL,
-        base.Session.GetFlashes("errors"),
-	}
+	codeURL := fmt.Sprintf("otpauth://totp/%v:%v?secret=%v&issuer=%v", "MyServer", base.Account.Account.Name, secretKey, "MyServer")
+	base.Data["QR"] = "http://chart.apis.google.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=" + codeURL
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
 	base.Session.Set("secret", secretKey)
-	err := base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving current session", http.StatusBadRequest)
-		return
-	}
-	template.Renderer.ExecuteTemplate(w, "account_twofactor.html", response)
+	base.Template = "account_twofactor.html"
 }
 
 // AccountSetTwoFactor Checks and sets a two factor key
 func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
-	if account.TwoFactor > 0 {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	if base.Account.TwoFactor > 0 {
+		base.Redirect = "/account/manage"
 		return
 	}
 	otpConfig := &dgoogauth.OTPConfig{
@@ -170,71 +93,54 @@ func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http
     success, _ := otpConfig.Authenticate(req.FormValue("password"))
     if !success {
         base.Session.AddFlash("Wrong authenticator code", "errors")
-        base.Session.Save(req, w)
-        http.Redirect(w, req, "/account/manage/twofactor", http.StatusMovedPermanently)
+        base.Redirect = "/account/manage/twofactor"
         return
     }
-    err := account.EnableTwoFactor(base.Session.GetString("secret"))
+    err := base.Account.EnableTwoFactor(base.Session.GetString("secret"))
     if err != nil {
-        util.HandleError("Error while updating accounts secret row", err)
-        http.Error(w, "Cannot activate two-factor on your account", 500)
+        base.Error = "Error while activating two factor on your account"
         return
     }
     // TODO: REMOVE SECRET FROM SESSION
     base.Session.AddFlash("Two Factor authenticator activated. Enjoy your new security level", "success")
-    base.Session.Save(req, w)
-    http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+    base.Redirect = "/account/manage"
 }
 
 // AccountDeleteCharacter shows the form to delete a character
 func (base *BaseController) AccountDeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
 	characterName, err := url.QueryUnescape(ps.ByName("name"))
 	if err != nil {
-		http.Error(w, "Oops! Something while reading character name!", http.StatusBadRequest)
+		base.Error = "Cannot escape character name"
 		return
 	}
-	player := account.GetCharacter(characterName)
+	player := base.Account.GetCharacter(characterName)
 	if player == nil {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage"
 		return
 	}
 	if player.Cloaka.Deleted == 1 {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage"
 	}
-	token := uniuri.New()
-	response := &deletion{
-		token,
-		base.Session.GetFlashes("errors"),
-		player.Name,
-	}
-	base.Session.Save(req, w)
-	template.Renderer.ExecuteTemplate(w, "delete_character.html", response)
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data["Name"] = player.Name
+	base.Template = "delete_character.html"
 }
 
 // DeleteCharacter deletes an account character
 func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
 	characterName, err := url.QueryUnescape(ps.ByName("name"))
 	if err != nil {
 		http.Error(w, "Oops! Something while reading character name!", http.StatusBadRequest)
 		return
 	}
-	player := account.GetCharacter(characterName)
+	player := base.Account.GetCharacter(characterName)
 	if player == nil {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage"
 		return
 	}
 	if player.Cloaka.Deleted == 1 {
-		http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage"
+		return
 	}
 	form := &deletionForm{
 		req.FormValue("password"),
@@ -244,60 +150,40 @@ func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Req
 		for i := range errs {
 			base.Session.AddFlash(errs[i].Error(), "errors")
 		}
-		base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/manage/delete/" + ps.ByName("name"), http.StatusMovedPermanently)
+		base.Redirect = "/account/manage/delete/" + ps.ByName("name")
 		return
 	}
 	password := fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
-	if account.Account.Password != password {
+	if base.Account.Account.Password != password {
 		base.Session.AddFlash("Wrong password", "errors")
-		base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/manage/delete/" + ps.ByName("name"), http.StatusMovedPermanently)
+		base.Redirect = "/account/manage/delete/" + ps.ByName("name")
 		return
 	}
 	deletion := time.Now().Unix() + ((3600 * 24) * 7)
 	err = player.Delete(deletion)
 	if err != nil {
-		util.HandleError("Error setting a deletion date", err)
-		http.Error(w, "Error setting your character deletion date", 500)
+		base.Error = "Error setting character deletion time"
 		return
 	}
 	deletionDate := time.Unix(deletion, 0)
 	base.Session.AddFlash(fmt.Sprintf("Character set for deletion at: <b>%v-%v-%v</b>", deletionDate.Month().String()[:3], deletionDate.Day(), deletionDate.Year()), "success")
-	base.Session.Save(req, w)
-	http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	base.Redirect = "/account/manage"
 }
 
 // AccountCreateCharacter shows the form to create an account character
 func (base *BaseController) AccountCreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
-	token := uniuri.New()
 	towns, err := models.GetTowns()
 	if err != nil {
-		util.HandleError("Error getting town list", err)
-		http.Error(w, "Cannot get town list", 500)
+		base.Error = "Error while getting town list"
 		return
 	}
-	response := &creation{
-		token,
-		base.Session.GetFlashes("errors"),
-		towns,
-	}
-	base.Session.Save(req, w)
-	template.Renderer.ExecuteTemplate(w, "create_character.html", response)
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data["Towns"] = towns
+	base.Template = "create_character.html"
 }
 
 // CreateCharacter creates an account character
 func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	account := models.GetAccountByToken(base.Session.GetString("key"))
-	if account == nil {
-		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)
-		return
-	}
 	form := &creationForm{
 		req.FormValue("name"),
 		req.FormValue("town"),
@@ -309,24 +195,21 @@ func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Req
 		for i := range errs {
 			base.Session.AddFlash(errs[i].Error(), "errors")
 		}
-		base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/manage/create", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage/create"
 		return
 	}
 	town := models.GetTownByName(form.Town)
 	if town == nil {
 		base.Session.AddFlash("Unknown town name", "errors")
-		base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/manage/create", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage/create"
 		return
 	}
 	player := models.NewPlayer()
 	player.Name = form.Name
-	player.AccountID = account.Account.ID
+	player.AccountID = base.Account.Account.ID
 	if player.Exists() {
 		base.Session.AddFlash("Character name is already in use", "errors")
-		base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/manage/create", http.StatusMovedPermanently)
+		base.Redirect = "/account/manage/create"
 		return
 	}
 	player.Level = util.Parser.Register.Level
@@ -361,11 +244,9 @@ func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Req
 	player.Experience = util.Parser.Register.Experience
 	err := player.Save()
 	if err != nil {
-		util.HandleError("Error creating player", err)
-		http.Error(w, "Oops! Something wrong happened while creating player", http.StatusBadRequest)
+		base.Error = "Error while creating your character"
 		return
 	}
 	base.Session.AddFlash("Character <b>" + player.Name + "</b> created successfully", "success")
-	base.Session.Save(req, w)
-	http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
+	base.Redirect = "/account/manage"
 }

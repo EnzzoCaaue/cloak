@@ -4,7 +4,6 @@ import (
     "net/http"
     "crypto/sha1"
 	"github.com/julienschmidt/httprouter"
-    "github.com/Cloakaac/cloak/template"
 	"github.com/dchest/uniuri"
     "github.com/dgryski/dgoogauth"
 	"github.com/Cloakaac/cloak/util"
@@ -12,9 +11,8 @@ import (
 	"fmt"
 )
 
-type login struct {
-    Errors []string
-    Token string
+type LoginController struct {
+    *BaseController
 }
 
 // LoginForm saves the login form
@@ -26,21 +24,8 @@ type LoginForm struct {
 
 // Login shows the login form
 func (base *BaseController) Login(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-    csrfToken := uniuri.New()
-	//base.Session.Set("token", csrfToken)
-    response := &login{
-        base.Session.GetFlashes("errors"),
-        csrfToken,
-        
-    }
-    err := base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving your request session", http.StatusBadRequest)
-		return
-
-	}
-    template.Renderer.ExecuteTemplate(w, "login.html", response)
+    base.Data["Errors"] = base.Session.GetFlashes("errors")
+    base.Template = "login.html"
 }
 
 // SignIn process the login form
@@ -53,9 +38,8 @@ func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ h
     if errs := util.Validate(form); len(errs) > 0 {
         for _, v := range errs {
 		    base.Session.AddFlash(v.Error(), "errors")
-            base.Session.Save(req, w)
         }
-        http.Redirect(w, req, "/account/login", 301)
+        base.Redirect = "/account/login"
         return
     }
     account := models.NewAccount()
@@ -64,8 +48,7 @@ func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ h
     account.Account.Password = fmt.Sprintf("%x", hash)
     if !account.SignIn() {
         base.Session.AddFlash("Wrong account or password", "errors")
-        base.Session.Save(req, w)
-        http.Redirect(w, req, "/account/login", 301)
+        base.Redirect = "/account/login"
         return
     }
     if account.TwoFactor > 0 {
@@ -77,8 +60,7 @@ func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ h
         success, _ := otpConfig.Authenticate(req.FormValue("logincode"))
         if !success {
             base.Session.AddFlash("Wrong two-factor code", "errors")
-            base.Session.Save(req, w)
-            http.Redirect(w, req, "/account/login", 301)
+            base.Redirect = "/account/login"
             return
         }
     }
@@ -88,17 +70,10 @@ func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ h
     }
     err := account.UpdateToken(key)
 	if err != nil {
-		util.HandleError("Error updating your account token", err)
-		http.Error(w, "Oops! Something wrong happened while setting your login token", http.StatusBadRequest)
+		base.Error = "Unable to update your token key"
 		return
 	}
 	base.Session.Set("key", key)
 	base.Session.Set("logged", 1)	
-    err = base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while getting town list", http.StatusBadRequest)
-		return
-	}
-    http.Redirect(w, req, "/account/manage", 301)
+    base.Redirect = "/account/manage"
 }

@@ -3,8 +3,13 @@ package web
 import (
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/util"
+	"github.com/Cloakaac/cloak/template"
+	"github.com/Cloakaac/cloak/models"
 	"github.com/julienschmidt/httprouter"
+	"github.com/dchest/uniuri"
 	"net/http"
+	"reflect"
+	"log"
 )
 
 const (
@@ -21,26 +26,25 @@ func newRouter() *httprouter.Router {
 }
 
 func registerRoutes(router *httprouter.Router) {
-	base := &controllers.BaseController{}
-	router.GET("/", route(base.Home, base, pass))
-	router.GET("/guilds/list", route(base.GuildList, base, pass))
-	router.POST("/guilds/create", route(base.CreateGuild, base, logged))
-	router.GET("/account/create", route(base.Register, base, guest))
-	router.POST("/account/create", route(base.CreateAccount, base, guest))
-	router.GET("/account/login", route(base.Login, base, guest))
-	router.POST("/account/login", route(base.SignIn, base, guest))
-	router.GET("/account/manage", route(base.AccountManage, base, logged))
-	router.GET("/account/logout", route(base.AccountLogout, base, logged))
-	router.GET("/character/view/:name", route(base.CharacterView, base, pass))
-	router.GET("/character/signature/:name", route(base.SignatureView, base, pass))
-	router.GET("/account/manage/recovery", route(base.AccountSetRecovery, base, logged))
-	router.GET("/account/manage/twofactor", route(base.AccountTwoFactor, base, logged))
-	router.POST("/account/manage/twofactor", route(base.AccountSetTwoFactor, base, logged))
-	router.GET("/account/manage/delete/:name", route(base.AccountDeleteCharacter, base, logged))
-	router.POST("/account/manage/delete/:name", route(base.DeleteCharacter, base, logged))
-	router.GET("/account/manage/create", route(base.AccountCreateCharacter, base, logged))
-	router.POST("/account/manage/create", route(base.CreateCharacter, base, logged))
-	router.POST("/character/search", route(base.SearchCharacter, base, pass))
+	router.GET("/", route(&controllers.HomeController{}, "Home", pass))
+	router.GET("/guilds/list", route(&controllers.GuildController{}, "GuildList", logged))
+	router.POST("/guilds/create", route(&controllers.GuildController{}, "CreateGuild", logged))
+	router.GET("/account/create", route(&controllers.RegisterController{}, "Register", guest))
+	router.POST("/account/create", route(&controllers.RegisterController{}, "CreateAccount", guest))
+	router.GET("/account/login", route(&controllers.LoginController{}, "Login", guest))
+	router.POST("/account/login", route(&controllers.LoginController{}, "SignIn", guest))
+	router.GET("/account/manage", route(&controllers.AccountController{}, "AccountManage", logged))
+	router.GET("/account/logout", route(&controllers.AccountController{}, "AccountLogout", logged))
+	router.GET("/character/view/:name", route(&controllers.CommunityController{}, "CharacterView", pass))
+	router.GET("/character/signature/:name", route(&controllers.CommunityController{}, "SignatureView", pass))
+	router.GET("/account/manage/recovery", route(&controllers.AccountController{}, "AccountSetRecovery", logged))
+	router.GET("/account/manage/twofactor", route(&controllers.AccountController{}, "AccountTwoFactor", logged))
+	router.POST("/account/manage/twofactor", route(&controllers.AccountController{}, "AccountSetTwoFactor", logged))
+	router.GET("/account/manage/delete/:name", route(&controllers.AccountController{}, "AccountDeleteCharacter", logged))
+	router.POST("/account/manage/delete/:name", route(&controllers.AccountController{}, "DeleteCharacter", logged))
+	router.GET("/account/manage/create", route(&controllers.AccountController{}, "AccountCreateCharacter", logged))
+	router.POST("/account/manage/create", route(&controllers.AccountController{}, "CreateCharacter", logged))
+	router.POST("/character/search", route(&controllers.CommunityController{}, "SearchCharacter", pass))
 	for _, route := range util.Parser.Routes {
 		if route.Method == "GET" {
 			router.GET(route.Path, luaRoute(route.File, route.Mode))
@@ -72,8 +76,9 @@ func luaRoute(luaFile, mode string) func(w http.ResponseWriter, req *http.Reques
 	}
 }
 
-func route(controller func(w http.ResponseWriter, req *http.Request, ps httprouter.Params), base *controllers.BaseController, mode ...int) func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func route(controller interface{}, method string, mode ...int) func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	return func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		ctrller := reflect.ValueOf(controller)
 		if req.Method == http.MethodPost {
 			err := req.ParseForm()
 			if err != nil {
@@ -86,6 +91,10 @@ func route(controller func(w http.ResponseWriter, req *http.Request, ps httprout
 			util.HandleError("Something occured while getting a session", err)
 			return
 		}
+		base := &controllers.BaseController{}
+		if session.GetInt("logged") == 1 {
+			base.Account = models.GetAccountByToken(session.GetString("key"))
+		}
 		for i := range mode {
 			if mode[i] == admin {
 
@@ -94,12 +103,35 @@ func route(controller func(w http.ResponseWriter, req *http.Request, ps httprout
 				http.Redirect(w, req, "/account/login", http.StatusMovedPermanently)
 				return
 			}
-			if mode[i] == guest && session.GetInt("logged") == 1 {
+			if mode[i] == guest && session.GetInt("logged") == 1 && base.Account != nil {
 				http.Redirect(w, req, "/account/manage", http.StatusMovedPermanently)
 				return
 			}
 		}
 		base.Session = session
-		controller(w, req, ps)
+		base.Data = make(map[interface{}]interface{})
+		base.Data["Token"] = uniuri.New()
+		ctrller.Elem().Field(0).Set(reflect.ValueOf(base))
+		ctrller.MethodByName(method).Call([]reflect.Value{
+			reflect.ValueOf(w),
+			reflect.ValueOf(req),
+			reflect.ValueOf(ps),
+		})
+		err = base.Session.Save(req, w)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if base.Template != "" {			
+			template.Renderer.ExecuteTemplate(w, base.Template, base.Data)
+			return
+		}
+		if base.Error != "" {
+			http.Error(w, base.Error, 500)
+			return
+		}
+		if base.Redirect != "" {
+			http.Redirect(w, req, base.Redirect, 301)
+			return
+		}
 	}
 }

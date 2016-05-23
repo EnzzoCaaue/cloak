@@ -10,6 +10,10 @@ import (
     "time"
 )
 
+type GuildController struct {
+    *BaseController
+}
+
 type guildlist struct {
     Token string
     Errors []string
@@ -24,7 +28,7 @@ type GuildCreateForm struct {
 }
 
 // GuildList shows a list of guilds
-func (base *BaseController) GuildList(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *GuildController) GuildList(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
     account := models.GetAccountByToken(base.Session.GetString("key"))
 	if account == nil {
 		http.Error(w, "Oops! Something wrong happened while getting your account!", http.StatusBadRequest)

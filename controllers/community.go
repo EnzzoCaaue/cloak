@@ -13,6 +13,10 @@ import (
 	"github.com/Cloakaac/cloak/template"
 )
 
+type CommunityController struct {
+	*BaseController
+}
+
 type characterView struct {
 	Info *models.Player
 	Deaths []*models.Death

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -11,10 +10,8 @@ import (
 	"fmt"
 )
 
-type register struct {
-	Errors []string
-	Token  string
-	Towns  []*models.Town
+type RegisterController struct {
+	*BaseController
 }
 
 // RegisterForm saves the register form
@@ -33,25 +30,12 @@ type RegisterForm struct {
 func (base *BaseController) Register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	towns, err := models.GetTowns()
 	if err != nil {
-		util.HandleError("Error on models.GetTowns", err)
-		http.Error(w, "Oops! Something wrong happened while getting town list", http.StatusBadRequest)
+		base.Error = "Error fetching town list"
 		return
 	}
-	csrfToken := uniuri.New()
-	//base.Session.Set("token", csrfToken)
-	response := &register{
-		base.Session.GetFlashes("errors"),
-		csrfToken,
-		towns,
-	}
-	err = base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while saving your request session", http.StatusBadRequest)
-		return
-
-	}
-	template.Renderer.ExecuteTemplate(w, "register.html", response)
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data["Towns"] = towns
+	base.Template = "register.html"
 }
 
 // CreateAccount process register.html and creates an account
@@ -69,30 +53,26 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	if errs := util.Validate(form); len(errs) > 0 {
         for _, v := range errs {
 		    base.Session.AddFlash(v.Error(), "errors")
-            base.Session.Save(req, w)
         }
-        http.Redirect(w, req, "/account/create", 301)
+        base.Redirect = "/account/create"
         return
 	}
 	town := models.NewTown(form.CharacterTown)
 	if !town.Exists() {
 		base.Session.AddFlash("Invalid character town", "errors")
-        base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/create", 301)
+        base.Redirect = "/account/create"
         return
 	}
     account := models.NewAccount()
 	account.Account.Name = form.AccountName
 	if account.NameExists() {
 		base.Session.AddFlash("Account name is already in use", "errors")
-        base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/create", 301)
+        base.Redirect = "/account/create"
         return
 	}
 	if account.EmailExists() {
 		base.Session.AddFlash("Account email is already in use", "errors")
-        base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/create", 301)
+        base.Redirect = "/account/create"
         return
 	}
 	account.Account.Password = fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
@@ -100,14 +80,12 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	account.Account.Email = form.Email
 	err := account.Account.Save()
 	if err != nil {
-		util.HandleError("Error creating account", err)
-		http.Error(w, "Oops! Something wrong happened while creating your account", http.StatusBadRequest)
+		base.Error = "Error while saving your account"
 		return
 	}
 	err = account.Save()
 	if err != nil {
-		util.HandleError("Error creating account", err)
-		http.Error(w, "Oops! Something wrong happened while creating your cloaka account", http.StatusBadRequest)
+		base.Error = "Error while saving your account"
 		return
 	}
 	player := models.NewPlayer()
@@ -115,8 +93,7 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	player.Name = form.CharacterName
 	if player.Exists() {
 		base.Session.AddFlash("Character name is already in use", "errors")
-        base.Session.Save(req, w)
-		http.Redirect(w, req, "/account/create", 301)
+        base.Redirect = "/account/create"
         return
 	}
 	player.Level = util.Parser.Register.Level
@@ -151,8 +128,7 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	player.Experience = util.Parser.Register.Experience
 	err = player.Save()
 	if err != nil {
-		util.HandleError("Error creating player", err)
-		http.Error(w, "Oops! Something wrong happened while creating player", http.StatusBadRequest)
+		base.Error = "Error while saving player"
 		return
 	}
 	key := uniuri.New()
@@ -161,17 +137,10 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	}
 	err = account.UpdateToken(key)
 	if err != nil {
-		util.HandleError("Error updating your account token", err)
-		http.Error(w, "Oops! Something wrong happened while setting your login token", http.StatusBadRequest)
+		base.Error = "Error while updating your acocunt token"
 		return
 	}
 	base.Session.Set("key", key)
 	base.Session.Set("logged", 1)	
-    err = base.Session.Save(req, w)
-	if err != nil {
-		util.HandleError("Error saving the current session", err)
-		http.Error(w, "Oops! Something wrong happened while getting town list", http.StatusBadRequest)
-		return
-	}
-	http.Redirect(w, req, "/account/manage", 301)
+	base.Redirect = "/account/manage"
 }
