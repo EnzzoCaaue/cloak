@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"github.com/dchest/uniuri"
 	"crypto/sha1"
 	"fmt"
+	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
+	"github.com/dchest/uniuri"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
 )
 
 type RegisterController struct {
@@ -23,7 +23,7 @@ type RegisterForm struct {
 	CharacterSex      string `validate:"validGender" alias:"Character gender"`
 	CharacterVocation string `validate:"validVocation" alias:"Character vocation"`
 	CharacterTown     string
-    Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	Captcha           string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
 // Register shows the register.html page
@@ -48,32 +48,32 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 		req.FormValue("sex"),
 		req.FormValue("vocation"),
 		req.FormValue("town"),
-        req.FormValue("g-recaptcha-response"),
+		req.FormValue("g-recaptcha-response"),
 	}
 	if errs := util.Validate(form); len(errs) > 0 {
-        for _, v := range errs {
-		    base.Session.AddFlash(v.Error(), "errors")
-        }
-        base.Redirect = "/account/create"
-        return
+		for _, v := range errs {
+			base.Session.AddFlash(v.Error(), "errors")
+		}
+		base.Redirect = "/account/create"
+		return
 	}
 	town := models.NewTown(form.CharacterTown)
 	if !town.Exists() {
 		base.Session.AddFlash("Invalid character town", "errors")
-        base.Redirect = "/account/create"
-        return
+		base.Redirect = "/account/create"
+		return
 	}
-    account := models.NewAccount()
+	account := models.NewAccount()
 	account.Account.Name = form.AccountName
 	if account.NameExists() {
 		base.Session.AddFlash("Account name is already in use", "errors")
-        base.Redirect = "/account/create"
-        return
+		base.Redirect = "/account/create"
+		return
 	}
 	if account.EmailExists() {
 		base.Session.AddFlash("Account email is already in use", "errors")
-        base.Redirect = "/account/create"
-        return
+		base.Redirect = "/account/create"
+		return
 	}
 	account.Account.Password = fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
 	account.Account.Premdays = util.Parser.Register.Premdays
@@ -93,8 +93,8 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 	player.Name = form.CharacterName
 	if player.Exists() {
 		base.Session.AddFlash("Character name is already in use", "errors")
-        base.Redirect = "/account/create"
-        return
+		base.Redirect = "/account/create"
+		return
 	}
 	player.Level = util.Parser.Register.Level
 	player.Health = util.Parser.Register.Health
@@ -141,6 +141,6 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	base.Session.Set("key", key)
-	base.Session.Set("logged", 1)	
+	base.Session.Set("logged", 1)
 	base.Redirect = "/account/manage"
 }

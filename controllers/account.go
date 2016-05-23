@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"crypto/sha1"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
-	"crypto/sha1"
-	"time"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
 	"net/url"
+	"time"
 )
 
 type AccountController struct {
@@ -20,15 +20,15 @@ type AccountController struct {
 
 type deletionForm struct {
 	Password string
-	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
 type creationForm struct {
-	Name string `validate:"regexp=^[A-Z a-z]+$, max=14" alias:"Character name"`
-	Town string
-	Gender string `validate:"validGender" alias:"Character Gender"`
+	Name     string `validate:"regexp=^[A-Z a-z]+$, max=14" alias:"Character name"`
+	Town     string
+	Gender   string `validate:"validGender" alias:"Character Gender"`
 	Vocation string `validate:"validVocation" alias:"Character Vocation"`
-	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
 // AccountManage shows the account manage page
@@ -90,20 +90,20 @@ func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http
 		WindowSize:  3,
 		HotpCounter: 0,
 	}
-    success, _ := otpConfig.Authenticate(req.FormValue("password"))
-    if !success {
-        base.Session.AddFlash("Wrong authenticator code", "errors")
-        base.Redirect = "/account/manage/twofactor"
-        return
-    }
-    err := base.Account.EnableTwoFactor(base.Session.GetString("secret"))
-    if err != nil {
-        base.Error = "Error while activating two factor on your account"
-        return
-    }
-    // TODO: REMOVE SECRET FROM SESSION
-    base.Session.AddFlash("Two Factor authenticator activated. Enjoy your new security level", "success")
-    base.Redirect = "/account/manage"
+	success, _ := otpConfig.Authenticate(req.FormValue("password"))
+	if !success {
+		base.Session.AddFlash("Wrong authenticator code", "errors")
+		base.Redirect = "/account/manage/twofactor"
+		return
+	}
+	err := base.Account.EnableTwoFactor(base.Session.GetString("secret"))
+	if err != nil {
+		base.Error = "Error while activating two factor on your account"
+		return
+	}
+	// TODO: REMOVE SECRET FROM SESSION
+	base.Session.AddFlash("Two Factor authenticator activated. Enjoy your new security level", "success")
+	base.Redirect = "/account/manage"
 }
 
 // AccountDeleteCharacter shows the form to delete a character
@@ -144,7 +144,7 @@ func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Req
 	}
 	form := &deletionForm{
 		req.FormValue("password"),
-		req.FormValue("g-recaptcha-response"),	
+		req.FormValue("g-recaptcha-response"),
 	}
 	if errs := util.Validate(form); len(errs) > 0 {
 		for i := range errs {
@@ -247,6 +247,6 @@ func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Req
 		base.Error = "Error while creating your character"
 		return
 	}
-	base.Session.AddFlash("Character <b>" + player.Name + "</b> created successfully", "success")
+	base.Session.AddFlash("Character <b>"+player.Name+"</b> created successfully", "success")
 	base.Redirect = "/account/manage"
 }

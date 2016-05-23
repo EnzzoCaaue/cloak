@@ -10,45 +10,45 @@ type Player struct {
 	AccountID   int64
 	Name        string
 	Vocation    int
-	Gender         int
+	Gender      int
 	Level       int
-	Health int
-	HealthMax int
-	Mana int
-	ManaMax int
-	LookBody int
-	LookFeet int
-	LookHead int
-	LookLegs int
-	LookType int
-	LookAddons int
-	MagicLevel int
-	Soul int
-	Town *Town
-	Stamina int	
-	SkillFist int
-	SkillClub int
-	SkillSword int
-	SkillAxe int
-	SkillDist int
+	Health      int
+	HealthMax   int
+	Mana        int
+	ManaMax     int
+	LookBody    int
+	LookFeet    int
+	LookHead    int
+	LookLegs    int
+	LookType    int
+	LookAddons  int
+	MagicLevel  int
+	Soul        int
+	Town        *Town
+	Stamina     int
+	SkillFist   int
+	SkillClub   int
+	SkillSword  int
+	SkillAxe    int
+	SkillDist   int
 	SkillShield int
-	SkillFish int
-	Experience int
-	Balance int
-	Premdays int
-	LastLogin int64
-	GuildName string
-	GuildRank string
-	Cloaka *CloakaPlayer
+	SkillFish   int
+	Experience  int
+	Balance     int
+	Premdays    int
+	LastLogin   int64
+	GuildName   string
+	GuildRank   string
+	Cloaka      *CloakaPlayer
 }
 
 // CloakaPlayer struct for cloaka_players
 type CloakaPlayer struct {
-	ID int64
+	ID       int64
 	PlayerID int64
-	Comment string
-	Deleted int
-	Hide int
+	Comment  string
+	Deleted  int
+	Hide     int
 }
 
 // GetTopPlayers gets sidebar top players
@@ -192,7 +192,7 @@ func (player *Player) GetDeaths() ([]*Death, error) {
 
 // SearchPlayers searchs for player with name LIKE
 func SearchPlayers(name string) ([]*Player, error) {
-	rows, err := database.Connection.Query("SELECT name FROM players WHERE name LIKE ?", "%" + name + "%")
+	rows, err := database.Connection.Query("SELECT name FROM players WHERE name LIKE ?", "%"+name+"%")
 	defer rows.Close()
 	if err != nil {
 		return nil, err

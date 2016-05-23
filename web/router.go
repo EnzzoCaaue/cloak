@@ -2,14 +2,14 @@ package web
 
 import (
 	"github.com/Cloakaac/cloak/controllers"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/models"
-	"github.com/julienschmidt/httprouter"
+	"github.com/Cloakaac/cloak/template"
+	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
+	"github.com/julienschmidt/httprouter"
+	"log"
 	"net/http"
 	"reflect"
-	"log"
 )
 
 const (
@@ -72,7 +72,7 @@ func luaRoute(luaFile, mode string) func(w http.ResponseWriter, req *http.Reques
 			http.Redirect(w, req, "/account/login", http.StatusMovedPermanently)
 			return
 		}
-		controllers.LuaController(luaFile, w, req, ps)	
+		controllers.LuaController(luaFile, w, req, ps)
 	}
 }
 
@@ -121,7 +121,7 @@ func route(controller interface{}, method string, mode ...int) func(w http.Respo
 		if err != nil {
 			log.Fatal(err)
 		}
-		if base.Template != "" {			
+		if base.Template != "" {
 			template.Renderer.ExecuteTemplate(w, base.Template, base.Data)
 			return
 		}

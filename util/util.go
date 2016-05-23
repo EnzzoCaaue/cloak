@@ -1,8 +1,8 @@
 package util
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 
 var (
 	// Mode stores the AAC mode
-	Mode int
+	Mode       int
 	genderList = map[string]int{
 		"Male":   male,
 		"Female": female,

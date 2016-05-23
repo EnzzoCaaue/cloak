@@ -46,7 +46,7 @@ func createFuncs() template.FuncMap {
 			return util.GetVocation(vocation)
 		},
 		"rawHTML": func(msg string) template.HTML {
-			return template.HTML(msg)	
+			return template.HTML(msg)
 		},
 		"accountSecurity": func(twofactor int, key string) bool {
 			if twofactor != 0 && len(key) > 0 {
@@ -55,7 +55,7 @@ func createFuncs() template.FuncMap {
 			return false
 		},
 		"hasRecoveryKey": func(key string) bool {
-			return len(key) > 0	
+			return len(key) > 0
 		},
 		"unixToNews": func(unix int64) string {
 			t := time.Unix(unix, 0)

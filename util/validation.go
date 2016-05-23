@@ -1,15 +1,15 @@
 package util
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
-	"encoding/json"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 )
 
 type captcha struct {
-    Success bool
+	Success bool
 }
 
 // Validate validates de given struct with its tags
@@ -65,10 +65,10 @@ func valid(tag, alias, value string) (bool, error) {
 		if !validateVocation(value) {
 			return false, fmt.Errorf("%v: %v", alias, "Invalid vocation")
 		}
-    case "validCaptcha":
-        if !validateCaptcha(value) && Mode == 1 {
-            return false, fmt.Errorf("%v: %v", alias, "Wrong captcha response")
-        }
+	case "validCaptcha":
+		if !validateCaptcha(value) && Mode == 1 {
+			return false, fmt.Errorf("%v: %v", alias, "Wrong captcha response")
+		}
 	}
 	return true, nil
 }
@@ -119,20 +119,20 @@ func validateCaptcha(val string) bool {
 		},
 	})
 	if err != nil {
-        HandleError("Error on validateCaptcha()", err)
+		HandleError("Error on validateCaptcha()", err)
 		return false
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-        HandleError("Error on validateCaptcha()", err)
+		HandleError("Error on validateCaptcha()", err)
 		return false
 	}
 	captchaResponse := &captcha{}
-    err = json.Unmarshal(body, captchaResponse)
-    if err != nil {
-        HandleError("Error on validateCaptcha() json.Unmarshal()", err)
+	err = json.Unmarshal(body, captchaResponse)
+	if err != nil {
+		HandleError("Error on validateCaptcha() json.Unmarshal()", err)
 		return false
 	}
-    return captchaResponse.Success
+	return captchaResponse.Success
 }

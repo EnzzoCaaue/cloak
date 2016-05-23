@@ -7,10 +7,10 @@ import (
 
 // BaseController is the main controller that all controllers extend
 type BaseController struct {
-	Session *util.Session
-	Data map[interface{}]interface{}
+	Session  *util.Session
+	Data     map[interface{}]interface{}
 	Template string
-	Error string
+	Error    string
 	Redirect string
-	Account *models.CloakaAccount
+	Account  *models.CloakaAccount
 }
