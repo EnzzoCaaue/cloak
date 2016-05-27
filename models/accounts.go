@@ -95,6 +95,9 @@ func (account *CloakaAccount) EmailExists() bool {
 
 // GetAccountByToken gets an account with the given cookie token
 func GetAccountByToken(token string) *CloakaAccount {
+	if token == "" {
+		return nil
+	}
 	if !TokenExists(token) {
 		return nil
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/raggaer/pigo"
-	//"log"
 )
 
 func registerRoutes() {
@@ -52,7 +51,7 @@ func main() {
 	pigo.ControllerHook("account", func(c *pigo.Controller) {
 		account := models.GetAccountByToken(c.Session.GetString("key"))
 		c.Hook["account"] = account
-		c.Data["logged"] = account == nil
+		c.Data["logged"] = account != nil
 	})
 	registerRoutes()
 	pigo.Run()

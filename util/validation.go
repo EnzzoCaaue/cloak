@@ -67,7 +67,7 @@ func valid(tag, alias, value string) (bool, error) {
 			return false, fmt.Errorf("%v: %v", alias, "Invalid vocation")
 		}
 	case "validCaptcha":
-		if !validateCaptcha(value) && Mode == 1 {
+		if !validateCaptcha(value) && pigo.Config.String("mode") != "DEV" {
 			return false, fmt.Errorf("%v: %v", alias, "Wrong captcha response")
 		}
 	}
