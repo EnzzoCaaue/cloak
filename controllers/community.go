@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
+	"github.com/raggaer/pigo"
 	"github.com/julienschmidt/httprouter"
 )
 
 type CommunityController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 // CharacterView shows a character
-func (base *BaseController) CharacterView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func (base *CommunityController) CharacterView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	name, err := url.QueryUnescape(p.ByName("name"))
 	if err != nil {
 		base.Error = "Invalid character name"
@@ -40,7 +41,7 @@ func (base *BaseController) CharacterView(w http.ResponseWriter, req *http.Reque
 }
 
 // SignatureView shows a signature
-func (base *BaseController) SignatureView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func (base *CommunityController) SignatureView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	name, err := url.QueryUnescape(p.ByName("name"))
 	if err != nil {
 		base.Error = "Invalid character name"
@@ -51,7 +52,7 @@ func (base *BaseController) SignatureView(w http.ResponseWriter, req *http.Reque
 		base.Error = "Unknown character name"
 		return
 	}
-	signatureFile, err := os.Open(util.Parser.Template + "/public/signatures/" + player.Name + ".png")
+	signatureFile, err := os.Open(pigo.Config.String("template") + "/public/signatures/" + player.Name + ".png")
 	if err != nil { // No signature
 		signature, err := util.CreateSignature(player.Name, player.Gender, player.Vocation, player.Level, player.LastLogin)
 		if err != nil {
@@ -89,7 +90,7 @@ func (base *BaseController) SignatureView(w http.ResponseWriter, req *http.Reque
 }
 
 // SearchCharacter searchs for names LIKE
-func (base *BaseController) SearchCharacter(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func (base *CommunityController) SearchCharacter(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	players, err := models.SearchPlayers(req.FormValue("name"))
 	if err != nil {
 		base.Error = "Error while searching for players"

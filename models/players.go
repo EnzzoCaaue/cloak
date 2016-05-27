@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"github.com/raggaer/pigo"
 )
 
 // Player struct for database players
@@ -53,7 +53,7 @@ type CloakaPlayer struct {
 
 // GetTopPlayers gets sidebar top players
 func GetTopPlayers(limit int) ([]*Player, error) {
-	rows, err := database.Connection.Query("SELECT name, level FROM players ORDER BY level DESC LIMIT ?", limit)
+	rows, err := pigo.Database.Query("SELECT name, level FROM players ORDER BY level DESC LIMIT ?", limit)
 	if err != nil {
 		return nil, err
 	}
@@ -81,20 +81,20 @@ func GetPlayerByName(name string) *Player {
 	if !player.Exists() {
 		return nil
 	}
-	row := database.Connection.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
+	row := pigo.Database.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
 	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.Cloaka.Deleted)
 	return player
 }
 
 // GetGuild gets a character guild
 func (player *Player) GetGuild() {
-	row := database.Connection.QueryRow("SELECT a.name, b.name FROM guilds a, guild_ranks b, guild_membership c WHERE a.id = c.guild_id AND c.player_id = ? AND b.id = c.rank_id", player.ID)
+	row := pigo.Database.QueryRow("SELECT a.name, b.name FROM guilds a, guild_ranks b, guild_membership c WHERE a.id = c.guild_id AND c.player_id = ? AND b.id = c.rank_id", player.ID)
 	row.Scan(&player.GuildName, &player.GuildRank)
 }
 
 // Save saves a player into a database
 func (player *Player) Save() error {
-	result, err := database.Connection.Exec(`INSERT INTO
+	result, err := pigo.Database.Exec(`INSERT INTO
 	players
 	(name, account_id, level, vocation, health, healthmax, experience, lookbody, lookfeet, lookhead, looklegs, looktype, lookaddons, maglevel, mana, manamax, soul, town_id, posx, posy, posz, conditions, cap, sex, stamina, skill_fist, skill_club, skill_sword, skill_axe, skill_dist, skill_shielding, skill_fishing)
 	VALUES
@@ -140,13 +140,13 @@ func (player *Player) Save() error {
 		return err
 	}
 	player.ID = id
-	_, err = database.Connection.Exec("INSERT INTO cloaka_players (player_id) VALUES (?)", player.ID)
+	_, err = pigo.Database.Exec("INSERT INTO cloaka_players (player_id) VALUES (?)", player.ID)
 	return err
 }
 
 // Exists checks if a character name is already in use
 func (player *Player) Exists() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ?)", player.Name)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ?)", player.Name)
 	exists := false
 	row.Scan(&exists)
 	return exists
@@ -154,7 +154,7 @@ func (player *Player) Exists() bool {
 
 // GetCharacters gets all account characters
 func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
-	rows, err := database.Connection.Query("SELECT a.id, a.name, a.vocation, a.level, a.lastlogin, a.balance, a.sex, b.deleted, c.name FROM players a, cloaka_players b, cloaka_towns c WHERE a.account_id = ? AND b.player_id = a.id AND a.town_id = c.town_id ORDER BY a.id DESC", account.Account.ID)
+	rows, err := pigo.Database.Query("SELECT a.id, a.name, a.vocation, a.level, a.lastlogin, a.balance, a.sex, b.deleted, c.name FROM players a, cloaka_players b, cloaka_towns c WHERE a.account_id = ? AND b.player_id = a.id AND a.town_id = c.town_id ORDER BY a.id DESC", account.Account.ID)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -170,13 +170,13 @@ func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
 
 // Delete deletes a character
 func (player *Player) Delete(del int64) error {
-	_, err := database.Connection.Exec("UPDATE players a, cloaka_players b SET a.deletion = ?, b.deleted = 1 WHERE b.player_id = a.id AND a.id = ?", del, player.ID)
+	_, err := pigo.Database.Exec("UPDATE players a, cloaka_players b SET a.deletion = ?, b.deleted = 1 WHERE b.player_id = a.id AND a.id = ?", del, player.ID)
 	return err
 }
 
 // GetDeaths returns a slice with a character deaths
 func (player *Player) GetDeaths() ([]*Death, error) {
-	rows, err := database.Connection.Query("SELECT a.time, a.level, a.killed_by, a.is_player, a.mostdamage_by, a.mostdamage_is_player, a.unjustified, a.mostdamage_unjustified FROM player_deaths a, players b WHERE a.player_id = b.id AND b.name = ?", player.Name)
+	rows, err := pigo.Database.Query("SELECT a.time, a.level, a.killed_by, a.is_player, a.mostdamage_by, a.mostdamage_is_player, a.unjustified, a.mostdamage_unjustified FROM player_deaths a, players b WHERE a.player_id = b.id AND b.name = ?", player.Name)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (player *Player) GetDeaths() ([]*Death, error) {
 
 // SearchPlayers searchs for player with name LIKE
 func SearchPlayers(name string) ([]*Player, error) {
-	rows, err := database.Connection.Query("SELECT name FROM players WHERE name LIKE ?", "%"+name+"%")
+	rows, err := pigo.Database.Query("SELECT name FROM players WHERE name LIKE ?", "%"+name+"%")
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func SearchPlayers(name string) ([]*Player, error) {
 
 // IsInGuild checks if a player is in a guild
 func (player *Player) IsInGuild() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM guild_membership WHERE player_id = ?)", player.ID)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM guild_membership WHERE player_id = ?)", player.ID)
 	exists := false
 	row.Scan(&exists)
 	return exists

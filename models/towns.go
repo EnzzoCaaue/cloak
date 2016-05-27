@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"github.com/raggaer/pigo"
 )
 
 // Town struct for towns database
@@ -13,7 +13,7 @@ type Town struct {
 
 // GetTowns gets all towns
 func GetTowns() ([]*Town, error) {
-	rows, err := database.Connection.Query("SELECT name, town_id FROM cloaka_towns ORDER BY id DESC")
+	rows, err := pigo.Database.Query("SELECT name, town_id FROM cloaka_towns ORDER BY id DESC")
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -38,14 +38,14 @@ func NewTown(name string) *Town {
 
 // Get gets town information from database
 func (t *Town) Get() *Town {
-	row := database.Connection.QueryRow("SELECT id, town_id FROM cloaka_towns WHERE name = ?", t.Name)
+	row := pigo.Database.QueryRow("SELECT id, town_id FROM cloaka_towns WHERE name = ?", t.Name)
 	row.Scan(&t.ID, &t.TownID)
 	return t
 }
 
 // Exists checks if a town exists
 func (t *Town) Exists() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM cloaka_towns WHERE name = ?)", t.Name)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM cloaka_towns WHERE name = ?)", t.Name)
 	exists := false
 	row.Scan(&exists)
 	return exists

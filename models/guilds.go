@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"github.com/raggaer/pigo"
 )
 
 type Guild struct {
@@ -27,7 +27,7 @@ func NewGuild() *Guild {
 // GetGuildList gets the full list from database
 func GetGuildList() ([]*Guild, error) {
 	list := []*Guild{}
-	rows, err := database.Connection.Query("SELECT a.name, a.creationdata, a.motd, b.name FROM guilds a, players b WHERE a.ownerid = b.id ORDER BY a.creationdata DESC")
+	rows, err := pigo.Database.Query("SELECT a.name, a.creationdata, a.motd, b.name FROM guilds a, players b WHERE a.ownerid = b.id ORDER BY a.creationdata DESC")
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func GetGuildList() ([]*Guild, error) {
 
 // GuildExists checks if a guild exists
 func GuildExists(name string) bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM guilds WHERE name = ?)", name)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM guilds WHERE name = ?)", name)
 	exists := false
 	row.Scan(&exists)
 	return exists
@@ -50,6 +50,6 @@ func GuildExists(name string) bool {
 
 // Create creates a guild
 func (guild *Guild) Create() error {
-	_, err := database.Connection.Exec("INSERT INTO guilds (name, ownerid, creationdata, motd) VALUES(?, ?, ?, ?)", guild.Name, guild.Owner.ID, guild.Creation, guild.Motd)
+	_, err := pigo.Database.Exec("INSERT INTO guilds (name, ownerid, creationdata, motd) VALUES(?, ?, ?, ?)", guild.Name, guild.Owner.ID, guild.Creation, guild.Motd)
 	return err
 }

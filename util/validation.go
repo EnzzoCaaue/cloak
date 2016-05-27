@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"github.com/raggaer/pigo"
 )
 
 var (
@@ -112,7 +113,7 @@ func validateVocation(val string) bool {
 func validateCaptcha(val string) bool {
 	resp, err := http.PostForm(captchaVerificationURL, url.Values{
 		"secret": {
-			Parser.Captcha.Secret,
+			pigo.Config.Key("captcha").String("secret"),
 		},
 		"response": {
 			val,

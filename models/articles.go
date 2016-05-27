@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"github.com/raggaer/pigo"
 	"html/template"
 )
 
@@ -18,7 +18,7 @@ type Article struct {
 // GetArticles gets all database articles
 func GetArticles(count int) ([]*Article, error) {
 	articles := []*Article{}
-	rows, err := database.Connection.Query("SELECT title, text, created, type FROM cloaka_news ORDER BY created DESC LIMIT ?", count)
+	rows, err := pigo.Database.Query("SELECT title, text, created, type FROM cloaka_news ORDER BY created DESC LIMIT ?", count)
 	defer rows.Close()
 	if err != nil {
 		return nil, err

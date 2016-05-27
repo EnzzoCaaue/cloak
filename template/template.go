@@ -1,44 +1,21 @@
 package template
 
 import (
-	"fmt"
+	"github.com/raggaer/pigo"
+	"net/url"
+	"html/template"
+	"time"
+	"strings"
+	"strconv"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
-	"html/template"
-	"net/url"
-	"strconv"
-	"strings"
-	"time"
+	"fmt"
 )
 
-var (
-	// Renderer contains the AAC template renderer
-	Renderer *template.Template
-)
-
-// NewRender creates a new template renderer with the given path
-func NewRender(path string) error {
-	Renderer = template.New("cloaka")
-	Renderer.Funcs(createFuncs())
-	Renderer.Delims("[[", "]]")
-	_, err := Renderer.ParseGlob(fmt.Sprintf("%v/*.html", path))
-	if err != nil {
-		return err
-	}
-	_, err = Renderer.ParseGlob(fmt.Sprintf("%v/pages/*.html", path))
-	if err != nil {
-		return err
-	}
-	_, err = Renderer.ParseGlob(fmt.Sprintf("%v/admin/*.html", path))
-	if err != nil {
-		return err
-	}
-	_, err = Renderer.ParseGlob(fmt.Sprintf("%v/installer/*.html", path))
-	return err
-}
-
-func createFuncs() template.FuncMap {
-	funcMap := template.FuncMap{
+// Load loads the AAC template
+func Load() {
+	pigo.TemplateDelims("[[", "]]")
+	pigo.TemplateFunc(template.FuncMap{
 		"gender": func(gender int) string {
 			return util.GetGender(gender)
 		},
@@ -137,7 +114,7 @@ func createFuncs() template.FuncMap {
 			return true
 		},
 		"getCaptchaKey": func() string {
-			return util.Parser.Captcha.Public
+			return pigo.Config.Key("captcha").String("public")
 		},
 		"parseComment": func(comment string) []string {
 			return strings.Split(comment, "\n")
@@ -176,6 +153,6 @@ func createFuncs() template.FuncMap {
 			}
 			return false
 		},
-	}
-	return funcMap
+	})
+	pigo.LoadTemplate()
 }

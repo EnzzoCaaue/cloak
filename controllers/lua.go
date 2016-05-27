@@ -1,6 +1,6 @@
 package controllers
 
-import (
+/*import (
 	"github.com/Cloakaac/cloak/database"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
@@ -81,3 +81,4 @@ func (l *luaInterface) query(luaVM *lua.LState) int {
 	luaVM.Push(r)
 	return 1
 }
+*/

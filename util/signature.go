@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"github.com/raggaer/pigo"
 	"github.com/golang/freetype"
 	"image"
 	"image/draw"
@@ -16,7 +17,7 @@ import (
 
 // CreateSignature creates a player signature image
 func CreateSignature(name string, gender, vocation, level int, lastlogin int64) ([]byte, error) {
-	background, err := os.Open(Parser.Template + "/public/images/signature.png")
+	background, err := os.Open(pigo.Config.String("template") + "/public/images/signature.png")
 	if err != nil {
 		HandleError("Cannot open signature background image", err)
 		return nil, err
@@ -28,7 +29,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 		return nil, err
 	}
 	draw.Draw(backgroundRGBA, backgroundRGBA.Bounds(), backgroundDecoded, image.ZP, draw.Src)
-	fontBytes, err := ioutil.ReadFile(Parser.Template + "/public/fonts/Aller_Bd.ttf")
+	fontBytes, err := ioutil.ReadFile(pigo.Config.String("template") + "/public/fonts/Aller_Bd.ttf")
 	if err != nil {
 		HandleError("Cannot open signature font file", err)
 		return nil, err
@@ -76,35 +77,8 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 		HandleError("Error writing to output buffer", err)
 		return nil, err
 	}
-	signatureFile, err := os.Create(Parser.Template + "/public/signatures/" + name + ".png")
+	signatureFile, err := os.Create(pigo.Config.String("template") + "/public/signatures/" + name + ".png")
 	defer signatureFile.Close()
 	signatureFile.Write(buffer.Bytes())
 	return buffer.Bytes(), nil
 }
-
-/*
-
-
-
-
-	buffer_signature := bytes.Buffer{}
-	b := bufio.NewWriter(&buffer_signature)
-	err = png.Encode(b, rgba)
-	if err != nil {
-		http.Error(res, "Error while encoding PNG file", 500)
-		return
-	}
-	err = b.Flush()
-	if err != nil {
-		http.Error(res, "Error while writing the PNG file", 500)
-		return
-	}
-	signature_out, err := os.Create(config.Parser.Style.Template + "/public/signatures/" + character_info.Name + ".png")
-	if err != nil {
-		http.Error(res, "Error while saving signature", 500)
-		return
-	}
-	defer signature_out.Close()
-	signature_out.Write(buffer_signature.Bytes())
-	res.Header().Set("Content-type", "image/png")
-	res.Write(buffer_signature.Bytes())*/

@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-
+	"github.com/raggaer/pigo"
 	"crypto/sha1"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
@@ -15,7 +15,7 @@ import (
 )
 
 type AccountController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 type deletionForm struct {
@@ -31,33 +31,38 @@ type creationForm struct {
 	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
+// AccountLost shows the recover account form
+func (base *AccountController) AccountLost(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	base.Template = "account_lost.html"
+}
+
 // AccountManage shows the account manage page
-func (base *BaseController) AccountManage(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	characters, err := base.Account.GetCharacters()
+func (base *AccountController) AccountManage(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
 	if err != nil {
 		base.Error = "Error while getting your character list"
 		return
 	}
 	base.Data["Success"] = base.Session.GetFlashes("success")
 	base.Data["Characters"] = characters
-	base.Data["Account"] = base.Account
+	base.Data["Account"] = base.Hook["account"].(*models.CloakaAccount)
 	base.Template = "manage.html"
 }
 
 // AccountLogout logs the user out
-func (base *BaseController) AccountLogout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *AccountController) AccountLogout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Session.Delete("key")
 	base.Redirect = "/account/login"
 }
 
 // AccountSetRecovery sets an account recovery key
-func (base *BaseController) AccountSetRecovery(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	if base.Account.RecoveryKey != "" {
+func (base *AccountController) AccountSetRecovery(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	if base.Hook["account"].(*models.CloakaAccount).RecoveryKey != "" {
 		base.Redirect = "/account/manage"
 		return
 	}
 	key := uniuri.New()
-	err := base.Account.UpdateRecoveryKey(key)
+	err := base.Hook["account"].(*models.CloakaAccount).UpdateRecoveryKey(key)
 	if err != nil {
 		base.Error = "Error while updating your recovery key"
 		return
@@ -67,12 +72,12 @@ func (base *BaseController) AccountSetRecovery(w http.ResponseWriter, req *http.
 }
 
 //AccountTwoFactor the form to set-up a two factor auth
-func (base *BaseController) AccountTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	if base.Account.TwoFactor > 0 {
+func (base *AccountController) AccountTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	if base.Hook["account"].(*models.CloakaAccount).TwoFactor > 0 {
 		base.Redirect = "/account/manage"
 	}
 	secretKey := uniuri.NewLenChars(16, []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"))
-	codeURL := fmt.Sprintf("otpauth://totp/%v:%v?secret=%v&issuer=%v", "MyServer", base.Account.Account.Name, secretKey, "MyServer")
+	codeURL := fmt.Sprintf("otpauth://totp/%v:%v?secret=%v&issuer=%v", "MyServer", base.Hook["account"].(*models.CloakaAccount).Account.Name, secretKey, "MyServer")
 	base.Data["QR"] = "http://chart.apis.google.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=" + codeURL
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
 	base.Session.Set("secret", secretKey)
@@ -80,8 +85,8 @@ func (base *BaseController) AccountTwoFactor(w http.ResponseWriter, req *http.Re
 }
 
 // AccountSetTwoFactor Checks and sets a two factor key
-func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	if base.Account.TwoFactor > 0 {
+func (base *AccountController) AccountSetTwoFactor(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	if base.Hook["account"].(*models.CloakaAccount).TwoFactor > 0 {
 		base.Redirect = "/account/manage"
 		return
 	}
@@ -96,7 +101,7 @@ func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http
 		base.Redirect = "/account/manage/twofactor"
 		return
 	}
-	err := base.Account.EnableTwoFactor(base.Session.GetString("secret"))
+	err := base.Hook["account"].(*models.CloakaAccount).EnableTwoFactor(base.Session.GetString("secret"))
 	if err != nil {
 		base.Error = "Error while activating two factor on your account"
 		return
@@ -107,13 +112,13 @@ func (base *BaseController) AccountSetTwoFactor(w http.ResponseWriter, req *http
 }
 
 // AccountDeleteCharacter shows the form to delete a character
-func (base *BaseController) AccountDeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (base *AccountController) AccountDeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	characterName, err := url.QueryUnescape(ps.ByName("name"))
 	if err != nil {
 		base.Error = "Cannot escape character name"
 		return
 	}
-	player := base.Account.GetCharacter(characterName)
+	player := base.Hook["account"].(*models.CloakaAccount).GetCharacter(characterName)
 	if player == nil {
 		base.Redirect = "/account/manage"
 		return
@@ -127,13 +132,13 @@ func (base *BaseController) AccountDeleteCharacter(w http.ResponseWriter, req *h
 }
 
 // DeleteCharacter deletes an account character
-func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (base *AccountController) DeleteCharacter(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	characterName, err := url.QueryUnescape(ps.ByName("name"))
 	if err != nil {
 		http.Error(w, "Oops! Something while reading character name!", http.StatusBadRequest)
 		return
 	}
-	player := base.Account.GetCharacter(characterName)
+	player := base.Hook["account"].(*models.CloakaAccount).GetCharacter(characterName)
 	if player == nil {
 		base.Redirect = "/account/manage"
 		return
@@ -154,7 +159,7 @@ func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Req
 		return
 	}
 	password := fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
-	if base.Account.Account.Password != password {
+	if base.Hook["account"].(*models.CloakaAccount).Account.Password != password {
 		base.Session.AddFlash("Wrong password", "errors")
 		base.Redirect = "/account/manage/delete/" + ps.ByName("name")
 		return
@@ -171,7 +176,7 @@ func (base *BaseController) DeleteCharacter(w http.ResponseWriter, req *http.Req
 }
 
 // AccountCreateCharacter shows the form to create an account character
-func (base *BaseController) AccountCreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *AccountController) AccountCreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	towns, err := models.GetTowns()
 	if err != nil {
 		base.Error = "Error while getting town list"
@@ -183,7 +188,7 @@ func (base *BaseController) AccountCreateCharacter(w http.ResponseWriter, req *h
 }
 
 // CreateCharacter creates an account character
-func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *AccountController) CreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	form := &creationForm{
 		req.FormValue("name"),
 		req.FormValue("town"),
@@ -206,42 +211,42 @@ func (base *BaseController) CreateCharacter(w http.ResponseWriter, req *http.Req
 	}
 	player := models.NewPlayer()
 	player.Name = form.Name
-	player.AccountID = base.Account.Account.ID
+	player.AccountID = base.Hook["account"].(*models.CloakaAccount).Account.ID
 	if player.Exists() {
 		base.Session.AddFlash("Character name is already in use", "errors")
 		base.Redirect = "/account/manage/create"
 		return
 	}
-	player.Level = util.Parser.Register.Level
-	player.Health = util.Parser.Register.Health
-	player.HealthMax = util.Parser.Register.Healthmax
-	player.Mana = util.Parser.Register.Mana
-	player.ManaMax = util.Parser.Register.Manamax
+	player.Level = pigo.Config.Key("register").Int("level")
+	player.Health = pigo.Config.Key("register").Int("health")
+	player.HealthMax = pigo.Config.Key("register").Int("healthmax")
+	player.Mana = pigo.Config.Key("register").Int("mana")
+	player.ManaMax = pigo.Config.Key("register").Int("manamax")
 	player.Vocation = util.Vocation(form.Vocation)
 	player.Gender = util.Gender(form.Gender)
 	if player.Gender == 0 { // female
-		player.LookBody = util.Parser.Register.Female.Lookbody
-		player.LookFeet = util.Parser.Register.Female.Lookfeet
-		player.LookHead = util.Parser.Register.Female.Lookhead
-		player.LookType = util.Parser.Register.Female.Looktype
-		player.LookAddons = util.Parser.Register.Female.Lookaddons
+		player.LookBody = pigo.Config.Key("register").Key("female").Int("lookbody")
+		player.LookFeet = pigo.Config.Key("register").Key("female").Int("lookfeet")
+		player.LookHead = pigo.Config.Key("register").Key("female").Int("lookhead")
+		player.LookType = pigo.Config.Key("register").Key("female").Int("looktype")
+		player.LookAddons = pigo.Config.Key("register").Key("female").Int("lookaddons")
 	} else {
-		player.LookBody = util.Parser.Register.Male.Lookbody
-		player.LookFeet = util.Parser.Register.Male.Lookfeet
-		player.LookHead = util.Parser.Register.Male.Lookhead
-		player.LookType = util.Parser.Register.Male.Looktype
-		player.LookAddons = util.Parser.Register.Male.Lookaddons
+		player.LookBody = pigo.Config.Key("register").Key("male").Int("lookbody")
+		player.LookFeet = pigo.Config.Key("register").Key("male").Int("lookfeet")
+		player.LookHead = pigo.Config.Key("register").Key("male").Int("lookhead")
+		player.LookType = pigo.Config.Key("register").Key("male").Int("looktype")
+		player.LookAddons = pigo.Config.Key("register").Key("male").Int("lookaddons")
 	}
 	player.Town = town
-	player.Stamina = util.Parser.Register.Stamina
-	player.SkillAxe = util.Parser.Register.Skills.Axe
-	player.SkillSword = util.Parser.Register.Skills.Sword
-	player.SkillClub = util.Parser.Register.Skills.Club
-	player.SkillDist = util.Parser.Register.Skills.Dist
-	player.SkillFish = util.Parser.Register.Skills.Fish
-	player.SkillFist = util.Parser.Register.Skills.Fist
-	player.SkillShield = util.Parser.Register.Skills.Shield
-	player.Experience = util.Parser.Register.Experience
+	player.Stamina = pigo.Config.Key("register").Int("stamina")
+	player.SkillAxe = pigo.Config.Key("register").Key("skills").Int("axe")
+	player.SkillSword = pigo.Config.Key("register").Key("skills").Int("sword")
+	player.SkillClub = pigo.Config.Key("register").Key("skills").Int("club")
+	player.SkillDist = pigo.Config.Key("register").Key("skills").Int("dist")
+	player.SkillFish = pigo.Config.Key("register").Key("skills").Int("fish")
+	player.SkillFist = pigo.Config.Key("register").Key("skills").Int("fist")
+	player.SkillShield = pigo.Config.Key("register").Key("skills").Int("shield")
+	player.Experience = pigo.Config.Key("register").Int("experience")
 	err := player.Save()
 	if err != nil {
 		base.Error = "Error while creating your character"

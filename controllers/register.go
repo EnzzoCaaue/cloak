@@ -8,10 +8,11 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"github.com/raggaer/pigo"
 )
 
 type RegisterController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 // RegisterForm saves the register form
@@ -27,7 +28,7 @@ type RegisterForm struct {
 }
 
 // Register shows the register.html page
-func (base *BaseController) Register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *RegisterController) Register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	towns, err := models.GetTowns()
 	if err != nil {
 		base.Error = "Error fetching town list"
@@ -39,7 +40,7 @@ func (base *BaseController) Register(w http.ResponseWriter, req *http.Request, _
 }
 
 // CreateAccount process register.html and creates an account
-func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	form := &RegisterForm{
 		req.FormValue("accountname"),
 		req.FormValue("email"),
@@ -76,7 +77,7 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	account.Account.Password = fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
-	account.Account.Premdays = util.Parser.Register.Premdays
+	account.Account.Premdays = pigo.Config.Key("Register").Int("Premdays")
 	account.Account.Email = form.Email
 	err := account.Account.Save()
 	if err != nil {
@@ -96,36 +97,36 @@ func (base *BaseController) CreateAccount(w http.ResponseWriter, req *http.Reque
 		base.Redirect = "/account/create"
 		return
 	}
-	player.Level = util.Parser.Register.Level
-	player.Health = util.Parser.Register.Health
-	player.HealthMax = util.Parser.Register.Healthmax
-	player.Mana = util.Parser.Register.Mana
-	player.ManaMax = util.Parser.Register.Manamax
+	player.Level = pigo.Config.Key("register").Int("level")
+	player.Health = pigo.Config.Key("register").Int("health")
+	player.HealthMax = pigo.Config.Key("register").Int("healthmax")
+	player.Mana = pigo.Config.Key("register").Int("mana")
+	player.ManaMax = pigo.Config.Key("register").Int("manamax")
 	player.Vocation = util.Vocation(form.CharacterVocation)
 	player.Gender = util.Gender(form.CharacterSex)
 	if player.Gender == 0 { // female
-		player.LookBody = util.Parser.Register.Female.Lookbody
-		player.LookFeet = util.Parser.Register.Female.Lookfeet
-		player.LookHead = util.Parser.Register.Female.Lookhead
-		player.LookType = util.Parser.Register.Female.Looktype
-		player.LookAddons = util.Parser.Register.Female.Lookaddons
+		player.LookBody = pigo.Config.Key("register").Key("female").Int("lookbody")
+		player.LookFeet = pigo.Config.Key("register").Key("female").Int("lookfeet")
+		player.LookHead = pigo.Config.Key("register").Key("female").Int("lookhead")
+		player.LookType = pigo.Config.Key("register").Key("female").Int("looktype")
+		player.LookAddons = pigo.Config.Key("register").Key("female").Int("lookaddons")
 	} else {
-		player.LookBody = util.Parser.Register.Male.Lookbody
-		player.LookFeet = util.Parser.Register.Male.Lookfeet
-		player.LookHead = util.Parser.Register.Male.Lookhead
-		player.LookType = util.Parser.Register.Male.Looktype
-		player.LookAddons = util.Parser.Register.Male.Lookaddons
+		player.LookBody = pigo.Config.Key("register").Key("male").Int("lookbody")
+		player.LookFeet = pigo.Config.Key("register").Key("male").Int("lookfeet")
+		player.LookHead = pigo.Config.Key("register").Key("male").Int("lookhead")
+		player.LookType = pigo.Config.Key("register").Key("male").Int("looktype")
+		player.LookAddons = pigo.Config.Key("register").Key("male").Int("lookaddons")
 	}
 	player.Town = town.Get()
-	player.Stamina = util.Parser.Register.Stamina
-	player.SkillAxe = util.Parser.Register.Skills.Axe
-	player.SkillSword = util.Parser.Register.Skills.Sword
-	player.SkillClub = util.Parser.Register.Skills.Club
-	player.SkillDist = util.Parser.Register.Skills.Dist
-	player.SkillFish = util.Parser.Register.Skills.Fish
-	player.SkillFist = util.Parser.Register.Skills.Fist
-	player.SkillShield = util.Parser.Register.Skills.Shield
-	player.Experience = util.Parser.Register.Experience
+	player.Stamina = pigo.Config.Key("register").Int("stamina")
+	player.SkillAxe = pigo.Config.Key("register").Key("skills").Int("axe")
+	player.SkillSword = pigo.Config.Key("register").Key("skills").Int("sword")
+	player.SkillClub = pigo.Config.Key("register").Key("skills").Int("club")
+	player.SkillDist = pigo.Config.Key("register").Key("skills").Int("dist")
+	player.SkillFish = pigo.Config.Key("register").Key("skills").Int("fish")
+	player.SkillFist = pigo.Config.Key("register").Key("skills").Int("fist")
+	player.SkillShield = pigo.Config.Key("register").Key("skills").Int("shield")
+	player.Experience = pigo.Config.Key("register").Int("experience")
 	err = player.Save()
 	if err != nil {
 		base.Error = "Error while saving player"

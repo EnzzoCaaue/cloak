@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/raggaer/pigo"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
@@ -8,7 +9,7 @@ import (
 )
 
 type HomeController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 // Home shows the homepage and loads news
@@ -18,5 +19,6 @@ func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ htt
 		util.HandleError("Error on models.GetArticles", err)
 	}
 	base.Data["Articles"] = articles
+	base.Session.AddFlash("test", "test")
 	base.Template = "home.html"
 }

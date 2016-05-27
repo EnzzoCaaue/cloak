@@ -5,11 +5,12 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"github.com/raggaer/pigo"
 	"time"
 )
 
 type GuildController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 // GuildCreateForm is the form for guild creation POST
@@ -20,7 +21,7 @@ type GuildCreateForm struct {
 
 // GuildList shows a list of guilds
 func (base *GuildController) GuildList(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	characters, err := base.Account.GetCharacters()
+	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
 	if err != nil {
 		base.Error = "Error while getting your character list"
 		return
@@ -37,7 +38,7 @@ func (base *GuildController) GuildList(w http.ResponseWriter, req *http.Request,
 }
 
 // CreateGuild creates a guild
-func (base *BaseController) CreateGuild(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *GuildController) CreateGuild(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	form := &GuildCreateForm{
 		req.FormValue("name"),
 		req.FormValue("owner"),
@@ -49,7 +50,7 @@ func (base *BaseController) CreateGuild(w http.ResponseWriter, req *http.Request
 		base.Redirect = "/guilds.list"
 		return
 	}
-	if !base.Account.HasCharacter(form.OwnerName) {
+	if !base.Hook["account"].(*models.CloakaAccount).HasCharacter(form.OwnerName) {
 		base.Redirect = "/guilds.list"
 		return
 	}

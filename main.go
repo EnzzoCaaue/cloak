@@ -1,37 +1,81 @@
 package main
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"net/http"
 	"github.com/Cloakaac/cloak/template"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/Cloakaac/cloak/web"
-	"log"
+	"github.com/julienschmidt/httprouter"
+	"github.com/Cloakaac/cloak/controllers"
+	"github.com/Cloakaac/cloak/models"
+	"github.com/raggaer/pigo"
+	//"log"
 )
 
-func main() {
-	err := util.LoadConfig()
-	if err != nil {
-		log.Println("Cannot parse config.json")
-		log.Fatal(err)
-	}
-	log.Println("Config values parsed")
-	err = database.NewConnection(util.Parser.Database.User, util.Parser.Database.Password, util.Parser.Database.Database)
-	if err != nil {
-		log.Println("An error occured while connecting to MySQL database")
-		log.Fatal(err)
-	}
-	log.Println("MySQL connection estabilished")
-	err = template.NewRender(util.Parser.Template)
-	if err != nil {
-		log.Println("An error occured while parsing Cloaka template")
-		log.Fatal(err)
-	}
-	log.Println("Template renderer registered")
-	util.SetMode(util.Parser.Mode)
-	if util.Parser.Mode == 0 {
-		log.Println("Running Cloaka on DEBUG mode")
-	} else {
-		log.Println("Running Cloaka on RELEASE mode")
-	}
-	web.Start(util.Parser.Port, util.Parser.Template)
+func registerRoutes() {
+	pigo.Get("/", &controllers.HomeController{}, "Home", "")
+	pigo.Get("/account/login", &controllers.LoginController{}, "Login", "guest")
+	pigo.Post("/account/login", &controllers.LoginController{}, "SignIn", "guest")
+	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList", "logged")
+	pigo.Post("/guilds/create", &controllers.GuildController{}, "CreateGuild", "logged")
+	pigo.Get("/account/create", &controllers.RegisterController{}, "Register", "guest")
+	pigo.Post("/account/create", &controllers.RegisterController{}, "CreateAccount", "guest")
+	pigo.Get("/account/manage", &controllers.AccountController{}, "AccountManage", "logged")
+	pigo.Get("/account/logout", &controllers.AccountController{}, "AccountLogout", "logged")
+	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView", "")
+	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView", "")
+	pigo.Get("/account/manage/recovery", &controllers.AccountController{}, "AccountSetRecovery", "logged")
+	pigo.Get("/account/manage/twofactor", &controllers.AccountController{}, "AccountTwoFactor", "logged")
+	pigo.Post("/account/manage/twofactor", &controllers.AccountController{}, "AccountSetTwoFactor", "logged")
+	pigo.Get("/account/manage/delete/:name", &controllers.AccountController{}, "AccountDeleteCharacter", "logged")
+	pigo.Post("/account/manage/delete/:name", &controllers.AccountController{}, "DeleteCharacter", "logged")
+	pigo.Get("/account/manage/create", &controllers.AccountController{}, "AccountCreateCharacter", "logged")
+	pigo.Post("/account/manage/create", &controllers.AccountController{}, "CreateCharacter", "logged")
+	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter", "")
+	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")
 }
+
+func main() {
+	template.Load()
+	pigo.Filter("logged", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		if c.Session.GetString("key") == "" {
+			http.Redirect(w, req, "/account/login", 301)
+			return false
+		}
+		return true
+	})
+	pigo.Filter("guest", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		if c.Session.GetString("key") != "" {
+			http.Redirect(w, req, "/account/manage", 301)
+			return false
+		}
+		return true
+	})
+	pigo.ControllerHook("account", func(c *pigo.Controller) {
+		account := models.GetAccountByToken(c.Session.GetString("key"))
+		c.Hook["account"] = account
+		c.Data["logged"] = account == nil
+	})
+	registerRoutes()
+	pigo.Run()
+}
+
+
+/*
+	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList", "logged")
+	pigo.Post("/guilds/create", &controllers.GuildController{}, "CreateGuild", "logged")
+	pigo.Get("/account/create", &controllers.RegisterController{}, "Register", "guest")
+	pigo.Post("/account/create", &controllers.RegisterController{}, "CreateAccount", "guest")
+	pigo.Get("/account/login", &controllers.LoginController{}, "Login", "guest")
+	pigo.Post("/account/login", &controllers.LoginController{}, "SignIn", "guest")
+	pigo.Get("/account/manage", &controllers.AccountController{}, "AccountManage", "logged")
+	pigo.Get("/account/logout", &controllers.AccountController{}, "AccountLogout", "logged")
+	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView", "")
+	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView", "")
+	pigo.Get("/account/manage/recovery", &controllers.AccountController{}, "AccountSetRecovery", "logged")
+	pigo.Get("/account/manage/twofactor", &controllers.AccountController{}, "AccountTwoFactor", "logged")
+	pigo.Post("/account/manage/twofactor", &controllers.AccountController{}, "AccountSetTwoFactor", "logged")
+	pigo.Get("/account/manage/delete/:name", &controllers.AccountController{}, "AccountDeleteCharacter", "logged")
+	pigo.Post("/account/manage/delete/:name", &controllers.AccountController{}, "DeleteCharacter", "logged")
+	pigo.Get("/account/manage/create", &controllers.AccountController{}, "AccountCreateCharacter", "logged")
+	pigo.Post("/account/manage/create", &controllers.AccountController{}, "CreateCharacter", "logged")
+	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter", "")
+	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")*/

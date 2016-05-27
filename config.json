@@ -1,6 +1,6 @@
 {
     "port": "8080",
-    "mode": 0,
+    "mode": "DEV",
     "template": "G:/Workspace/Go/src/github.com/Cloakaac/template-default",
     "routes": [
         {
@@ -11,6 +11,7 @@
         }
     ],
     "database": {
+        "type": "mysql",
         "user": "root",
         "password": "admin",
         "database": "cloaka"

@@ -9,10 +9,11 @@ import (
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"github.com/raggaer/pigo"
 )
 
 type LoginController struct {
-	*BaseController
+	*pigo.Controller
 }
 
 // LoginForm saves the login form
@@ -23,13 +24,13 @@ type LoginForm struct {
 }
 
 // Login shows the login form
-func (base *BaseController) Login(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *LoginController) Login(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
 	base.Template = "login.html"
 }
 
 // SignIn process the login form
-func (base *BaseController) SignIn(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *LoginController) SignIn(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	form := &LoginForm{
 		req.FormValue("loginname"),
 		req.FormValue("loginpassword"),

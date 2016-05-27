@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/Cloakaac/cloak/database"
+	"github.com/raggaer/pigo"
 	"time"
 )
 
@@ -54,7 +54,7 @@ func NewAccount() *CloakaAccount {
 
 // Save registers an account
 func (account *Account) Save() error {
-	result, err := database.Connection.Exec("INSERT INTO accounts (name, password, type, premdays, lastday, email, creation) VALUES (?, ?, 0, ?, 0, ?, ?)",
+	result, err := pigo.Database.Exec("INSERT INTO accounts (name, password, type, premdays, lastday, email, creation) VALUES (?, ?, 0, ?, 0, ?, ?)",
 		account.Name,
 		account.Password,
 		account.Premdays,
@@ -73,13 +73,13 @@ func (account *Account) Save() error {
 
 // Save registers a cloaka account
 func (account *CloakaAccount) Save() error {
-	_, err := database.Connection.Exec("INSERT INTO cloaka_accounts (account, token, admin, twofactor, recovery) VALUES (?, ?, ?, ?, ?)", account.Account.ID, account.Token, account.Admin, 0, "")
+	_, err := pigo.Database.Exec("INSERT INTO cloaka_accounts (account, token, admin, twofactor, recovery) VALUES (?, ?, ?, ?, ?)", account.Account.ID, account.Token, account.Admin, 0, "")
 	return err
 }
 
 // NameExists checks if an account name is already in use
 func (account *CloakaAccount) NameExists() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE name = ?)", account.Account.Name)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE name = ?)", account.Account.Name)
 	exists := false
 	row.Scan(&exists)
 	return exists
@@ -87,7 +87,7 @@ func (account *CloakaAccount) NameExists() bool {
 
 // EmailExists checks if an account email is already in use
 func (account *CloakaAccount) EmailExists() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE email = ?)", account.Account.Email)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE email = ?)", account.Account.Email)
 	exists := false
 	row.Scan(&exists)
 	return exists
@@ -99,14 +99,14 @@ func GetAccountByToken(token string) *CloakaAccount {
 		return nil
 	}
 	account := NewAccount()
-	row := database.Connection.QueryRow("SELECT a.id, a.name, a.password, a.email, a.premdays, b.points, b.admin, b.twofactor, b.recovery FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND b.token = ?", token)
+	row := pigo.Database.QueryRow("SELECT a.id, a.name, a.password, a.email, a.premdays, b.points, b.admin, b.twofactor, b.recovery FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND b.token = ?", token)
 	row.Scan(&account.Account.ID, &account.Account.Name, &account.Account.Password, &account.Account.Email, &account.Account.Premdays, &account.Points, &account.Admin, &account.TwoFactor, &account.RecoveryKey)
 	return account
 }
 
 // TokenExists checks if a token is already in use by an account
 func TokenExists(token string) bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM cloaka_accounts WHERE token = ?)", token)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM cloaka_accounts WHERE token = ?)", token)
 	exists := false
 	row.Scan(&exists)
 	return exists
@@ -114,38 +114,38 @@ func TokenExists(token string) bool {
 
 // UpdateToken sets an account cookie token
 func (account *CloakaAccount) UpdateToken(token string) error {
-	_, err := database.Connection.Exec("UPDATE cloaka_accounts SET token = ? WHERE account = ?", token, account.Account.ID)
+	_, err := pigo.Database.Exec("UPDATE cloaka_accounts SET token = ? WHERE account = ?", token, account.Account.ID)
 	return err
 }
 
 // SignIn checks if a given username and password exists
 func (account *CloakaAccount) SignIn() bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE name = ? AND password = ?)", account.Account.Name, account.Account.Password)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE name = ? AND password = ?)", account.Account.Name, account.Account.Password)
 	success := false
 	row.Scan(&success)
 	if !success {
 		return false
 	}
-	row = database.Connection.QueryRow("SELECT a.id, a.secret, b.twofactor FROM accounts a, cloaka_accounts b WHERE a.name = ? AND a.id = b.account", account.Account.Name)
+	row = pigo.Database.QueryRow("SELECT a.id, a.secret, b.twofactor FROM accounts a, cloaka_accounts b WHERE a.name = ? AND a.id = b.account", account.Account.Name)
 	row.Scan(&account.Account.ID, &account.Account.SecretKey, &account.TwoFactor)
 	return true
 }
 
 // UpdateRecoveryKey sets an account recovery key
 func (account *CloakaAccount) UpdateRecoveryKey(key string) error {
-	_, err := database.Connection.Exec("UPDATE cloaka_accounts SET recovery = ? WHERE account = ?", key, account.Account.ID)
+	_, err := pigo.Database.Exec("UPDATE cloaka_accounts SET recovery = ? WHERE account = ?", key, account.Account.ID)
 	return err
 }
 
 // EnableTwoFactor enables the two-factor google auth system on a given account
 func (account *CloakaAccount) EnableTwoFactor(secret string) error {
-	_, err := database.Connection.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ? AND b.account = a.id", secret, account.Account.ID)
+	_, err := pigo.Database.Exec("UPDATE accounts a, cloaka_accounts b SET b.twofactor = 1, a.secret = ? WHERE a.id = ? AND b.account = a.id", secret, account.Account.ID)
 	return err
 }
 
 // HasCharacter checks if an account got a player
 func (account *CloakaAccount) HasCharacter(name string) bool {
-	row := database.Connection.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ? AND account_id = ?)", name, account.Account.ID)
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM players WHERE name = ? AND account_id = ?)", name, account.Account.ID)
 	exists := false
 	row.Scan(&exists)
 	return exists
