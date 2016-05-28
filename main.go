@@ -31,6 +31,7 @@ func registerRoutes() {
 	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter", "")
 	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")
 	pigo.Post("/account/lost/password", &controllers.AccountController{}, "AccountLostPassword", "guest")
+	pigo.Post("/account/lost/name", &controllers.AccountController{}, "AccountLostName", "guest")
 }
 
 func main() {

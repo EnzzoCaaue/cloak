@@ -170,6 +170,14 @@ func RecoverAccountPassword(key, name string) bool {
 	return exists
 }
 
+// RecoverAccountName checks if the key and password of an account exists
+func RecoverAccountName(key, password string) string {
+	row := pigo.Database.QueryRow("SELECT a.name FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND a.password = ? AND b.recovery = ?", password, key)
+	var name string
+	row.Scan(&name)
+	return name
+}
+
 // SetNewPassword changes an account password by the name
 func SetNewPassword(name, password string) error {
 	_, err := pigo.Database.Exec("UPDATE accounts SET password = ? WHERE name = ?", password, name)

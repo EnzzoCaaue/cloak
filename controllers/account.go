@@ -12,6 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/url"
 	"time"
+	"log"
 )
 
 type AccountController struct {
@@ -39,7 +40,23 @@ type passwordLostForm struct {
 func (base *AccountController) AccountLost(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Data["ErrorsPassword"] = base.Session.GetFlashes("errorsPassword")
 	base.Data["SuccessPassword"] = base.Session.GetFlashes("successPassword")
+	base.Data["ErrorsName"] = base.Session.GetFlashes("errorsName")
+	base.Data["SuccessName"] = base.Session.GetFlashes("successName")
 	base.Template = "account_lost.html"
+}
+
+// AccountLostName recovers an account name using the recovery key and the password
+func (base *AccountController) AccountLostName(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	passwordSha1 := fmt.Sprintf("%x", sha1.Sum([]byte(req.FormValue("password"))))
+	log.Println(req.FormValue("key"))
+	name := models.RecoverAccountName(req.FormValue("key"), passwordSha1)
+	if name == "" {
+		base.Session.AddFlash("Wrong account password or recovery key", "errorsName")
+		base.Redirect = "/account/lost"
+		return
+	}
+	base.Session.AddFlash("Your account name is <b>" + name + "</b>", "successName")
+	base.Redirect = "/account/lost"
 }
 
 // AccountLostPassword recovers an account using the recovery key and the name
