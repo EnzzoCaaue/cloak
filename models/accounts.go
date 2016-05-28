@@ -161,3 +161,17 @@ func (account *CloakaAccount) GetCharacter(name string) *Player {
 	}
 	return GetPlayerByName(name)
 }
+
+// RecoverAccountPassword checks if the key and account name exists
+func RecoverAccountPassword(key, name string) bool {
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts a, cloaka_accounts b WHERE a.id = b.account AND a.name = ? AND b.recovery = ?)", name, key)
+	exists := false
+	row.Scan(&exists)
+	return exists
+}
+
+// SetNewPassword changes an account password by the name
+func SetNewPassword(name, password string) error {
+	_, err := pigo.Database.Exec("UPDATE accounts SET password = ? WHERE name = ?", password, name)
+	return err
+}

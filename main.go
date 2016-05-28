@@ -30,6 +30,7 @@ func registerRoutes() {
 	pigo.Post("/account/manage/create", &controllers.AccountController{}, "CreateCharacter", "logged")
 	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter", "")
 	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")
+	pigo.Post("/account/lost/password", &controllers.AccountController{}, "AccountLostPassword", "guest")
 }
 
 func main() {

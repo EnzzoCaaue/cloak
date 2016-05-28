@@ -31,9 +31,42 @@ type creationForm struct {
 	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
 }
 
+type passwordLostForm struct {
+	Password string `validate:"min=8, max=30" alias:"Account password"`
+}
+
 // AccountLost shows the recover account form
 func (base *AccountController) AccountLost(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	base.Data["ErrorsPassword"] = base.Session.GetFlashes("errorsPassword")
+	base.Data["SuccessPassword"] = base.Session.GetFlashes("successPassword")
 	base.Template = "account_lost.html"
+}
+
+// AccountLostPassword recovers an account using the recovery key and the name
+func (base *AccountController) AccountLostPassword(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	if !models.RecoverAccountPassword(req.FormValue("key"), req.FormValue("name")) {
+		base.Session.AddFlash("Wrong account name or recovery key", "errorsPassword")
+		base.Redirect = "/account/lost"
+		return
+	}
+	form := &passwordLostForm{
+		req.FormValue("password"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for i := range errs {
+			base.Session.AddFlash(errs[i].Error(), "errorsPassword")
+		}
+		base.Redirect = "/account/lost"
+		return
+	}
+	passwordSha1 := sha1.Sum([]byte(req.FormValue("password")))
+	err := models.SetNewPassword(req.FormValue("name"), fmt.Sprintf("%x", passwordSha1))
+	if err != nil {
+		base.Error = "Error while updating your acocunt password"
+		return
+	}
+	base.Session.AddFlash("Password changed successfully", "successPassword")
+	base.Redirect = "/account/lost"
 }
 
 // AccountManage shows the account manage page
