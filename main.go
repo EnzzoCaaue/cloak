@@ -10,6 +10,7 @@ import (
 )
 
 func registerRoutes() {
+	pigo.Get("/credits", &controllers.HomeController{}, "Credits", "")
 	pigo.Get("/", &controllers.HomeController{}, "Home", "")
 	pigo.Get("/account/login", &controllers.LoginController{}, "Login", "guest")
 	pigo.Post("/account/login", &controllers.LoginController{}, "SignIn", "guest")
