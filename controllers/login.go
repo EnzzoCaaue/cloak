@@ -52,7 +52,7 @@ func (base *LoginController) SignIn(w http.ResponseWriter, req *http.Request, _ 
 		base.Redirect = "/account/login"
 		return
 	}
-	if account.TwoFactor > 0 {
+	if account.TwoFactor > 0 && pigo.Config.String("mode") != "DEV" {
 		otpConfig := &dgoogauth.OTPConfig{
 			Secret:      account.Account.SecretKey,
 			WindowSize:  3,

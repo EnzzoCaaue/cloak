@@ -14,7 +14,7 @@ func registerRoutes() {
 	pigo.Get("/", &controllers.HomeController{}, "Home", "")
 	pigo.Get("/account/login", &controllers.LoginController{}, "Login", "guest")
 	pigo.Post("/account/login", &controllers.LoginController{}, "SignIn", "guest")
-	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList", "logged")
+	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList", "")
 	pigo.Post("/guilds/create", &controllers.GuildController{}, "CreateGuild", "logged")
 	pigo.Get("/account/create", &controllers.RegisterController{}, "Register", "guest")
 	pigo.Post("/account/create", &controllers.RegisterController{}, "CreateAccount", "guest")
@@ -33,6 +33,7 @@ func registerRoutes() {
 	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")
 	pigo.Post("/account/lost/password", &controllers.AccountController{}, "AccountLostPassword", "guest")
 	pigo.Post("/account/lost/name", &controllers.AccountController{}, "AccountLostName", "guest")
+	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild", "")
 }
 
 func main() {

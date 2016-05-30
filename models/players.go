@@ -39,6 +39,8 @@ type Player struct {
 	LastLogin   int64
 	GuildName   string
 	GuildRank   string
+	GuildNick string
+	Online int
 	Cloaka      *CloakaPlayer
 }
 
