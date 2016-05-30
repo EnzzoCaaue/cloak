@@ -8,8 +8,12 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"log"
 	"github.com/raggaer/pigo"
 	"time"
+	"image"
+	"image/gif"
+	"github.com/nfnt/resize"
 )
 
 type GuildController struct {
@@ -56,6 +60,70 @@ func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request,
 	base.Data["Errors"] = base.Session.GetFlashes("Errors")
 	base.Data["Success"] = base.Session.GetFlashes("Success")
 	base.Template = "view_guild.html"
+}
+
+// GuildLogo changes a guild logo image
+func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	guildName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		base.Error = "Error while reading guild name"
+		return
+	}
+	if !models.GuildExists(guildName) {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	guild, err := models.GetGuildByName(guildName)
+	if err != nil {
+		base.Error = "Error while getting guild data"
+		return
+	}
+	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
+	if err != nil {
+		base.Error = "Error while getting account characters"
+		return
+	}
+	isOwner := false
+	for i := range characters {
+		if characters[i].ID == guild.Owner.ID {
+			isOwner = true
+			break
+		}
+	}
+	if !isOwner {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	logo, _, err := req.FormFile("logo")
+	defer logo.Close()
+	logoGif, format, err := image.Decode(logo)
+	if err != nil {
+		base.Error = "Error while decoding your guild logo"
+		return
+	}
+	log.Println(format)
+	if !util.ValidFormat(format) {
+		base.Session.AddFlash("Guild logo should be PNG, GIF, JPEG", "Errors")
+		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		return
+	}
+	log.Println(pigo.Config.String("template")+"/public/guilds/"+ps.ByName("name")+".gif")
+	logoImage, err := os.Create(pigo.Config.String("template")+"/public/guilds/"+ps.ByName("name")+".gif")
+	if err != nil {
+		base.Error = "Error while trying to open guild logo image"
+		return
+	}
+	defer logoImage.Close()
+	resizedLogo := resize.Resize(64, 64, logoGif, resize.Lanczos3)
+	err = gif.Encode(logoImage, resizedLogo, &gif.Options{
+		256,
+		nil,
+		nil,
+	})
+	if err != nil {
+		base.Error = "Error while encoding your guild logo"
+		return
+	}
 }
 
 // GuildList shows a list of guilds
