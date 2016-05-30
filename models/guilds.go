@@ -116,3 +116,9 @@ func GetGuildByName(name string) (*Guild, error) {
 	}
 	return guild, nil
 }
+
+// ChangeMotd changes a guild motd
+func (guild *Guild) ChangeMotd(motd string) error {
+	_, err := pigo.Database.Exec("UPDATE guilds SET motd = ? WHERE id = ?", motd, guild.ID)
+	return err
+}

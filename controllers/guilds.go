@@ -26,6 +26,15 @@ type GuildCreateForm struct {
 	OwnerName string
 }
 
+type guildEditForm struct {
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+}
+
+type guildEditMotdForm struct {
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	Motd string `validate:"min=10, max=50" alias:"Guild Motd"`
+}
+
 // ViewGuild shows a guild page
 func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	guildName, err := url.QueryUnescape(ps.ByName("name"))
@@ -62,6 +71,58 @@ func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request,
 	base.Template = "view_guild.html"
 }
 
+// GuildMotd changes a guild motd
+func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	guildName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		base.Error = "Error while reading guild name"
+		return
+	}
+	if !models.GuildExists(guildName) {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	guild, err := models.GetGuildByName(guildName)
+	if err != nil {
+		base.Error = "Error while getting guild data"
+		return
+	}
+	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
+	if err != nil {
+		base.Error = "Error while getting account characters"
+		return
+	}
+	isOwner := false
+	for i := range characters {
+		if characters[i].ID == guild.Owner.ID {
+			isOwner = true
+			break
+		}
+	}
+	if !isOwner {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	form := &guildEditMotdForm{
+		req.FormValue("g-recaptcha-response"),
+		req.FormValue("motd"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for _, v := range errs {
+			base.Session.AddFlash(v.Error(), "Errors")
+		}
+		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		return
+	}
+	err = guild.ChangeMotd(form.Motd)
+	if err != nil {
+		base.Error = "Error while updating guild Motd"
+		return
+	}
+	base.Session.AddFlash("Guild Motd changed successfully", "Success")
+	base.Redirect = "/guilds/view/"+ps.ByName("name")
+}
+
 // GuildLogo changes a guild logo image
 func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	guildName, err := url.QueryUnescape(ps.ByName("name"))
@@ -94,6 +155,16 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		base.Redirect = "/guilds/list"
 		return
 	}
+	form := &guildEditForm{
+		req.FormValue("g-recaptcha-response"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for _, v := range errs {
+			base.Session.AddFlash(v.Error(), "Errors")
+		}
+		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		return
+	}
 	logo, _, err := req.FormFile("logo")
 	defer logo.Close()
 	logoGif, format, err := image.Decode(logo)
@@ -124,6 +195,8 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		base.Error = "Error while encoding your guild logo"
 		return
 	}
+	base.Session.AddFlash("Guild Logo changed successfully", "Success")
+	base.Redirect = "/guilds/view/"+ps.ByName("name")
 }
 
 // GuildList shows a list of guilds
