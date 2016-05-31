@@ -8,8 +8,8 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 	"github.com/raggaer/pigo"
+	"net/http"
 )
 
 type LoginController struct {

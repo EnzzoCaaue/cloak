@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
 	"github.com/julienschmidt/httprouter"
+	"github.com/raggaer/pigo"
 )
 
 type CommunityController struct {

@@ -2,8 +2,8 @@ package util
 
 import (
 	"bytes"
-	"github.com/raggaer/pigo"
 	"github.com/golang/freetype"
+	"github.com/raggaer/pigo"
 	"image"
 	"image/draw"
 	_ "image/gif"

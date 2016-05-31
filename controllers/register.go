@@ -7,8 +7,8 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 	"github.com/raggaer/pigo"
+	"net/http"
 )
 
 type RegisterController struct {

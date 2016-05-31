@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"github.com/raggaer/pigo"
+	"encoding/json"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"encoding/json"
+	"github.com/raggaer/pigo"
 	"io/ioutil"
+	"net/http"
 )
 
 type HomeController struct {
@@ -15,9 +15,9 @@ type HomeController struct {
 }
 
 type githubCollaborator struct {
-	Login string `json:"login"`
-	AvatarURL string `json:"avatar_url"`
-	Contributions int `json:"contributions"`
+	Login         string `json:"login"`
+	AvatarURL     string `json:"avatar_url"`
+	Contributions int    `json:"contributions"`
 }
 
 // Home shows the homepage and loads news

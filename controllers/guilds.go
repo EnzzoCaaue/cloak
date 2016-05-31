@@ -4,16 +4,16 @@ import (
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"io/ioutil"
-	"net/url"
-	"os"
-	"log"
+	"github.com/nfnt/resize"
 	"github.com/raggaer/pigo"
-	"time"
 	"image"
 	"image/gif"
-	"github.com/nfnt/resize"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
 )
 
 type GuildController struct {
@@ -32,14 +32,14 @@ type guildEditForm struct {
 
 type guildEditMotdForm struct {
 	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
-	Motd string `validate:"min=10, max=50" alias:"Guild Motd"`
+	Motd    string `validate:"min=10, max=50" alias:"Guild Motd"`
 }
 
 type guildEditRanksForm struct {
-	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
-	ThirdLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 3"`
+	Captcha     string `validate:"validCaptcha" alias:"Captcha check"`
+	ThirdLevel  string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 3"`
 	SecondLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 2"`
-	FirstLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 1"`
+	FirstLevel  string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 1"`
 }
 
 // ViewGuild shows a guild page
@@ -118,7 +118,7 @@ func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request,
 		for _, v := range errs {
 			base.Session.AddFlash(v.Error(), "Errors")
 		}
-		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
 	err = guild.ChangeMotd(form.Motd)
@@ -127,10 +127,10 @@ func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request,
 		return
 	}
 	base.Session.AddFlash("Guild Motd changed successfully", "Success")
-	base.Redirect = "/guilds/view/"+ps.ByName("name")
+	base.Redirect = "/guilds/view/" + ps.ByName("name")
 }
 
-// GuildRanks changes a guild rank names	
+// GuildRanks changes a guild rank names
 func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	guildName, err := url.QueryUnescape(ps.ByName("name"))
 	if err != nil {
@@ -172,7 +172,7 @@ func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request
 		for i := range errs {
 			base.Session.AddFlash(errs[i].Error(), "Errors")
 		}
-		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
 	err = guild.ChangeRanks(form.ThirdLevel, form.SecondLevel, form.FirstLevel)
@@ -181,7 +181,7 @@ func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request
 		return
 	}
 	base.Session.AddFlash("Guild ranks updated successfully", "Success")
-	base.Redirect = "/guilds/view/"+ps.ByName("name")
+	base.Redirect = "/guilds/view/" + ps.ByName("name")
 }
 
 // GuildLogo changes a guild logo image
@@ -223,7 +223,7 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		for _, v := range errs {
 			base.Session.AddFlash(v.Error(), "Errors")
 		}
-		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
 	logo, _, err := req.FormFile("logo")
@@ -236,11 +236,11 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 	log.Println(format)
 	if !util.ValidFormat(format) {
 		base.Session.AddFlash("Guild logo should be PNG, GIF, JPEG", "Errors")
-		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
-	log.Println(pigo.Config.String("template")+"/public/guilds/"+ps.ByName("name")+".gif")
-	logoImage, err := os.Create(pigo.Config.String("template")+"/public/guilds/"+ps.ByName("name")+".gif")
+	log.Println(pigo.Config.String("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
+	logoImage, err := os.Create(pigo.Config.String("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
 	if err != nil {
 		base.Error = "Error while trying to open guild logo image"
 		return
@@ -257,7 +257,7 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		return
 	}
 	base.Session.AddFlash("Guild Logo changed successfully", "Success")
-	base.Redirect = "/guilds/view/"+ps.ByName("name")
+	base.Redirect = "/guilds/view/" + ps.ByName("name")
 }
 
 // GuildList shows a list of guilds
@@ -323,17 +323,17 @@ func (base *GuildController) CreateGuild(w http.ResponseWriter, req *http.Reques
 		base.Error = "Error while saving your guild"
 		return
 	}
-	logo, err := ioutil.ReadFile(pigo.Config.String("template")+"/public/images/logo.gif")
+	logo, err := ioutil.ReadFile(pigo.Config.String("template") + "/public/images/logo.gif")
 	if err != nil {
 		base.Error = "Error reading default guild logo"
 		return
 	}
-	guildLogo, err := os.Create(pigo.Config.String("template")+"/public/guilds/"+url.QueryEscape(guild.Name)+".gif")
+	guildLogo, err := os.Create(pigo.Config.String("template") + "/public/guilds/" + url.QueryEscape(guild.Name) + ".gif")
 	if err != nil {
 		base.Error = "Error creating your guild logo image"
 		return
 	}
 	guildLogo.Write(logo)
 	guildLogo.Close()
-	base.Redirect = "/guilds/view/"+url.QueryEscape(guild.Name)
+	base.Redirect = "/guilds/view/" + url.QueryEscape(guild.Name)
 }

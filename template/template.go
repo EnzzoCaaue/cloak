@@ -1,15 +1,15 @@
 package template
 
 import (
-	"github.com/raggaer/pigo"
-	"net/url"
-	"html/template"
-	"time"
-	"strings"
-	"strconv"
+	"fmt"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
-	"fmt"
+	"github.com/raggaer/pigo"
+	"html/template"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // Load loads the AAC template

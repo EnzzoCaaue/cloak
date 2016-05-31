@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/raggaer/pigo"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -10,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"github.com/raggaer/pigo"
 )
 
 var (

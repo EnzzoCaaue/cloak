@@ -5,27 +5,27 @@ import (
 )
 
 type Guild struct {
-	ID       int64
-	Name     string
-	Owner    *Player
-	Creation int64
-	Motd     string
-	Info *GuildInfo
-	Members []*Player
+	ID          int64
+	Name        string
+	Owner       *Player
+	Creation    int64
+	Motd        string
+	Info        *GuildInfo
+	Members     []*Player
 	Invitations []*Player
-	Ranks []*GuildRank
+	Ranks       []*GuildRank
 }
 
 type GuildRank struct {
-	Name string
+	Name  string
 	Level int
 }
 
 type GuildInfo struct {
-	Online int
+	Online  int
 	Members int
-	Top int
-	Low int
+	Top     int
+	Low     int
 }
 
 // NewGuild returns a new guild struct
@@ -91,7 +91,7 @@ func GetGuildByName(name string) (*Guild, error) {
 	for rows.Next() {
 		player := NewPlayer()
 		rows.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.GuildNick, &player.GuildRank, &player.Online)
-		guild.Members = append(guild.Members, player)	
+		guild.Members = append(guild.Members, player)
 	}
 	rows.Close()
 	rows, err = pigo.Database.Query("SELECT a.name FROM players a, guild_invites b WHERE a.id = b.player_id AND b.guild_id = ?", guild.ID)
@@ -132,5 +132,5 @@ func (guild *Guild) ChangeRanks(third, second, first string) error {
 		   WHEN level = 1 THEN ?
 	 END )
 	 WHERE guild_id = ?`, third, second, first, guild.ID)
-	 return err
+	return err
 }

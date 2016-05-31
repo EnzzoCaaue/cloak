@@ -1,18 +1,18 @@
 package controllers
 
 import (
-	"fmt"
-	"net/http"
-	"github.com/raggaer/pigo"
 	"crypto/sha1"
+	"fmt"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
+	"github.com/raggaer/pigo"
+	"log"
+	"net/http"
 	"net/url"
 	"time"
-	"log"
 )
 
 type AccountController struct {
@@ -55,7 +55,7 @@ func (base *AccountController) AccountLostName(w http.ResponseWriter, req *http.
 		base.Redirect = "/account/lost"
 		return
 	}
-	base.Session.AddFlash("Your account name is <b>" + name + "</b>", "successName")
+	base.Session.AddFlash("Your account name is <b>"+name+"</b>", "successName")
 	base.Redirect = "/account/lost"
 }
 
