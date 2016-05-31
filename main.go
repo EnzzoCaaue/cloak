@@ -36,6 +36,7 @@ func registerRoutes() {
 	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild", "")
 	pigo.Post("/guilds/logo/:name", &controllers.GuildController{}, "GuildLogo", "logged")
 	pigo.Post("/guilds/motd/:name", &controllers.GuildController{}, "GuildMotd", "logged")
+	pigo.Post("/guilds/ranks/:name", &controllers.GuildController{}, "GuildRanks", "logged")
 }
 
 func main() {

@@ -122,3 +122,15 @@ func (guild *Guild) ChangeMotd(motd string) error {
 	_, err := pigo.Database.Exec("UPDATE guilds SET motd = ? WHERE id = ?", motd, guild.ID)
 	return err
 }
+
+// ChangeRanks changes a guild ranks
+func (guild *Guild) ChangeRanks(third, second, first string) error {
+	_, err := pigo.Database.Exec(`
+	UPDATE guild_ranks SET name =
+	( CASE WHEN level = 3 THEN ?
+		   WHEN level = 2 THEN ?
+		   WHEN level = 1 THEN ?
+	 END )
+	 WHERE guild_id = ?`, third, second, first, guild.ID)
+	 return err
+}

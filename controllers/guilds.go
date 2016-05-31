@@ -35,6 +35,13 @@ type guildEditMotdForm struct {
 	Motd string `validate:"min=10, max=50" alias:"Guild Motd"`
 }
 
+type guildEditRanksForm struct {
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	ThirdLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 3"`
+	SecondLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 2"`
+	FirstLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 1"`
+}
+
 // ViewGuild shows a guild page
 func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	guildName, err := url.QueryUnescape(ps.ByName("name"))
@@ -120,6 +127,60 @@ func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request,
 		return
 	}
 	base.Session.AddFlash("Guild Motd changed successfully", "Success")
+	base.Redirect = "/guilds/view/"+ps.ByName("name")
+}
+
+// GuildRanks changes a guild rank names	
+func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	guildName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		base.Error = "Error while reading guild name"
+		return
+	}
+	if !models.GuildExists(guildName) {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	guild, err := models.GetGuildByName(guildName)
+	if err != nil {
+		base.Error = "Error while getting guild data"
+		return
+	}
+	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
+	if err != nil {
+		base.Error = "Error while getting account characters"
+		return
+	}
+	isOwner := false
+	for i := range characters {
+		if characters[i].ID == guild.Owner.ID {
+			isOwner = true
+			break
+		}
+	}
+	if !isOwner {
+		base.Redirect = "/guilds/list"
+		return
+	}
+	form := &guildEditRanksForm{
+		req.FormValue("g-recaptcha-response"),
+		req.FormValue("level3"),
+		req.FormValue("level2"),
+		req.FormValue("level1"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for i := range errs {
+			base.Session.AddFlash(errs[i].Error(), "Errors")
+		}
+		base.Redirect = "/guilds/view/"+ps.ByName("name")
+		return
+	}
+	err = guild.ChangeRanks(form.ThirdLevel, form.SecondLevel, form.FirstLevel)
+	if err != nil {
+		base.Error = "Error while updating your guild ranks"
+		return
+	}
+	base.Session.AddFlash("Guild ranks updated successfully", "Success")
 	base.Redirect = "/guilds/view/"+ps.ByName("name")
 }
 
