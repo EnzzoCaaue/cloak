@@ -7,6 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"net/http"
+	"net/url"
 )
 
 func registerRoutes() {
@@ -34,9 +35,10 @@ func registerRoutes() {
 	pigo.Post("/account/lost/password", &controllers.AccountController{}, "AccountLostPassword", "guest")
 	pigo.Post("/account/lost/name", &controllers.AccountController{}, "AccountLostName", "guest")
 	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild", "")
-	pigo.Post("/guilds/logo/:name", &controllers.GuildController{}, "GuildLogo", "logged")
-	pigo.Post("/guilds/motd/:name", &controllers.GuildController{}, "GuildMotd", "logged")
-	pigo.Post("/guilds/ranks/:name", &controllers.GuildController{}, "GuildRanks", "logged")
+	pigo.Post("/guilds/logo/:name", &controllers.GuildController{}, "GuildLogo", "logged", "guildOwner")
+	pigo.Post("/guilds/motd/:name", &controllers.GuildController{}, "GuildMotd", "logged", "guildOwner")
+	pigo.Post("/guilds/ranks/:name", &controllers.GuildController{}, "GuildRanks", "logged", "guildOwner")
+	pigo.Post("/guilds/invite/:name", &controllers.GuildController{}, "GuildInvite", "logged", "guildOwner")
 }
 
 func main() {
@@ -54,6 +56,30 @@ func main() {
 			return false
 		}
 		return true
+	})
+	pigo.Filter("guildOwner", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		guildName, err := url.QueryUnescape(ps.ByName("name"))
+		if err != nil {
+			return false
+		}
+		if !models.GuildExists(guildName) {
+			return false
+		}
+		guild, err := models.GetGuildByName(guildName)
+		if err != nil {
+			return false
+		}
+		characters, err := c.Hook["account"].(*models.CloakaAccount).GetCharacters()
+		if err != nil {
+			return false
+		}
+		for i := range characters {
+			if characters[i].ID == guild.Owner.ID {
+				c.Hook["guild"] = guild
+				return true
+			}
+		}
+		return false
 	})
 	pigo.ControllerHook("account", func(c *pigo.Controller) {
 		account := models.GetAccountByToken(c.Session.GetString("key"))

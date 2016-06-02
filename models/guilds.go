@@ -134,3 +134,9 @@ func (guild *Guild) ChangeRanks(third, second, first string) error {
 	 WHERE guild_id = ?`, third, second, first, guild.ID)
 	return err
 }
+
+// InvitePlayer invites a player to the guilds
+func (guild *Guild) InvitePlayer(player int64) error {
+	_, err := pigo.Database.Exec("INSERT INTO guild_invites (player_id, guild_id) VALUES (?, ?)", player, guild.ID)
+	return err
+}

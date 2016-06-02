@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/gif"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -33,6 +32,11 @@ type guildEditForm struct {
 type guildEditMotdForm struct {
 	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
 	Motd    string `validate:"min=10, max=50" alias:"Guild Motd"`
+}
+
+type guildInvitePlayer struct {
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+	Player string `validate:"min=1" alias:"Player name"`
 }
 
 type guildEditRanksForm struct {
@@ -80,36 +84,6 @@ func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request,
 
 // GuildMotd changes a guild motd
 func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	guildName, err := url.QueryUnescape(ps.ByName("name"))
-	if err != nil {
-		base.Error = "Error while reading guild name"
-		return
-	}
-	if !models.GuildExists(guildName) {
-		base.Redirect = "/guilds/list"
-		return
-	}
-	guild, err := models.GetGuildByName(guildName)
-	if err != nil {
-		base.Error = "Error while getting guild data"
-		return
-	}
-	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
-	if err != nil {
-		base.Error = "Error while getting account characters"
-		return
-	}
-	isOwner := false
-	for i := range characters {
-		if characters[i].ID == guild.Owner.ID {
-			isOwner = true
-			break
-		}
-	}
-	if !isOwner {
-		base.Redirect = "/guilds/list"
-		return
-	}
 	form := &guildEditMotdForm{
 		req.FormValue("g-recaptcha-response"),
 		req.FormValue("motd"),
@@ -121,7 +95,8 @@ func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request,
 		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
-	err = guild.ChangeMotd(form.Motd)
+	guild := base.Hook["guild"].(*models.Guild)
+	err := guild.ChangeMotd(form.Motd)
 	if err != nil {
 		base.Error = "Error while updating guild Motd"
 		return
@@ -132,36 +107,6 @@ func (base *GuildController) GuildMotd(w http.ResponseWriter, req *http.Request,
 
 // GuildRanks changes a guild rank names
 func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	guildName, err := url.QueryUnescape(ps.ByName("name"))
-	if err != nil {
-		base.Error = "Error while reading guild name"
-		return
-	}
-	if !models.GuildExists(guildName) {
-		base.Redirect = "/guilds/list"
-		return
-	}
-	guild, err := models.GetGuildByName(guildName)
-	if err != nil {
-		base.Error = "Error while getting guild data"
-		return
-	}
-	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
-	if err != nil {
-		base.Error = "Error while getting account characters"
-		return
-	}
-	isOwner := false
-	for i := range characters {
-		if characters[i].ID == guild.Owner.ID {
-			isOwner = true
-			break
-		}
-	}
-	if !isOwner {
-		base.Redirect = "/guilds/list"
-		return
-	}
 	form := &guildEditRanksForm{
 		req.FormValue("g-recaptcha-response"),
 		req.FormValue("level3"),
@@ -175,7 +120,8 @@ func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request
 		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
-	err = guild.ChangeRanks(form.ThirdLevel, form.SecondLevel, form.FirstLevel)
+	guild := base.Hook["guild"].(*models.Guild)
+	err := guild.ChangeRanks(form.ThirdLevel, form.SecondLevel, form.FirstLevel)
 	if err != nil {
 		base.Error = "Error while updating your guild ranks"
 		return
@@ -186,36 +132,6 @@ func (base *GuildController) GuildRanks(w http.ResponseWriter, req *http.Request
 
 // GuildLogo changes a guild logo image
 func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	guildName, err := url.QueryUnescape(ps.ByName("name"))
-	if err != nil {
-		base.Error = "Error while reading guild name"
-		return
-	}
-	if !models.GuildExists(guildName) {
-		base.Redirect = "/guilds/list"
-		return
-	}
-	guild, err := models.GetGuildByName(guildName)
-	if err != nil {
-		base.Error = "Error while getting guild data"
-		return
-	}
-	characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
-	if err != nil {
-		base.Error = "Error while getting account characters"
-		return
-	}
-	isOwner := false
-	for i := range characters {
-		if characters[i].ID == guild.Owner.ID {
-			isOwner = true
-			break
-		}
-	}
-	if !isOwner {
-		base.Redirect = "/guilds/list"
-		return
-	}
 	form := &guildEditForm{
 		req.FormValue("g-recaptcha-response"),
 	}
@@ -233,13 +149,11 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		base.Error = "Error while decoding your guild logo"
 		return
 	}
-	log.Println(format)
 	if !util.ValidFormat(format) {
 		base.Session.AddFlash("Guild logo should be PNG, GIF, JPEG", "Errors")
 		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
-	log.Println(pigo.Config.String("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
 	logoImage, err := os.Create(pigo.Config.String("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
 	if err != nil {
 		base.Error = "Error while trying to open guild logo image"
@@ -257,6 +171,40 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		return
 	}
 	base.Session.AddFlash("Guild Logo changed successfully", "Success")
+	base.Redirect = "/guilds/view/" + ps.ByName("name")
+}
+
+// GuildInvite invites a character to a guild
+func (base *GuildController) GuildInvite(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	form := &guildInvitePlayer{
+		req.FormValue("g-recaptcha-response"),
+		req.FormValue("player"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for i := range errs {
+			base.Session.AddFlash(errs[i].Error(), "Errors")
+		}
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
+		return
+	}
+	player := models.GetPlayerByName(form.Player)
+	if player == nil {
+		base.Session.AddFlash("Player doesnt exists", "Errors")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
+		return
+	}
+	if player.IsInGuild() {
+		base.Session.AddFlash("Player is already in a guild", "Errors")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
+		return
+	}
+	guild := base.Hook["guild"].(*models.Guild)
+	err := guild.InvitePlayer(player.ID)
+	if err != nil {
+		base.Error = "Error while inviting player to guild"
+		return
+	}
+	base.Session.AddFlash("Invitation sent", "Success")
 	base.Redirect = "/guilds/view/" + ps.ByName("name")
 }
 
