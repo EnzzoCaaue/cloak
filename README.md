@@ -1,9 +1,28 @@
-# Cloaka [![GoDoc](https://godoc.org/github.com/cloakaac/cloaka?status.svg)](http://godoc.org/github.com/cloakaac/cloaka)
+# Cloaka
 
-This is the main repository of the Cloak AAC
+Cloaka is an Automatic Account Creator for Open Tibia. 
 
-This code is a rewrite of the core repository using proper standards
+Cloaka provides great performance and an easy to use scripting environment using **lua**. Faster and less demanding than the PHP AACs out there.
 
-# About
+# Compatible OT distributions
 
-Cloak AAC is an Automatic Account Creator for OpenTibia made in Go by **@Raggaer** using **Pigo**
+Cloaka is only compatible with [The Forgotten Server](https://github.com/otland/forgottenserver). Cloaka only supports its newer version 1.0 or greater.
+
+# How to build
+
+To build your custom version of Cloaka you will need to have the following dependencies:
+
++ Go 1.5 or greater
++ Git
+
+Once everything is installed you can simply do (to get the newer version)
+
+```
+go get github.com/Cloakaac/cloak
+```
+
+And finally
+
+```
+go build
+```
