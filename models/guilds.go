@@ -140,3 +140,10 @@ func (guild *Guild) InvitePlayer(player int64) error {
 	_, err := pigo.Database.Exec("INSERT INTO guild_invites (player_id, guild_id) VALUES (?, ?)", player, guild.ID)
 	return err
 }
+
+func (guild *Guild) IsInvited(player int64) bool {
+	row := pigo.Database.QueryRow("SELECT EXISTS(SELECT 1 FROM guild_invites WHERE player_id = ? AND guild_id = ?)", player, guild.ID)
+	exists := false
+	row.Scan(&exists)
+	return exists
+}

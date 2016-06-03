@@ -175,7 +175,7 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 }
 
 // GuildInvite invites a character to a guild
-func (base *GuildController) GuildInvite(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base *GuildController) GuildInvite(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	form := &guildInvitePlayer{
 		req.FormValue("g-recaptcha-response"),
 		req.FormValue("player"),
@@ -199,6 +199,11 @@ func (base *GuildController) GuildInvite(w http.ResponseWriter, req *http.Reques
 		return
 	}
 	guild := base.Hook["guild"].(*models.Guild)
+	if guild.IsInvited(player.ID) {
+		base.Session.AddFlash("Player is already invited to the guild", "Errors")
+		base.Redirect = "/guilds/view/" + ps.ByName("name")
+		return
+	}
 	err := guild.InvitePlayer(player.ID)
 	if err != nil {
 		base.Error = "Error while inviting player to guild"
