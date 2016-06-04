@@ -39,6 +39,7 @@ var (
 		"Royal Paladin":   royalPaladin,
 		"Elite Knight":    eliteKnight,
 	}
+	monsters []*monster
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

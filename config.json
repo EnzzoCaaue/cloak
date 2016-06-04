@@ -1,6 +1,7 @@
 {
     "port": "8080",
     "mode": "DEV",
+    "datapack": "C:/Users/ragga/Desktop/forgottenserver-master",
     "template": "G:/Workspace/Go/src/github.com/Cloakaac/template-default",
     "static": "/public/",
     "routes": [

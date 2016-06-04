@@ -3,11 +3,13 @@ package main
 import (
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"net/http"
 	"net/url"
+	"log"
 )
 
 func registerRoutes() {
@@ -87,5 +89,8 @@ func main() {
 		c.Data["logged"] = account != nil
 	})
 	registerRoutes()
+	log.Println("Route registered")
+	util.ParseMonsters(pigo.Config.String("datapack"))
+	log.Println("Monsters parsed")
 	pigo.Run()
 }
