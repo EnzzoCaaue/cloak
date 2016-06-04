@@ -86,7 +86,6 @@ func (base *CommunityController) SignatureView(w http.ResponseWriter, req *http.
 	}
 	w.Header().Set("Content-type", "image/png")
 	w.Write(signature)
-	return
 }
 
 // SearchCharacter searchs for names LIKE
@@ -99,4 +98,15 @@ func (base *CommunityController) SearchCharacter(w http.ResponseWriter, req *htt
 	base.Data["Current"] = req.FormValue("name")
 	base.Data["Characters"] = players
 	base.Template = "character_search.html"
+}
+
+// OutfitView shows a player outfit
+func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	outfit, err := util.Outfit()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	w.Write(outfit)
+	w.Header().Set("Content-type", "image/png")
 }
