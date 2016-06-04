@@ -4,9 +4,15 @@ Cloaka is an Automatic Account Creator for Open Tibia.
 
 Cloaka provides great performance and an easy to use scripting environment using **lua**. Faster and less demanding than the PHP AACs out there.
 
+It is made using [Pigo](https://github.com/Raggaer/Pigo) web-framework
+
 # Compatible OT distributions
 
 Cloaka is only compatible with [The Forgotten Server](https://github.com/otland/forgottenserver). Cloaka only supports its newer version 1.0 or greater.
+
+# Download
+
+Currently there are no releases of **Cloak** you can however build it
 
 # How to build
 

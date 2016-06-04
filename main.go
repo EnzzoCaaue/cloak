@@ -9,7 +9,6 @@ import (
 	"github.com/raggaer/pigo"
 	"net/http"
 	"net/url"
-	"log"
 )
 
 func registerRoutes() {
@@ -89,8 +88,6 @@ func main() {
 		c.Data["logged"] = account != nil
 	})
 	registerRoutes()
-	log.Println("Route registered")
 	util.ParseMonsters(pigo.Config.String("datapack"))
-	log.Println("Monsters parsed")
 	pigo.Run()
 }
