@@ -1,13 +1,17 @@
 package util
 
 import (
-    "log"
+    //"log"
     "bytes"
     "os"
     "image"
     "image/draw"
     "image/color"
     "image/png"
+)
+
+var (
+    red = color.RGBA{255, 0, 0, 255}
 )
 
 // Outfit renders a tibia outfit with the given looks
@@ -31,7 +35,7 @@ func Outfit() ([]byte, error) {
     if err != nil {
         return nil, err
     }
-    colorize(tplImg)
+    tplImg = colorize(tplImg)
     out := drawOutfitBase(dstImg, tplImg)
     output := bytes.Buffer{}
     err = png.Encode(&output, out)
@@ -41,14 +45,18 @@ func Outfit() ([]byte, error) {
     return output.Bytes(), nil
 }
 
-func colorize(img image.Image) {
+func colorize(img image.Image) image.Image {
     b := image.NewRGBA(img.Bounds())
     draw.Draw(b, b.Bounds(), img, image.ZP, draw.Src)
     for x := 0; x < b.Bounds().Dx(); x++ {
         for y := 0; y < b.Bounds().Dy(); y++ {
-            log.Println(b.At(x, y).RGBA())
+            colorRGBA := color.RGBAModel.Convert(b.At(x, y)).(color.RGBA)
+            if colorRGBA == red {
+                b.Set(x, y, color.RGBA{174, 27, 255, 255})
+            }
         }
     }
+    return b
 }
 
 func drawOutfitBase(dst, tpl image.Image) *image.RGBA {
