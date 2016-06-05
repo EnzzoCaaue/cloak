@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"log"
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
@@ -102,9 +103,16 @@ func (base *CommunityController) SearchCharacter(w http.ResponseWriter, req *htt
 
 // OutfitView shows a player outfit
 func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-	outfit, err := util.Outfit()
+	playerName := p.ByName("name")
+	player := models.GetPlayerByName(playerName)
+	if player == nil {
+		return
+	}
+	log.Println(player.LookBody)
+	outfit, err := util.Outfit(pigo.Config.String("template"), player.LookType, player.LookHead, player.LookBody, player.LookLegs, player.LookFeet, player.LookAddons)
 	if err != nil {
 		base.Error = err.Error()
+		log.Println(err)
 		return
 	}
 	w.Write(outfit)

@@ -83,8 +83,8 @@ func GetPlayerByName(name string) *Player {
 	if !player.Exists() {
 		return nil
 	}
-	row := pigo.Database.QueryRow("SELECT a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
-	row.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.Cloaka.Deleted)
+	row := pigo.Database.QueryRow("SELECT a.looktype, a.lookbody, a.lookhead, a.looklegs, a.lookfeet, a.lookaddons, a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
+	row.Scan(&player.LookType, &player.LookBody, &player.LookHead, &player.LookLegs, &player.LookFeet, &player.LookAddons, &player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.Cloaka.Deleted)
 	return player
 }
 
