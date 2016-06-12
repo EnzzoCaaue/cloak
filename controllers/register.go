@@ -36,6 +36,7 @@ func (base *RegisterController) Register(w http.ResponseWriter, req *http.Reques
 	}
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
 	base.Data["Towns"] = towns
+	base.Data["csrfToken"] = uniuri.New()
 	base.Template = "register.html"
 }
 
