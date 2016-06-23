@@ -4,6 +4,11 @@
     "datapack": "C:/Users/ragga/Desktop/forgottenserver-master",
     "template": "G:/Workspace/Go/src/github.com/Cloakaac/template-default",
     "static": "/public/",
+    "https": {
+        "enabled": false,
+        "cert": "icon-universe.txt",
+        "key": "icon-universe.com.key"
+    },
     "routes": [
         {
             "path": "/lua/test",

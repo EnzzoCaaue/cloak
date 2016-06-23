@@ -105,7 +105,7 @@ func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.R
 	player.ManaMax = pigo.Config.Key("register").Int("manamax")
 	player.Vocation = util.Vocation(form.CharacterVocation)
 	player.Gender = util.Gender(form.CharacterSex)
-	if player.Gender == 0 { // female
+	if player.Gender == 0 {
 		player.LookBody = pigo.Config.Key("register").Key("female").Int("lookbody")
 		player.LookFeet = pigo.Config.Key("register").Key("female").Int("lookfeet")
 		player.LookHead = pigo.Config.Key("register").Key("female").Int("lookhead")
