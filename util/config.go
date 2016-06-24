@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"strconv"
 )
 
 var (
@@ -59,16 +60,18 @@ func (c *ConfigLUA) String(key string) string {
 
 // Int returns a config lua int value
 func (c *ConfigLUA) Int(key string) int {
-	if v, ok := c.v[key].(int); ok {
-		return v
+	k, err := strconv.Atoi(c.v[key].(string))
+	if err != nil {
+		return 0
 	}
-	return 0
+	return k
 }
 
 // Bool returns a config lua bool value
 func (c *ConfigLUA) Bool(key string) bool {
-	if v, ok := c.v[key].(bool); ok {
-		return v
+	k, err := strconv.ParseBool(c.v[key].(string))
+	if err != nil {
+		return false
 	}
-	return false
+	return k
 }

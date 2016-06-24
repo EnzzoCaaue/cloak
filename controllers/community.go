@@ -112,7 +112,6 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 	outfit, err := util.Outfit(pigo.Config.String("template"), player.LookType, player.LookHead, player.LookBody, player.LookLegs, player.LookFeet, player.LookAddons)
 	if err != nil {
 		base.Error = err.Error()
-		log.Println(err)
 		return
 	}
 	w.Write(outfit)
@@ -121,5 +120,17 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 
 // ServerOverview shows all the server information
 func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-
+	base.Template = "server_overview.html"
+	base.Data["Name"] = util.Config.String("serverName")
+	base.Data["WorldType"] = util.Config.String("worldType")
+	base.Data["ProtectionLevel"] = util.Config.Int("protectionLevel")
+	base.Data["RedSkull"] = util.Config.Int("killsToRedSkull")
+	base.Data["BlackSkull"] = util.Config.Int("killsToBlackSkull")
+	base.Data["InfiniteRunes"] = util.Config.Bool("removeChargesFromRunes")
+	base.Data["MagicRate"] = util.Config.Int("rateMagic")
+	base.Data["LootRate"] = util.Config.Int("rateLoot")
+	base.Data["SkillRate"] = util.Config.Int("rateSkill")
+	base.Data["SpawnRate"] = util.Config.Int("rateSpawn")
+	base.Data["Motd"] = util.Config.String("motd")
+	base.Data["FreePremium"] = util.Config.Bool("freePremium")
 }
