@@ -3,10 +3,10 @@ package controllers
 import (
 	"github.com/Cloakaac/cloak/models"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"log"
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
@@ -117,4 +117,9 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 	}
 	w.Write(outfit)
 	w.Header().Set("Content-type", "image/png")
+}
+
+// ServerOverview shows all the server information
+func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+
 }

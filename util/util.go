@@ -40,6 +40,8 @@ var (
 		"Elite Knight":    eliteKnight,
 	}
 	monsters map[string]*Monster
+	// Config contains the whole parsed config lua file
+	Config *ConfigLUA
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

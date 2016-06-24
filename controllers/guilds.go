@@ -36,7 +36,7 @@ type guildEditMotdForm struct {
 
 type guildInvitePlayer struct {
 	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
-	Player string `validate:"min=1" alias:"Player name"`
+	Player  string `validate:"min=1" alias:"Player name"`
 }
 
 type guildEditRanksForm struct {
