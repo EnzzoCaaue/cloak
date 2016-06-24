@@ -1,13 +1,13 @@
 {
-    "port": "8080",
+    "port": "443",
     "mode": "DEV",
     "datapack": "C:/Users/ragga/Desktop/forgottenserver-master",
     "template": "G:/Workspace/Go/src/github.com/Cloakaac/template-default",
     "static": "/public/",
     "https": {
-        "enabled": false,
-        "cert": "icon-universe.txt",
-        "key": "icon-universe.com.key"
+        "enabled":  true,
+        "cert": "domain-crt.txt",
+        "key": "domain-key.txt"
     },
     "routes": [
         {
@@ -22,6 +22,17 @@
         "user": "root",
         "password": "admin",
         "database": "cloaka"
+    },
+    "paypal": {
+        "payment": {
+            "points": 5,
+            "min": 10,
+            "max": 100
+        },
+        "mode": "sandbox",
+        "public": "",
+        "secret": "",
+        "promo": 10 
     },
     "captcha": {
         "public": "6LfCbB4TAAAAAPeX_YA_QbD_RJSOMQmcRB_Kaouf",

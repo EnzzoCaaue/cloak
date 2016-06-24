@@ -41,6 +41,8 @@ func registerRoutes() {
 	pigo.Post("/guilds/ranks/:name", &controllers.GuildController{}, "GuildRanks", "logged", "guildOwner")
 	pigo.Post("/guilds/invite/:name", &controllers.GuildController{}, "GuildInvite", "logged", "guildOwner")
 	pigo.Get("/outfit/:name", &controllers.CommunityController{}, "OutfitView", "")
+	pigo.Get("/buypoints/paypal", &controllers.ShopController{}, "Paypal", "logged")
+	pigo.Post("/buypoints/paypal", &controllers.ShopController{}, "PaypalPay", "logged")
 }
 
 func main() {

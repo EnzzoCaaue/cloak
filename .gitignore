@@ -1,3 +1,8 @@
 # Ignore the built .exe
 
 *.exe
+
+# Ignore my testing ssl certs
+
+domain-crt.txt
+domain-key.txt
