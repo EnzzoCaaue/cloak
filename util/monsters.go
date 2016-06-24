@@ -6,7 +6,8 @@ import (
     "encoding/xml"
 )
 
-type monster struct {
+// Monster is the main monster representation
+type Monster struct {
     XMLName xml.Name `xml:"monster"`
     Name string `xml:"name,attr"`
     NameDescription string `xml:"nameDescription,attr"`
@@ -14,23 +15,26 @@ type monster struct {
     Experience int `xml:"experience,attr"`
     Speed int `xml:"speed,attr"`
     ManaCost int `xml:"manacost,attr"`
-    Health monsterHealth `xml:"health"`
-    Look monsterLook `xml:"look"`
-    Voices []monsterSentence `xml:"voices>voice"`
-    Loot []monsterItem `xml:"loot>item"`
+    Health MonsterHealth `xml:"health"`
+    Look MonsterLook `xml:"look"`
+    Voices []MonsterSentence `xml:"voices>voice"`
+    Loot []MonsterItem `xml:"loot>item"`
 }
 
-type monsterItem struct {
+// MonsterItem struct for monster loot
+type MonsterItem struct {
     ID int `xml:"id,attr"`
     CountMax int `xml:"countmax,attr"`
     Chance int `xml:"chance,attr"`
 }
 
-type monsterSentence struct {
+// MonsterSentence struct for monster talks
+type MonsterSentence struct {
     Sentence string `xml:"sentence,attr"`
 }
 
-type monsterLook struct {
+// MonsterLook struct for monster looktype
+type MonsterLook struct {
     Type int `xml:"type,attr"`
     Head int `xml:"head,attr"`
     Body int `xml:"body,attr"`
@@ -39,7 +43,8 @@ type monsterLook struct {
     Corpse int `xml:"corpse,attr"`
 }
 
-type monsterHealth struct {
+// MonsterHealth struct for monster stats
+type MonsterHealth struct {
     Now int `xml:"now,attr"`
     Max int `xml:"max,attr"`
 }
@@ -56,7 +61,7 @@ type monsterDefinition struct {
 
 // ParseMonsters parses monsters.xml
 func ParseMonsters(path string) {
-    monsters = []*monster{}
+    monsters = make(map[string]*Monster)
     b, err := ioutil.ReadFile(path+"/data/monster/monsters.xml")
     if err != nil {
         log.Fatal(err)
@@ -77,10 +82,18 @@ func parseMonster(path, name, file string) {
         log.Println("Error while parsing monster:", name)
         return
     }
-    m := &monster{}
+    m := &Monster{}
     err = xml.Unmarshal(b, &m)
     if err != nil {
         log.Fatal(err)
     }
-    monsters = append(monsters, m)
+    monsters[name] = m
+}
+
+// GetMonster returns a monster struct
+func GetMonster(name string) *Monster {
+    if v, ok := monsters[name]; ok {
+        return v
+    }
+    return nil
 }

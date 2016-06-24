@@ -39,7 +39,7 @@ var (
 		"Royal Paladin":   royalPaladin,
 		"Elite Knight":    eliteKnight,
 	}
-	monsters []*monster
+	monsters map[string]*Monster
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

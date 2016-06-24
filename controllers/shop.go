@@ -52,4 +52,23 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
         }
         paypalToken = token
     }
+    payment, err := util.CreatePaypalPayment(baseURL, paypalToken.Token)
+    if err != nil {
+        base.Session.AddFlash("Something went wrong while creating your payment", "errors")
+        base.Redirect = "/buypoints/paypal"
+        return
+    }
+    if payment.State != "created" {
+        base.Session.AddFlash("Your payment cannot be created. Please try again later", "errors")
+        base.Redirect = "/buypoints/paypal"
+        return
+    }
+    for i := range payment.Links {
+        if payment.Links[i].Rel == "approval_url" {
+            base.Redirect = payment.Links[i].Href
+            return
+        }
+    }
+    base.Session.AddFlash("Error while trying to get your payment approval URL. Please try again later", "errors")
+    base.Redirect = "/buypoints/paypal"
 }
