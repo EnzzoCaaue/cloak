@@ -1,12 +1,12 @@
 package util
 
 import (
-	"strconv"
 	"github.com/yuin/gopher-lua"
+	"strconv"
 )
 
 // QueryToTable converts a slice of interfaces to a lua table
-/*func QueryToTable(r [][]interface{}) *lua.LTable {
+func QueryToTable(r [][]interface{}) *lua.LTable {
 	resultTable := &lua.LTable{}
 	for i := range r {
 		t := &lua.LTable{}
@@ -16,7 +16,7 @@ import (
 		resultTable.RawSetInt(i, t)
 	}
 	return resultTable
-}*/
+}
 
 // LuaTableToMap converts a lua table to a Go map
 func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {

@@ -1,11 +1,16 @@
 package controllers
 
 import (
-	"github.com/raggaer/pigo"
-	"net/http"
+	"fmt"
 	"github.com/Cloakaac/cloak/util"
-	"github.com/yuin/gopher-lua"
 	"github.com/julienschmidt/httprouter"
+	"github.com/raggaer/pigo"
+	"github.com/yuin/gopher-lua"
+	"net/http"
+)
+
+var (
+	luaPages = "pages"
 )
 
 type LuaController struct {
@@ -24,16 +29,17 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	controllerTable.RawSetString("Error", lua.LString(""))
 	controllerTable.RawSetString("Redirect", lua.LString(""))
 	luaVM.SetGlobal("base", controllerTable)
-	err := luaVM.DoFile(pigo.Config.String("template")+"/pages/"+base.Page)
+	err := luaVM.DoFile(fmt.Sprintf(
+		"%v/%v/%v",
+		pigo.Config.String("template"),
+		luaPages,
+		base.Page,
+	))
 	if err != nil {
 		base.Base.Error = err.Error()
 		return
 	}
-	luaBase := luaVM.Get(-1)
-	if luaBase == nil {
-		base.Base.Error = "LUA page needs to return base variable"
-	}
-	base.Base.Data = util.LuaTableToMap(luaBase, nil, base.Base.Data)
+	base.Base.Data = util.LuaTableToMap(controllerTable, nil, base.Base.Data)
 	base.Base.Template = base.Base.Data["Template"].(string)
 	base.Base.Error = base.Base.Data["Error"].(string)
 	base.Base.JSON = base.Base.Data["Json"].(bool)
@@ -41,10 +47,9 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	base.Base.Data = base.Base.Data["Data"].(map[string]interface{})
 }
 
-/*
-func (l *luaInterface) query(luaVM *lua.LState) int {
+func query(luaVM *lua.LState) int {
 	query := luaVM.ToString(1)
-	rows, err := database.Connection.Query(query)
+	rows, err := pigo.Database.Query(query)
 	if err != nil {
 		luaVM.Push(lua.LBool(false))
 		return 1
@@ -68,4 +73,3 @@ func (l *luaInterface) query(luaVM *lua.LState) int {
 	luaVM.Push(r)
 	return 1
 }
-*/

@@ -51,7 +51,7 @@ func registerLUARoutes() {
 	for _, k := range routes {
 		if k.String("method") == http.MethodGet {
 			pigo.Get(k.String("path"), &controllers.LuaController{
-				Base: nil, 
+				Base: nil,
 				Page: k.String("file"),
 			}, "LuaPage")
 		}
