@@ -13,8 +13,7 @@
         {
             "path": "/lua/test",
             "method": "GET",
-            "file": "test.lua",
-            "mode": "logged"
+            "file": "test.lua"
         }
     ],
     "database": {

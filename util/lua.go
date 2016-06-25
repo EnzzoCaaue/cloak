@@ -1,41 +1,12 @@
 package util
 
 import (
-	"encoding/json"
+	"strconv"
 	"github.com/yuin/gopher-lua"
-	"io/ioutil"
 )
 
-// LuaFile saves all the lua routes
-type LuaFile struct {
-	Routes []*route
-}
-
-type route struct {
-	Path   string
-	Method string
-	File   string
-	Mode   string
-}
-
-// RegisterLuaRoutes loads routes.json and parses it
-func RegisterLuaRoutes() (*LuaFile, error) {
-	f, err := ioutil.ReadFile("routes.json")
-	if err != nil {
-		HandleError("Cannot open routes.json file", err)
-		return nil, err
-	}
-	luaRoutes := &LuaFile{}
-	err = json.Unmarshal(f, luaRoutes)
-	if err != nil {
-		HandleError("Error unmarshaling luaRoutes", err)
-		return nil, err
-	}
-	return luaRoutes, nil
-}
-
 // QueryToTable converts a slice of interfaces to a lua table
-func QueryToTable(r [][]interface{}) *lua.LTable {
+/*func QueryToTable(r [][]interface{}) *lua.LTable {
 	resultTable := &lua.LTable{}
 	for i := range r {
 		t := &lua.LTable{}
@@ -45,7 +16,7 @@ func QueryToTable(r [][]interface{}) *lua.LTable {
 		resultTable.RawSetInt(i, t)
 	}
 	return resultTable
-}
+}*/
 
 // LuaTableToMap converts a lua table to a Go map
 func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
@@ -64,7 +35,19 @@ func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}
 	case lua.LTString:
 		result[index.String()] = r.String()
 	case lua.LTNumber:
-
+		b, err := strconv.Atoi(r.String())
+		if err != nil {
+			result[index.String()] = 0
+		} else {
+			result[index.String()] = b
+		}
+	case lua.LTBool:
+		b, err := strconv.ParseBool(r.String())
+		if err != nil {
+			result[index.String()] = false
+		} else {
+			result[index.String()] = b
+		}
 	}
 	return result
 }

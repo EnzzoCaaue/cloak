@@ -46,6 +46,24 @@ func registerRoutes() {
 	pigo.Post("/buypoints/paypal", &controllers.ShopController{}, "PaypalPay", "logged")
 }
 
+func registerLUARoutes() {
+	routes := pigo.Config.Array("routes")
+	for _, k := range routes {
+		if k.String("method") == http.MethodGet {
+			pigo.Get(k.String("path"), &controllers.LuaController{
+				Base: nil, 
+				Page: k.String("file"),
+			}, "LuaPage")
+		}
+		if k.String("method") == http.MethodPost {
+			pigo.Post(k.String("path"), &controllers.LuaController{
+				Base: nil,
+				Page: k.String("file"),
+			}, "LuaPage")
+		}
+	}
+}
+
 func main() {
 	template.Load()
 	pigo.Filter("logged", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
@@ -92,6 +110,7 @@ func main() {
 		c.Data["logged"] = account != nil
 	})
 	registerRoutes()
+	registerLUARoutes()
 	util.ParseMonsters(pigo.Config.String("datapack"))
 	util.ParseConfig(pigo.Config.String("datapack"))
 	pigo.Run()

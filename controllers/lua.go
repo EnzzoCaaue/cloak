@@ -1,60 +1,47 @@
 package controllers
 
-/*import (
-	"github.com/Cloakaac/cloak/database"
-	"github.com/Cloakaac/cloak/template"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/julienschmidt/httprouter"
-	"github.com/yuin/gopher-lua"
+import (
+	"github.com/raggaer/pigo"
 	"net/http"
+	"github.com/Cloakaac/cloak/util"
+	"github.com/yuin/gopher-lua"
+	"github.com/julienschmidt/httprouter"
 )
 
-type luaInterface struct {
-	w   http.ResponseWriter
-	req *http.Request
+type LuaController struct {
+	Base *pigo.Controller
+	Page string
 }
 
-// LuaController is the controller for all .lua files
-func LuaController(file string, w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	l := &luaInterface{
-		w,
-		req,
-	}
+// LuaPage creates a new lua VM for the request
+func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	luaVM := lua.NewState()
 	defer luaVM.Close()
-	luaVM.SetGlobal("renderTemplate", luaVM.NewFunction(l.renderTemplate))
-	luaVM.SetGlobal("query", luaVM.NewFunction(l.query))
-	luaVM.SetGlobal("toInt", luaVM.NewFunction(l.toInt))
-	luaVM.SetGlobal("httpRedirect", luaVM.NewFunction(l.httpRedirect))
-	err := luaVM.DoFile(util.Parser.Template + "/pages/" + file)
+	controllerTable := &lua.LTable{}
+	controllerTable.RawSetString("Data", &lua.LTable{})
+	controllerTable.RawSetString("Template", lua.LString(""))
+	controllerTable.RawSetString("Json", lua.LBool(false))
+	controllerTable.RawSetString("Error", lua.LString(""))
+	controllerTable.RawSetString("Redirect", lua.LString(""))
+	luaVM.SetGlobal("base", controllerTable)
+	err := luaVM.DoFile(pigo.Config.String("template")+"/pages/"+base.Page)
 	if err != nil {
-		util.HandleError("Cannot run lua "+file+" file", err)
-		http.Error(w, "Error executing "+file+" lua file", 500)
+		base.Base.Error = err.Error()
 		return
 	}
+	luaBase := luaVM.Get(-1)
+	if luaBase == nil {
+		base.Base.Error = "LUA page needs to return base variable"
+	}
+	base.Base.Data = util.LuaTableToMap(luaBase, nil, base.Base.Data)
+	base.Base.Template = base.Base.Data["Template"].(string)
+	base.Base.Error = base.Base.Data["Error"].(string)
+	base.Base.JSON = base.Base.Data["Json"].(bool)
+	base.Base.Redirect = base.Base.Data["Redirect"].(string)
+	base.Base.Data = base.Base.Data["Data"].(map[string]interface{})
 }
 
-func (l *luaInterface) toInt(luaVM *lua.LState) int {
-	arg := luaVM.ToInt(1)
-	luaVM.Push(lua.LNumber(arg))
-	return 1
-}
-
-func (l *luaInterface) httpRedirect(luaVM *lua.LState) int {
-	to := luaVM.ToString(1)
-	http.Redirect(l.w, l.req, to, http.StatusMovedPermanently)
-	return 0
-}
-
-func (l *luaInterface) renderTemplate(luaVM *lua.LState) int {
-	tpl := luaVM.ToString(1)
-	args := luaVM.ToTable(2)
-	resultMap := make(map[string]interface{})
-	m := util.LuaTableToMap(args, nil, resultMap)
-	template.Renderer.ExecuteTemplate(l.w, tpl, m)
-	return 0
-}
-
+/*
 func (l *luaInterface) query(luaVM *lua.LState) int {
 	query := luaVM.ToString(1)
 	rows, err := database.Connection.Query(query)
