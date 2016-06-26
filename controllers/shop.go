@@ -1,15 +1,14 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"net/http"
 	"strconv"
 	"time"
-	"fmt"
-	"log"
-	"github.com/Cloakaac/cloak/models"
 )
 
 const (
@@ -78,11 +77,10 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 	} else {
 		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
 	}
-	log.Println(hostURL)
 	payment, err := util.CreatePaypalPayment(
 		hostURL,
-		baseURL, 
-		paypalToken.Token, 
+		baseURL,
+		paypalToken.Token,
 		req.FormValue("pay"),
 		pigo.Config.Key("paypal").String("description"),
 		pigo.Config.Key("paypal").String("currency"),
@@ -141,7 +139,7 @@ func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Reque
 	totalCoins := 0
 	if pigo.Config.Key("paypal").Float("promo") > 0 {
 		totalCoinsNoPromo := paid * pigo.Config.Key("paypal").Key("payment").Float("points")
-		totalCoins = int(((pigo.Config.Key("paypal").Float("promo") * totalCoinsNoPromo) / 100) + totalCoinsNoPromo);
+		totalCoins = int(((pigo.Config.Key("paypal").Float("promo") * totalCoinsNoPromo) / 100) + totalCoinsNoPromo)
 	} else {
 		totalCoins = int(paid * pigo.Config.Key("paypal").Key("payment").Float("points"))
 	}

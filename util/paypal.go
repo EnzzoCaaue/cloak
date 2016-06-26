@@ -3,16 +3,16 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 )
 
 var (
-	cloakaPaypalProcessURL = "/buypoints/paypal/process"
-	cloakaPaypalURL = "/buypoints/paypal"
-	paypalTokenURL         = "/v1/oauth2/token"
-	paypalCreatePaymentURL = "/v1/payments/payment"
+	cloakaPaypalProcessURL  = "/buypoints/paypal/process"
+	cloakaPaypalURL         = "/buypoints/paypal"
+	paypalTokenURL          = "/v1/oauth2/token"
+	paypalCreatePaymentURL  = "/v1/payments/payment"
 	paypalProcessPaymentURL = "/v1/payments/payment/%v/execute/"
 )
 
@@ -46,11 +46,11 @@ type PaypalPaymentCreation struct {
 
 // PaypalPaymentInformation contains information about an executed payment
 type PaypalPaymentInformation struct {
-	ID string
-	Intent       string              `json:"intent"`
-	State        string              `json:"state"`
-	Payer        PaypalPayerInformation         `json:"payer"`
-	Transactions []PaypalTransaction `json:"transactions"`
+	ID           string
+	Intent       string                 `json:"intent"`
+	State        string                 `json:"state"`
+	Payer        PaypalPayerInformation `json:"payer"`
+	Transactions []PaypalTransaction    `json:"transactions"`
 }
 
 // PaypalRedirectURL redirect url payment
@@ -66,17 +66,17 @@ type PaypalPayer struct {
 
 // PaypalPayerInformation holds information about the payer
 type PaypalPayerInformation struct {
-	PaymentMethod string `json:"payment_method"`
-	Status string `json:"status"`
-	PayerInfo PaypalPayerInfo `json:"payer_info"`
+	PaymentMethod string          `json:"payment_method"`
+	Status        string          `json:"status"`
+	PayerInfo     PaypalPayerInfo `json:"payer_info"`
 }
 
 // PaypalPayerInfo holds information about the payer
 type PaypalPayerInfo struct {
-	Email string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName string `json:"last_name"`
-	PayerID string `json:"payer_id"`
+	Email       string `json:"email"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	PayerID     string `json:"payer_id"`
 	CountryCode string `json:"country_code"`
 }
 
@@ -157,8 +157,8 @@ func CreatePaypalPayment(hostURL, baseURL, paypalToken, amount, description, cur
 	payment := &PaypalPaymentCreation{
 		Intent: "sale",
 		RedirectURL: PaypalRedirectURL{
-			ReturnURL: hostURL+cloakaPaypalProcessURL,
-			CancelURL: hostURL+cloakaPaypalURL,
+			ReturnURL: hostURL + cloakaPaypalProcessURL,
+			CancelURL: hostURL + cloakaPaypalURL,
 		},
 		Payer: PaypalPayer{
 			PaymentMethod: "paypal",
