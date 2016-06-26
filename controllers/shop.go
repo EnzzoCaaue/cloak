@@ -5,7 +5,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"net/http"
+	"strconv"
 	"time"
+	"log"
 )
 
 const (
@@ -43,6 +45,22 @@ func (base *ShopController) Paypal(w http.ResponseWriter, req *http.Request, _ h
 
 // PaypalPay process a paypal buypoints request
 func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	payAmount, err := strconv.ParseFloat(req.FormValue("pay"), 64)
+	if err != nil {
+		base.Session.AddFlash("Payment amount needs to be a number", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	if payAmount > pigo.Config.Key("paypal").Key("payment").Float("max") {
+		base.Session.AddFlash("Payment amount is too high", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	if payAmount < pigo.Config.Key("paypal").Key("payment").Float("min") {
+		base.Session.AddFlash("Payment amount is too low", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
 	timeNow := time.Now().Unix()
 	if paypalToken == nil || (timeNow+paypalToken.ExpiresIn) < timeNow {
 		token, err := util.GetPaypalToken(baseURL, pigo.Config.Key("paypal").String("public"), pigo.Config.Key("paypal").String("private"))
@@ -52,13 +70,20 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		}
 		paypalToken = token
 	}
-	payment, err := util.CreatePaypalPayment(baseURL, paypalToken.Token)
+	payment, err := util.CreatePaypalPayment(
+		baseURL, 
+		paypalToken.Token, 
+		req.FormValue("pay"),
+		pigo.Config.Key("paypal").String("description"),
+		pigo.Config.Key("paypal").String("currency"),
+	)
 	if err != nil {
 		base.Session.AddFlash("Something went wrong while creating your payment", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return
 	}
 	if payment.State != "created" {
+		log.Println(payment)
 		base.Session.AddFlash("Your payment cannot be created. Please try again later", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return

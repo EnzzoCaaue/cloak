@@ -77,7 +77,7 @@ type PaypalLink struct {
 }
 
 // CreatePaypalPayment creates a paypal payment and returns the response
-func CreatePaypalPayment(baseURL, paypalToken string) (*PaypalPayment, error) {
+func CreatePaypalPayment(baseURL, paypalToken, amount, description, currency string) (*PaypalPayment, error) {
 	payment := &PaypalPaymentCreation{
 		Intent: "sale",
 		RedirectURL: PaypalRedirectURL{
@@ -90,10 +90,10 @@ func CreatePaypalPayment(baseURL, paypalToken string) (*PaypalPayment, error) {
 		Transactions: []PaypalTransaction{
 			{
 				Amount: PaypalAmount{
-					Total:    "10.00",
-					Currency: "EUR",
+					Total:    amount,
+					Currency: currency,
 				},
-				Description: "OTX Donation",
+				Description: description,
 			},
 		},
 	}

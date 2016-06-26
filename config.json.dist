@@ -28,10 +28,12 @@
             "min": 10,
             "max": 100
         },
+        "currency": "EUR",
         "mode": "sandbox",
         "public": "",
         "secret": "",
-        "promo": 10 
+        "promo": 10,
+        "description": "Cloaka Donation"  
     },
     "captcha": {
         "public": "",

@@ -29,6 +29,7 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	controllerTable.RawSetString("Error", lua.LString(""))
 	controllerTable.RawSetString("Redirect", lua.LString(""))
 	luaVM.SetGlobal("base", controllerTable)
+	luaVM.SetGlobal("query", luaVM.NewFunction(query))
 	err := luaVM.DoFile(fmt.Sprintf(
 		"%v/%v/%v",
 		pigo.Config.String("template"),
