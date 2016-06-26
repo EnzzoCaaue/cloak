@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 	"log"
+	"github.com/Cloakaac/cloak/models"
 )
 
 const (
@@ -70,7 +72,15 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		}
 		paypalToken = token
 	}
+	hostURL := ""
+	if pigo.Config.Key("https").Bool("enabled") {
+		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
+	} else {
+		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
+	}
+	log.Println(hostURL)
 	payment, err := util.CreatePaypalPayment(
+		hostURL,
 		baseURL, 
 		paypalToken.Token, 
 		req.FormValue("pay"),
@@ -83,7 +93,6 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		return
 	}
 	if payment.State != "created" {
-		log.Println(payment)
 		base.Session.AddFlash("Your payment cannot be created. Please try again later", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return
@@ -95,5 +104,52 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		}
 	}
 	base.Session.AddFlash("Error while trying to get your payment approval URL. Please try again later", "errors")
+	base.Redirect = "/buypoints/paypal"
+}
+
+// PaypalProcess process a paypal payment
+func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	paymentID := req.URL.Query().Get("paymentId")
+	payerID := req.URL.Query().Get("PayerID")
+	if paymentID == "" {
+		base.Session.AddFlash("Missing payment ID. Cannot process your payment", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	if payerID == "" {
+		base.Session.AddFlash("Missing payer ID. Cannot process your payment", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	payment, err := util.ProcessPaypalPayment(baseURL, payerID, paymentID, paypalToken.Token)
+	if err != nil {
+		base.Session.AddFlash("Your payment could notbe processed. No money its been taking from your account", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	if payment.IsEmpty() {
+		base.Session.AddFlash("Invalid payment ID", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	paid, err := strconv.ParseFloat(payment.Transactions[0].Amount.Total, 64)
+	if err != nil {
+		base.Session.AddFlash("Your payment amount could not be processed. Please contant an administrator", "errors")
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
+	totalCoins := 0
+	if pigo.Config.Key("paypal").Float("promo") > 0 {
+		totalCoinsNoPromo := paid * pigo.Config.Key("paypal").Key("payment").Float("points")
+		totalCoins = int(((pigo.Config.Key("paypal").Float("promo") * totalCoinsNoPromo) / 100) + totalCoinsNoPromo);
+	} else {
+		totalCoins = int(paid * pigo.Config.Key("paypal").Key("payment").Float("points"))
+	}
+	err = base.Hook["account"].(*models.CloakaAccount).UpdatePoints(totalCoins)
+	if err != nil {
+		base.Error = "Unable to update account points"
+		return
+	}
+	base.Session.AddFlash("Payment completed. We added "+strconv.Itoa(totalCoins)+" coins to your account. Enjoy!", "success")
 	base.Redirect = "/buypoints/paypal"
 }
