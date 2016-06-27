@@ -4,6 +4,10 @@
     "datapack": "",
     "template": "",
     "static": "/public/",
+    "cache": {
+        "enabled": true,
+        "type": "memory"
+    },
     "https": {
         "enabled":  true,
         "cert": "",

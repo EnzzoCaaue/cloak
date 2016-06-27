@@ -8,6 +8,7 @@ import (
 	"github.com/raggaer/pigo"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type HomeController struct {
@@ -22,11 +23,16 @@ type githubCollaborator struct {
 
 // Home shows the homepage and loads news
 func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	articles, err := models.GetArticles(3)
-	if err != nil {
-		util.HandleError("Error on models.GetArticles", err)
+	if pigo.Cache.IsExpired("articles") {
+		articles, err := models.GetArticles(3)
+		if err != nil {
+			util.HandleError("Error on models.GetArticles", err)
+		}
+		pigo.Cache.Put("articles", time.Minute, articles)
+		base.Data["Articles"] = articles
+	} else {
+		base.Data["Articles"] = pigo.Cache.Get("articles").([]*models.Article)
 	}
-	base.Data["Articles"] = articles
 	base.Session.AddFlash("test", "test")
 	base.Template = "home.html"
 }
