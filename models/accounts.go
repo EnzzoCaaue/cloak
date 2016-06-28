@@ -23,7 +23,7 @@ type CloakaAccount struct {
 	Account     *Account
 	Token       string
 	Points      int
-	Admin       int
+	Admin       bool
 	TwoFactor   int
 	RecoveryKey string
 }
@@ -45,7 +45,7 @@ func NewAccount() *CloakaAccount {
 		account,
 		"",
 		0,
-		0,
+		false,
 		0,
 		"",
 	}

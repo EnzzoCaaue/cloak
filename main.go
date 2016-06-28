@@ -85,6 +85,12 @@ func main() {
 		}
 		return true
 	})
+	pigo.Filter("admin", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		if c.Hook["account"].(*models.CloakaAccount).Admin {
+			return true
+		}
+		return false
+	})
 	pigo.Filter("guildOwner", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
 		guildName, err := url.QueryUnescape(ps.ByName("name"))
 		if err != nil {

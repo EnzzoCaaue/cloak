@@ -19,8 +19,19 @@ type LuaController struct {
 	Page string
 }
 
+type LuaVM struct {
+	w http.ResponseWriter
+	req *http.Request
+	params httprouter.Params
+}
+
 // LuaPage creates a new lua VM for the request
 func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	vm := &LuaVM{
+		w,
+		req,
+		params,
+	}
 	luaVM := lua.NewState()
 	defer luaVM.Close()
 	controllerTable := &lua.LTable{}
@@ -31,6 +42,7 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	controllerTable.RawSetString("Redirect", lua.LString(""))
 	luaVM.SetGlobal("base", controllerTable)
 	luaVM.SetGlobal("query", luaVM.NewFunction(query))
+	luaVM.SetGlobal("urlParam", luaVM.NewFunction(vm.urlParam))
 	err := luaVM.DoFile(fmt.Sprintf(
 		"%v/%v/%v",
 		pigo.Config.String("template"),
@@ -49,9 +61,14 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	base.Base.Data = base.Base.Data["Data"].(map[string]interface{})
 }
 
+func (l *LuaVM) urlParam(luaVM *lua.LState) int {
+	luaVM.Push(lua.LString(l.params.ByName(luaVM.ToString(1))))
+	return 1
+}
+
 func query(luaVM *lua.LState) int {
 	query := luaVM.ToString(1)
-	if pigo.Cache.IsExpired(query) {
+	if pigo.Cache.IsExpired("luaQuery"+query) {
 		rows, err := pigo.Database.Query(query)
 		if err != nil {
 			luaVM.Push(lua.LBool(false))
@@ -77,6 +94,6 @@ func query(luaVM *lua.LState) int {
 		luaVM.Push(r)
 		return 1
 	}
-	luaVM.Push(pigo.Cache.Get(query).(*lua.LTable))
+	luaVM.Push(pigo.Cache.Get("luaQuery"+query).(*lua.LTable))
 	return 1
 }
