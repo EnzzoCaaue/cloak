@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-var (
+const (
 	cloakaPaypalProcessURL  = "/buypoints/paypal/process"
 	cloakaPaypalURL         = "/buypoints/paypal"
 	paypalTokenURL          = "/v1/oauth2/token"

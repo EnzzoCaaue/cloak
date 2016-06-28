@@ -5,10 +5,12 @@ import (
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
+	"github.com/Cloakaac/cloak/command"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"net/http"
 	"net/url"
+	"log"
 )
 
 func registerRoutes() {
@@ -67,6 +69,7 @@ func registerLUARoutes() {
 
 func main() {
 	template.Load()
+	log.Println("Template loaded")
 	pigo.Filter("logged", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
 		if c.Session.GetString("key") == "" {
 			http.Redirect(w, req, "/account/login", 301)
@@ -114,5 +117,6 @@ func main() {
 	registerLUARoutes()
 	util.ParseMonsters(pigo.Config.String("datapack"))
 	util.ParseConfig(pigo.Config.String("datapack"))
+	go command.ConsoleWatch()
 	pigo.Run()
 }

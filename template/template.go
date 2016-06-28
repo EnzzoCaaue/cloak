@@ -14,8 +14,7 @@ import (
 
 // Load loads the AAC template
 func Load() {
-	pigo.TemplateDelims("[[", "]]")
-	pigo.TemplateFunc(template.FuncMap{
+	pigo.LoadTemplate("[[", "]]", template.FuncMap{
 		"gender": func(gender int) string {
 			return util.GetGender(gender)
 		},
@@ -154,5 +153,4 @@ func Load() {
 			return false
 		},
 	})
-	pigo.LoadTemplate()
 }

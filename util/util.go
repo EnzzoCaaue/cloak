@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"time"
+	"sync"
 )
 
 const (
@@ -39,7 +40,11 @@ var (
 		"Royal Paladin":   royalPaladin,
 		"Elite Knight":    eliteKnight,
 	}
-	monsters map[string]*Monster
+	// Monsters holds all server monsters
+	Monsters = &ServerMonsters{
+		m: make(map[string]*Monster),
+		rw: &sync.RWMutex{},
+	}
 	// Config contains the whole parsed config lua file
 	Config *ConfigLUA
 )
