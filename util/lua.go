@@ -18,18 +18,18 @@ func QueryToTable(r [][]interface{}) *lua.LTable {
 	return resultTable
 }
 
-// LuaTableToMap converts a lua table to a Go map
-func LuaTableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
+// TableToMap converts a lua table to a Go map
+func TableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
 	switch r.Type() {
 	case lua.LTTable:
 		if index != nil {
 			result[index.String()] = make(map[string]interface{})
 			r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				result[index.String()] = LuaTableToMap(v, i, result[index.String()].(map[string]interface{}))
+				result[index.String()] = TableToMap(v, i, result[index.String()].(map[string]interface{}))
 			})
 		} else {
 			r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				result = LuaTableToMap(v, i, result)
+				result = TableToMap(v, i, result)
 			})
 		}
 	case lua.LTString:

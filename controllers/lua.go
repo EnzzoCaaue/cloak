@@ -7,6 +7,7 @@ import (
 	"github.com/raggaer/pigo"
 	"github.com/yuin/gopher-lua"
 	"net/http"
+	"time"
 )
 
 var (
@@ -40,7 +41,7 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		base.Base.Error = err.Error()
 		return
 	}
-	base.Base.Data = util.LuaTableToMap(controllerTable, nil, base.Base.Data)
+	base.Base.Data = util.TableToMap(controllerTable, nil, base.Base.Data)
 	base.Base.Template = base.Base.Data["Template"].(string)
 	base.Base.Error = base.Base.Data["Error"].(string)
 	base.Base.JSON = base.Base.Data["Json"].(bool)
@@ -50,27 +51,32 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 
 func query(luaVM *lua.LState) int {
 	query := luaVM.ToString(1)
-	rows, err := pigo.Database.Query(query)
-	if err != nil {
-		luaVM.Push(lua.LBool(false))
-		return 1
-	}
-	columnNames, err := rows.Columns()
-	if err != nil {
-		luaVM.Push(lua.LBool(false))
-		return 1
-	}
-	var results [][]interface{}
-	for rows.Next() {
-		columns := make([]interface{}, len(columnNames))
-		columnPointers := make([]interface{}, len(columnNames))
-		for i := range columnNames {
-			columnPointers[i] = &columns[i]
+	if pigo.Cache.IsExpired(query) {
+		rows, err := pigo.Database.Query(query)
+		if err != nil {
+			luaVM.Push(lua.LBool(false))
+			return 1
 		}
-		rows.Scan(columnPointers...)
-		results = append(results, columns)
+		columnNames, err := rows.Columns()
+		if err != nil {
+			luaVM.Push(lua.LBool(false))
+			return 1
+		}
+		var results [][]interface{}
+		for rows.Next() {
+			columns := make([]interface{}, len(columnNames))
+			columnPointers := make([]interface{}, len(columnNames))
+			for i := range columnNames {
+				columnPointers[i] = &columns[i]
+			}
+			rows.Scan(columnPointers...)
+			results = append(results, columns)
+		}
+		r := util.QueryToTable(results)
+		pigo.Cache.Put(query, time.Minute, r)
+		luaVM.Push(r)
+		return 1
 	}
-	r := util.QueryToTable(results)
-	luaVM.Push(r)
+	luaVM.Push(pigo.Cache.Get(query).(*lua.LTable))
 	return 1
 }
