@@ -3,9 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 )
@@ -22,6 +24,7 @@ type githubCollaborator struct {
 
 // Home shows the homepage and loads news
 func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	log.Println(util.Items.Get(2660))
 	if pigo.Cache.IsExpired("articles") {
 		articles, err := models.GetArticles(3)
 		if err != nil {

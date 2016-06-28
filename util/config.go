@@ -18,14 +18,14 @@ const (
 
 // ConfigLUA holds the parsed config lua file
 type ConfigLUA struct {
-	v map[string]interface{}
+	v  map[string]interface{}
 	rw *sync.RWMutex
 }
 
 // ParseConfig parses the config lua file
 func ParseConfig(path string) {
-	Config.rw.RLock()
-	defer Config.rw.RUnlock()
+	Config.rw.Lock()
+	defer Config.rw.Unlock()
 	Config.v = make(map[string]interface{})
 	file, err := os.Open(path + configLUAFile)
 	if err != nil {

@@ -118,6 +118,7 @@ func main() {
 	util.ParseMonsters(pigo.Config.String("datapack"))
 	util.ParseConfig(pigo.Config.String("datapack"))
 	util.ParseStages(pigo.Config.String("datapack"))
+	util.ParseItems(pigo.Config.String("datapack"))
 	go command.ConsoleWatch()
 	pigo.Run()
 }

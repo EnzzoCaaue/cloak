@@ -68,8 +68,8 @@ type monsterDefinition struct {
 
 // ParseMonsters parses monsters.xml
 func ParseMonsters(path string) {
-	Monsters.rw.RLock()
-	defer Monsters.rw.RUnlock()
+	Monsters.rw.Lock()
+	defer Monsters.rw.Unlock()
 	Monsters.m = make(map[string]*Monster)
 	b, err := ioutil.ReadFile(path + "/data/monster/monsters.xml")
 	if err != nil {

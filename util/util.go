@@ -55,6 +55,11 @@ var (
 		&stageDefinition{},
 		&sync.RWMutex{},
 	}
+	// Items contains the server items xml parsed
+	Items = &ServerItems{
+		make(map[int]ItemDefinition),
+		&sync.RWMutex{},
+	}
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

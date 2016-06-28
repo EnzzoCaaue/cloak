@@ -8,6 +8,7 @@ import (
 	"github.com/raggaer/pigo"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -18,8 +19,17 @@ const (
 
 var (
 	baseURL     string
-	paypalToken *util.PaypalToken
+	paypalToken = &Token{
+		nil,
+		&sync.RWMutex{},
+	}
 )
+
+// Token holds a paypal token with a mutex
+type Token struct {
+	PaypalToken *util.PaypalToken
+	rw          *sync.RWMutex
+}
 
 type ShopController struct {
 	*pigo.Controller
@@ -63,13 +73,15 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		return
 	}
 	timeNow := time.Now().Unix()
-	if paypalToken == nil || (timeNow+paypalToken.ExpiresIn) < timeNow {
+	if paypalToken.PaypalToken == nil || (timeNow+paypalToken.PaypalToken.ExpiresIn) < timeNow {
+		paypalToken.rw.Lock()
 		token, err := util.GetPaypalToken(baseURL, pigo.Config.Key("paypal").String("public"), pigo.Config.Key("paypal").String("private"))
 		if err != nil {
 			base.Error = err.Error()
 			return
 		}
-		paypalToken = token
+		paypalToken.PaypalToken = token
+		paypalToken.rw.Unlock()
 	}
 	hostURL := ""
 	if pigo.Config.Key("https").Bool("enabled") {
@@ -77,10 +89,12 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 	} else {
 		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
 	}
+	paypalToken.rw.RLock()
+	defer paypalToken.rw.RUnlock()
 	payment, err := util.CreatePaypalPayment(
 		hostURL,
 		baseURL,
-		paypalToken.Token,
+		paypalToken.PaypalToken.Token,
 		req.FormValue("pay"),
 		pigo.Config.Key("paypal").String("description"),
 		pigo.Config.Key("paypal").String("currency"),
@@ -107,6 +121,8 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 
 // PaypalProcess process a paypal payment
 func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	paypalToken.rw.RLock()
+	defer paypalToken.rw.RUnlock()
 	paymentID := req.URL.Query().Get("paymentId")
 	payerID := req.URL.Query().Get("PayerID")
 	if paymentID == "" {
@@ -119,7 +135,7 @@ func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Reque
 		base.Redirect = "/buypoints/paypal"
 		return
 	}
-	payment, err := util.ProcessPaypalPayment(baseURL, payerID, paymentID, paypalToken.Token)
+	payment, err := util.ProcessPaypalPayment(baseURL, payerID, paymentID, paypalToken.PaypalToken.Token)
 	if err != nil {
 		base.Session.AddFlash("Your payment could notbe processed. No money its been taking from your account", "errors")
 		base.Redirect = "/buypoints/paypal"
