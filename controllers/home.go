@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"io/ioutil"
@@ -26,7 +25,8 @@ func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ htt
 	if pigo.Cache.IsExpired("articles") {
 		articles, err := models.GetArticles(3)
 		if err != nil {
-			util.HandleError("Error on models.GetArticles", err)
+			base.Error = err.Error()
+			return
 		}
 		pigo.Cache.Put("articles", time.Minute, articles)
 		base.Data["Articles"] = articles

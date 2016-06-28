@@ -12,6 +12,10 @@ Cloaka support console commnads (handy for development) such as
 
 - reload template (will compile all the templates.html)
 - reload monsters (will load all the monsters from monsters.xml file)
+- reload config lua (will reload the config.lua file into memory)
+- reload config (will reload the config.json file into memory)
+- reload stages (will reload the stages.xml file into memory)
+- exit (will terminate cloaka)
 
 Feel free to create your own commands
 

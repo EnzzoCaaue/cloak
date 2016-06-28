@@ -133,7 +133,6 @@ func Load() {
 		"getTopPlayers": func(limit int) []*models.Player {
 			players, err := models.GetTopPlayers(limit)
 			if err != nil {
-				util.HandleError("Error on getTopPlayers", err)
 				return nil
 			}
 			return players

@@ -3,12 +3,12 @@ package command
 import (
 	"bufio"
 	"errors"
-	"os"
 	"log"
+	"os"
 )
 
 var (
-    commands = &cloakaCommands{
+	commands = &cloakaCommands{
 		make(map[string]command),
 	}
 )
@@ -35,7 +35,7 @@ func ConsoleWatch() {
 	for {
 		cmd, _, err := reader.ReadLine()
 		if err != nil {
-			log.Println("Error while reading command from stdin")
+			continue
 		}
 		if v, ok := commands.list[string(cmd)]; ok {
 			v.exec()

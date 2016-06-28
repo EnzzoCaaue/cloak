@@ -6,9 +6,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-var (
+const (
 	commentPrefix   = "-- "
 	lineSplit       = "="
 	stringSeparator = "\""
@@ -18,13 +19,14 @@ var (
 // ConfigLUA holds the parsed config lua file
 type ConfigLUA struct {
 	v map[string]interface{}
+	rw *sync.RWMutex
 }
 
 // ParseConfig parses the config lua file
 func ParseConfig(path string) {
-	Config = &ConfigLUA{
-		make(map[string]interface{}),
-	}
+	Config.rw.RLock()
+	defer Config.rw.RUnlock()
+	Config.v = make(map[string]interface{})
 	file, err := os.Open(path + configLUAFile)
 	if err != nil {
 		log.Fatal(err)
@@ -52,6 +54,8 @@ func ParseConfig(path string) {
 
 // String returns a config lua string value
 func (c *ConfigLUA) String(key string) string {
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	if v, ok := c.v[key].(string); ok {
 		return v
 	}
@@ -60,6 +64,8 @@ func (c *ConfigLUA) String(key string) string {
 
 // Int returns a config lua int value
 func (c *ConfigLUA) Int(key string) int {
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	k, err := strconv.Atoi(c.v[key].(string))
 	if err != nil {
 		return 0
@@ -69,6 +75,8 @@ func (c *ConfigLUA) Int(key string) int {
 
 // Bool returns a config lua bool value
 func (c *ConfigLUA) Bool(key string) bool {
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	k, err := strconv.ParseBool(c.v[key].(string))
 	if err != nil {
 		return false

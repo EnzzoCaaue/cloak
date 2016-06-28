@@ -19,24 +19,20 @@ import (
 func CreateSignature(name string, gender, vocation, level int, lastlogin int64) ([]byte, error) {
 	background, err := os.Open(pigo.Config.String("template") + "/public/images/signature.png")
 	if err != nil {
-		HandleError("Cannot open signature background image", err)
 		return nil, err
 	}
 	backgroundRGBA := image.NewRGBA(image.Rect(0, 0, 495, 134))
 	backgroundDecoded, _, err := image.Decode(background)
 	if err != nil {
-		HandleError("Cannot decode signature background image", err)
 		return nil, err
 	}
 	draw.Draw(backgroundRGBA, backgroundRGBA.Bounds(), backgroundDecoded, image.ZP, draw.Src)
 	fontBytes, err := ioutil.ReadFile(pigo.Config.String("template") + "/public/fonts/Aller_Bd.ttf")
 	if err != nil {
-		HandleError("Cannot open signature font file", err)
 		return nil, err
 	}
 	signatureFont, err := freetype.ParseFont(fontBytes)
 	if err != nil {
-		HandleError("Cannot parse free type font", err)
 		return nil, err
 	}
 	signatureTextDrawer := freetype.NewContext()
@@ -48,33 +44,27 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 	signatureTextDrawer.SetSrc(image.Black)
 	_, err = signatureTextDrawer.DrawString("Name: "+name, freetype.Pt(20, 30))
 	if err != nil {
-		HandleError("Error while drawing name text", err)
 		return nil, err
 	}
 	_, err = signatureTextDrawer.DrawString("Gender: "+GetGender(gender), freetype.Pt(20, 50))
 	if err != nil {
-		HandleError("Error while drawing gender text", err)
 		return nil, err
 	}
 	_, err = signatureTextDrawer.DrawString("Vocation: "+GetVocation(vocation), freetype.Pt(20, 70))
 	if err != nil {
-		HandleError("Error while drawing vocation text", err)
 		return nil, err
 	}
 	_, err = signatureTextDrawer.DrawString("Level: "+strconv.Itoa(level), freetype.Pt(20, 90))
 	if err != nil {
-		HandleError("Error while drawing level text", err)
 		return nil, err
 	}
 	_, err = signatureTextDrawer.DrawString("Last login: "+UnixToString(lastlogin), freetype.Pt(20, 110))
 	if err != nil {
-		HandleError("Error while drawing last login text", err)
 		return nil, err
 	}
 	buffer := &bytes.Buffer{}
 	err = png.Encode(buffer, backgroundRGBA)
 	if err != nil {
-		HandleError("Error writing to output buffer", err)
 		return nil, err
 	}
 	signatureFile, err := os.Create(pigo.Config.String("template") + "/public/signatures/" + name + ".png")

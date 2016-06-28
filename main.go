@@ -1,16 +1,16 @@
 package main
 
 import (
+	"github.com/Cloakaac/cloak/command"
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
-	"github.com/Cloakaac/cloak/command"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 )
 
 func registerRoutes() {
@@ -117,6 +117,7 @@ func main() {
 	registerLUARoutes()
 	util.ParseMonsters(pigo.Config.String("datapack"))
 	util.ParseConfig(pigo.Config.String("datapack"))
+	util.ParseStages(pigo.Config.String("datapack"))
 	go command.ConsoleWatch()
 	pigo.Run()
 }

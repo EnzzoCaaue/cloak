@@ -77,7 +77,6 @@ func valid(tag, alias, value string) (bool, error) {
 func validateRegexp(val, pattern string) bool {
 	match, err := regexp.MatchString(pattern, val)
 	if err != nil {
-		HandleError("Error on validateRegexp()", err)
 		return false
 	}
 	return match
@@ -120,19 +119,16 @@ func validateCaptcha(val string) bool {
 		},
 	})
 	if err != nil {
-		HandleError("Error on validateCaptcha()", err)
 		return false
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		HandleError("Error on validateCaptcha()", err)
 		return false
 	}
 	captchaResponse := &captcha{}
 	err = json.Unmarshal(body, captchaResponse)
 	if err != nil {
-		HandleError("Error on validateCaptcha() json.Unmarshal()", err)
 		return false
 	}
 	return captchaResponse.Success

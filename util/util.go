@@ -2,8 +2,8 @@ package util
 
 import (
 	"fmt"
-	"time"
 	"sync"
+	"time"
 )
 
 const (
@@ -42,11 +42,19 @@ var (
 	}
 	// Monsters holds all server monsters
 	Monsters = &ServerMonsters{
-		m: make(map[string]*Monster),
+		m:  make(map[string]*Monster),
 		rw: &sync.RWMutex{},
 	}
 	// Config contains the whole parsed config lua file
-	Config *ConfigLUA
+	Config = &ConfigLUA{
+		make(map[string]interface{}),
+		&sync.RWMutex{},
+	}
+	// Stages contains the server experience stages
+	Stages = &ServerStages{
+		&stageDefinition{},
+		&sync.RWMutex{},
+	}
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

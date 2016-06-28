@@ -133,4 +133,6 @@ func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http
 	base.Data["SpawnRate"] = util.Config.Int("rateSpawn")
 	base.Data["Motd"] = util.Config.String("motd")
 	base.Data["FreePremium"] = util.Config.Bool("freePremium")
+	base.Data["StagesEnabled"] = util.Stages.IsEnabled()
+	base.Data["Stages"] = util.Stages.GetAll()
 }

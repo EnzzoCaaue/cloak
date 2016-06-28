@@ -3,13 +3,13 @@ package util
 import (
 	"encoding/xml"
 	"io/ioutil"
-	"sync"
 	"log"
+	"sync"
 )
 
 // ServerMonsters holds all server monsters
 type ServerMonsters struct {
-	m map[string]*Monster
+	m  map[string]*Monster
 	rw *sync.RWMutex
 }
 
@@ -68,10 +68,9 @@ type monsterDefinition struct {
 
 // ParseMonsters parses monsters.xml
 func ParseMonsters(path string) {
-	Monsters = &ServerMonsters{
-		make(map[string]*Monster),
-		&sync.RWMutex{},
-	}
+	Monsters.rw.RLock()
+	defer Monsters.rw.RUnlock()
+	Monsters.m = make(map[string]*Monster)
 	b, err := ioutil.ReadFile(path + "/data/monster/monsters.xml")
 	if err != nil {
 		log.Fatal(err)
