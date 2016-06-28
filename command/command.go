@@ -41,6 +41,6 @@ func ConsoleWatch() {
 			v.exec()
 			continue
 		}
-		log.Println("Commands not found")
+		log.Println("Command not found")
 	}
 }

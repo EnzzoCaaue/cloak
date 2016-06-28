@@ -10,7 +10,10 @@ It is made using [Pigo](https://github.com/Raggaer/Pigo) web-framework
 
 Cloaka support console commnads (handy for development) such as
 
-- template reload
+- reload template (will compile all the templates.html)
+- reload monsters (will load all the monsters from monsters.xml file)
+
+Feel free to create your own commands
 
 # Compatible OT distributions
 
