@@ -14,6 +14,7 @@ const (
 	itemWeightLabel      = "weight"
 	itemDescriptionLabel = "description"
 	itemSlotLabel        = "slotType"
+    itemArmorLabel       = "armor"
 )
 
 // ServerItems holds all server items
@@ -103,4 +104,18 @@ func (s *ItemDefinition) GetSlot() string {
 		}
 	}
 	return ""
+}
+
+// GetArmor returns an item armor value
+func (s *ItemDefinition) GetArmor() int {
+    for _, v := range s.Attributes {
+        if v.Key == itemArmorLabel {
+            w, err := strconv.Atoi(v.Value)
+			if err != nil {
+				return 0
+			}
+			return w
+        }
+    }
+    return 0
 }

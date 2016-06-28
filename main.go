@@ -47,6 +47,7 @@ func registerRoutes() {
 	pigo.Get("/buypoints/paypal", &controllers.ShopController{}, "Paypal", "logged")
 	pigo.Post("/buypoints/paypal", &controllers.ShopController{}, "PaypalPay", "logged")
 	pigo.Get("/buypoints/paypal/process", &controllers.ShopController{}, "PaypalProcess")
+	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
 }
 
 func registerLUARoutes() {

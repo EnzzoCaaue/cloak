@@ -3,13 +3,15 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
+)
+
+const (
+	githubRepo = "https://api.github.com/repos/cloakaac/cloak/contributors"
 )
 
 type HomeController struct {
@@ -24,7 +26,6 @@ type githubCollaborator struct {
 
 // Home shows the homepage and loads news
 func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	log.Println(util.Items.Get(2660))
 	if pigo.Cache.IsExpired("articles") {
 		articles, err := models.GetArticles(3)
 		if err != nil {
@@ -42,23 +43,28 @@ func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ htt
 
 // Credits shows the credits page
 func (base *HomeController) Credits(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	resp, err := http.Get("https://api.github.com/repos/cloakaac/cloak/contributors")
-	if err != nil {
-		base.Error = "Error while getting cloak contributors"
-		return
+	if pigo.Cache.IsExpired("credits") {
+		resp, err := http.Get(githubRepo)
+		if err != nil {
+			base.Error = "Error while getting cloak contributors"
+			return
+		}
+		defer resp.Body.Close()
+		collaborators := []*githubCollaborator{}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			base.Error = "Error while reading response body"
+			return
+		}
+		err = json.Unmarshal(body, &collaborators)
+		if err != nil {
+			base.Error = "Error while unmarshaling body"
+			return
+		}
+		pigo.Cache.Put("credits", 10 * time.Minute, collaborators)
+		base.Data["Contributors"] = collaborators
+	} else {
+		base.Data["Contributors"] = pigo.Cache.Get("credits").([]*githubCollaborator)
 	}
-	defer resp.Body.Close()
-	collaborators := []*githubCollaborator{}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		base.Error = "Error while reading response body"
-		return
-	}
-	err = json.Unmarshal(body, &collaborators)
-	if err != nil {
-		base.Error = "Error while unmarshaling body"
-		return
-	}
-	base.Data["Contributors"] = collaborators
 	base.Template = "credits.html"
 }

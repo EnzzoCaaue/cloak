@@ -7,15 +7,49 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"fmt"
 )
 
 type CommunityController struct {
 	*pigo.Controller
+}
+
+// Highscores process and shows the highscores page
+func (base *CommunityController) Highscores(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	highscoreType := p.ByName("type")
+	page, err := strconv.Atoi(p.ByName("page"))	
+	if err != nil {
+		base.Redirect = "/"
+		return
+	}
+	pageIndex, query, name := util.GetHighscoreQuery(page, highscoreType, 10)
+	list, err := models.GetHighscores(pageIndex, query)
+	if err != nil {
+		base.Error = "Error while getting highscore list"
+		return
+	}
+	if len(list) == 0 && page > 0 {
+		base.Redirect = fmt.Sprintf("/highscores/%v/%v",
+			highscoreType,
+			page - 1,
+		)
+		return
+	}
+	base.Data["PageNext"] = page + 1
+	base.Data["PageOld"] = page - 1
+	base.Data["SkillName"] = name
+	base.Data["Skill"] = highscoreType
+	base.Data["List"] = list
+	base.Data["CurrentRank"] = pageIndex
+	base.Data["OldRank"] = pageIndex - 10
+	base.Data["NextRank"] = pageIndex + 10
+	base.Template = "highscores.html"
 }
 
 // CharacterView shows a character

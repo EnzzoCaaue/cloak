@@ -53,6 +53,13 @@ type CloakaPlayer struct {
 	Hide     int
 }
 
+// HighscorePlayer contains players for highscores page
+type HighscorePlayer struct {
+	Name string
+	Value int
+	Place int
+}
+
 // GetTopPlayers gets sidebar top players
 func GetTopPlayers(limit int) ([]*Player, error) {
 	rows, err := pigo.Database.Query("SELECT name, level FROM players ORDER BY level DESC LIMIT ?", limit)
@@ -214,4 +221,22 @@ func (player *Player) IsInGuild() bool {
 	exists := false
 	row.Scan(&exists)
 	return exists
+}
+
+// GetHighscores retuns highscores list by its type
+func GetHighscores(index int, query string) ([]*HighscorePlayer, error) {
+	rows, err := pigo.Database.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	highscores := []*HighscorePlayer{}
+	for rows.Next() {
+		h := &HighscorePlayer{}
+		rows.Scan(&h.Name, &h.Value)
+		h.Place = index + 1
+		highscores = append(highscores, h)
+		index++
+	}
+	return highscores, nil
 }

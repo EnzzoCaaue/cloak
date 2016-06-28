@@ -131,11 +131,15 @@ func Load() {
 			return msg
 		},
 		"getTopPlayers": func(limit int) []*models.Player {
-			players, err := models.GetTopPlayers(limit)
-			if err != nil {
-				return nil
+			if pigo.Cache.IsExpired("topPlayers") {
+				players, err := models.GetTopPlayers(limit)
+				if err != nil {
+					return nil
+				}
+				pigo.Cache.Put("topPlayers", time.Minute, players)
+				return players
 			}
-			return players
+			return pigo.Cache.Get("topPlayers").([]*models.Player)
 		},
 		"coolIndex": func(index int) int {
 			return index + 1
