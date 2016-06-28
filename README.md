@@ -6,6 +6,12 @@ Cloaka provides great performance and an easy to use scripting environment using
 
 It is made using [Pigo](https://github.com/Raggaer/Pigo) web-framework
 
+# Commands
+
+Cloaka support console commnads (handy for development) such as
+
+- template reload
+
 # Compatible OT distributions
 
 Cloaka is only compatible with [The Forgotten Server](https://github.com/otland/forgottenserver). Cloaka only supports its newer version 1.0 or greater.
