@@ -17,6 +17,12 @@ func (base *AdminController) Dashboard(w http.ResponseWriter, req *http.Request,
     adminInfo := models.GetAdminInformation()
     m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
+    onlineRecords, err := models.GetOnlineRecords(10)
+    if err != nil {
+        base.Error = "Error while trying to get online records"
+        return
+    }
+    base.Data["Records"] = onlineRecords
     base.Data["Memstats"] = m
     base.Data["Goversion"] = runtime.Version()
     base.Data["Numcpu"] = runtime.NumCPU()

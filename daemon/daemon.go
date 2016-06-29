@@ -51,6 +51,7 @@ func (c *cloakaDaemons) Add(key string, duration time.Duration, dm daemon) error
 }
 
 func runDaemon(dm *cloakaDaemon) {
+    defer dm.duration.Stop()
     for {
         select {
         case <- dm.duration.C:

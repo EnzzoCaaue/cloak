@@ -133,6 +133,9 @@ func main() {
 	util.ParseConfig(pigo.Config.String("datapack"))
 	util.ParseStages(pigo.Config.String("datapack"))
 	util.ParseItems(pigo.Config.String("datapack"))
+	if err := models.ClearOnlineLogs(); err != nil {
+		log.Fatal(err)
+	}
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()
