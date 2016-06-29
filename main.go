@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/Cloakaac/cloak/command"
-	"github.com/Cloakaac/cloak/daemon"
 	"github.com/Cloakaac/cloak/controllers"
+	"github.com/Cloakaac/cloak/daemon"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"

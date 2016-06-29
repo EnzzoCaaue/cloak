@@ -55,7 +55,7 @@ type CloakaPlayer struct {
 
 // HighscorePlayer contains players for highscores page
 type HighscorePlayer struct {
-	Name string
+	Name  string
 	Value int
 	Place int
 }

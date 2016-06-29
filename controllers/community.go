@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"time"
 
+	"fmt"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"fmt"
 )
 
 type CommunityController struct {
@@ -23,7 +23,7 @@ type CommunityController struct {
 // Highscores process and shows the highscores page
 func (base *CommunityController) Highscores(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	highscoreType := p.ByName("type")
-	page, err := strconv.Atoi(p.ByName("page"))	
+	page, err := strconv.Atoi(p.ByName("page"))
 	if err != nil {
 		base.Redirect = "/"
 		return
@@ -37,7 +37,7 @@ func (base *CommunityController) Highscores(w http.ResponseWriter, req *http.Req
 	if len(list) == 0 && page > 0 {
 		base.Redirect = fmt.Sprintf("/highscores/%v/%v",
 			highscoreType,
-			page - 1,
+			page-1,
 		)
 		return
 	}

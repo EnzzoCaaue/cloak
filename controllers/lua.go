@@ -20,8 +20,8 @@ type LuaController struct {
 }
 
 type LuaVM struct {
-	w http.ResponseWriter
-	req *http.Request
+	w      http.ResponseWriter
+	req    *http.Request
 	params httprouter.Params
 }
 
@@ -68,7 +68,7 @@ func (l *LuaVM) urlParam(luaVM *lua.LState) int {
 
 func query(luaVM *lua.LState) int {
 	query := luaVM.ToString(1)
-	if pigo.Cache.IsExpired("luaQuery"+query) {
+	if pigo.Cache.IsExpired("luaQuery" + query) {
 		rows, err := pigo.Database.Query(query)
 		if err != nil {
 			luaVM.Push(lua.LBool(false))
@@ -94,6 +94,6 @@ func query(luaVM *lua.LState) int {
 		luaVM.Push(r)
 		return 1
 	}
-	luaVM.Push(pigo.Cache.Get("luaQuery"+query).(*lua.LTable))
+	luaVM.Push(pigo.Cache.Get("luaQuery" + query).(*lua.LTable))
 	return 1
 }

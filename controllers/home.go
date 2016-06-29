@@ -61,7 +61,7 @@ func (base *HomeController) Credits(w http.ResponseWriter, req *http.Request, _ 
 			base.Error = "Error while unmarshaling body"
 			return
 		}
-		pigo.Cache.Put("credits", 10 * time.Minute, collaborators)
+		pigo.Cache.Put("credits", 10*time.Minute, collaborators)
 		base.Data["Contributors"] = collaborators
 	} else {
 		base.Data["Contributors"] = pigo.Cache.Get("credits").([]*githubCollaborator)
