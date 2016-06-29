@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Cloakaac/cloak/command"
+	"github.com/Cloakaac/cloak/daemon"
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
@@ -132,6 +133,7 @@ func main() {
 	util.ParseConfig(pigo.Config.String("datapack"))
 	util.ParseStages(pigo.Config.String("datapack"))
 	util.ParseItems(pigo.Config.String("datapack"))
+	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()
 }

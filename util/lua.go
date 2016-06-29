@@ -18,7 +18,7 @@ func QueryToTable(r [][]interface{}) *lua.LTable {
 	return resultTable
 }
 
-// TableToMap converts a lua table to a Go map
+// TableToMap converts a lua table to a map
 func TableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
 	switch r.Type() {
 	case lua.LTTable:
