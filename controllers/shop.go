@@ -25,6 +25,10 @@ var (
 	}
 )
 
+type paypalForm struct {
+	Captcha string `validate:"validCaptcha" alias:"Captcha check"`
+}
+
 // Token holds a paypal token with a mutex
 type Token struct {
 	PaypalToken *util.PaypalToken
@@ -56,6 +60,16 @@ func (base *ShopController) Paypal(w http.ResponseWriter, req *http.Request, _ h
 
 // PaypalPay process a paypal buypoints request
 func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	form := &paypalForm{
+		req.FormValue("g-recaptcha-response"),
+	}
+	if errs := util.Validate(form); len(errs) > 0 {
+		for _, v := range errs {
+			base.Session.AddFlash(v.Error(), "errors")
+		}
+		base.Redirect = "/buypoints/paypal"
+		return
+	}
 	payAmount, err := strconv.ParseFloat(req.FormValue("pay"), 64)
 	if err != nil {
 		base.Session.AddFlash("Payment amount needs to be a number", "errors")

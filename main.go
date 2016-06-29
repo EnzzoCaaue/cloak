@@ -48,6 +48,7 @@ func registerRoutes() {
 	pigo.Post("/buypoints/paypal", &controllers.ShopController{}, "PaypalPay", "logged")
 	pigo.Get("/buypoints/paypal/process", &controllers.ShopController{}, "PaypalProcess")
 	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
+	pigo.Get("/admin/overview", &controllers.AdminController{}, "Dashboard", "logged", "admin")
 }
 
 func registerLUARoutes() {
@@ -86,10 +87,11 @@ func main() {
 		return true
 	})
 	pigo.Filter("admin", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
-		if c.Hook["account"].(*models.CloakaAccount).Admin {
-			return true
+		account := c.Hook["account"].(*models.CloakaAccount)
+		if account == nil {
+			return false
 		}
-		return false
+		return account.Admin
 	})
 	pigo.Filter("guildOwner", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
 		guildName, err := url.QueryUnescape(ps.ByName("name"))
@@ -103,7 +105,11 @@ func main() {
 		if err != nil {
 			return false
 		}
-		characters, err := c.Hook["account"].(*models.CloakaAccount).GetCharacters()
+		account := c.Hook["account"].(*models.CloakaAccount)
+		if account == nil {
+			return false
+		}
+		characters, err := account.GetCharacters()
 		if err != nil {
 			return false
 		}
