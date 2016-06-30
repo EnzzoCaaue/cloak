@@ -19,6 +19,7 @@ type LuaController struct {
 	Page string
 }
 
+// LuaVM holds a lua virtual machine
 type LuaVM struct {
 	w      http.ResponseWriter
 	req    *http.Request
@@ -74,6 +75,7 @@ func query(luaVM *lua.LState) int {
 			luaVM.Push(lua.LBool(false))
 			return 1
 		}
+		defer rows.Close()
 		columnNames, err := rows.Columns()
 		if err != nil {
 			luaVM.Push(lua.LBool(false))
@@ -89,7 +91,7 @@ func query(luaVM *lua.LState) int {
 			rows.Scan(columnPointers...)
 			results = append(results, columns)
 		}
-		r := util.QueryToTable(results)
+		r := util.QueryToTable(results, columnNames)
 		pigo.Cache.Put(query, time.Minute, r)
 		luaVM.Push(r)
 		return 1
