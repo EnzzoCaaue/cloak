@@ -45,6 +45,15 @@ func Load() {
 			timeString := fmt.Sprintf("%v %v %v, %v:%v:%v", timeDate.Month().String()[:3], timeDate.Day(), timeDate.Year(), timeDate.Hour(), timeDate.Minute(), timeDate.Second())
 			return timeString
 		},
+		"luaUnixToDate": func(unix string) string {
+			b, err := strconv.ParseInt(unix, 10, 64)
+			if err != nil {
+				return "Never"
+			}
+			timeDate := time.Unix(b, 0)
+			timeString := fmt.Sprintf("%v %v %v, %v:%v:%v", timeDate.Month().String()[:3], timeDate.Day(), timeDate.Year(), timeDate.Hour(), timeDate.Minute(), timeDate.Second())
+			return timeString
+		},
 		"currentMenu": func(active string, key string) bool {
 			if active == key {
 				return true

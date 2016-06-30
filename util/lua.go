@@ -3,6 +3,7 @@ package util
 import (
 	"github.com/yuin/gopher-lua"
 	"strconv"
+	"log"
 )
 
 // QueryToTable converts a slice of interfaces to a lua table
@@ -11,43 +12,36 @@ func QueryToTable(r [][]interface{}) *lua.LTable {
 	for i := range r {
 		t := &lua.LTable{}
 		for x := range r[i] {
-			t.RawSetInt(x, lua.LString(string(r[i][x].([]uint8))))
+			t.Append(lua.LString(string(r[i][x].([]uint8))))
 		}
-		resultTable.RawSetInt(i, t)
+		resultTable.Append(t)
 	}
 	return resultTable
 }
 
 // TableToMap converts a lua table to a map
-func TableToMap(r lua.LValue, index lua.LValue, result map[string]interface{}) map[string]interface{} {
-	switch r.Type() {
-	case lua.LTTable:
-		if index != nil {
-			result[index.String()] = make(map[string]interface{})
-			r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				result[index.String()] = TableToMap(v, i, result[index.String()].(map[string]interface{}))
-			})
-		} else {
-			r.(*lua.LTable).ForEach(func(i lua.LValue, v lua.LValue) {
-				result = TableToMap(v, i, result)
-			})
+func TableToMap(r *lua.LTable) map[string]interface{} {
+	resultMap := make(map[string]interface{})
+	r.ForEach(func(i lua.LValue, v lua.LValue) {
+		switch v.Type() {
+		case lua.LTString:
+			resultMap[i.String()] = v.String()	
+		case lua.LTNumber:
+			n, err := strconv.Atoi(v.String())
+			if err != nil {
+				log.Fatal(err)
+			}
+			resultMap[i.String()] =	n
+		case lua.LTBool:
+			b, err := strconv.ParseBool(v.String())
+			if err != nil {
+				log.Fatal(err)
+			}
+			resultMap[i.String()] = b	
+		case lua.LTTable:
+			r := TableToMap(v.(*lua.LTable))
+			resultMap[i.String()] = r	
 		}
-	case lua.LTString:
-		result[index.String()] = r.String()
-	case lua.LTNumber:
-		b, err := strconv.Atoi(r.String())
-		if err != nil {
-			result[index.String()] = 0
-		} else {
-			result[index.String()] = b
-		}
-	case lua.LTBool:
-		b, err := strconv.ParseBool(r.String())
-		if err != nil {
-			result[index.String()] = false
-		} else {
-			result[index.String()] = b
-		}
-	}
-	return result
+	})
+	return resultMap
 }

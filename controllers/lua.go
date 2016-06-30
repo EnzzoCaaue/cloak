@@ -53,7 +53,7 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		base.Base.Error = err.Error()
 		return
 	}
-	base.Base.Data = util.TableToMap(controllerTable, nil, base.Base.Data)
+	base.Base.Data = util.TableToMap(controllerTable)
 	base.Base.Template = base.Base.Data["Template"].(string)
 	base.Base.Error = base.Base.Data["Error"].(string)
 	base.Base.JSON = base.Base.Data["Json"].(bool)

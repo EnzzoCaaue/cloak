@@ -50,6 +50,7 @@ func registerRoutes() {
 	pigo.Get("/buypoints/paypal/process", &controllers.ShopController{}, "PaypalProcess")
 	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
 	pigo.Get("/admin/overview", &controllers.AdminController{}, "Dashboard", "logged", "admin")
+	pigo.Get("/admin/server", &controllers.AdminController{}, "Server", "logged", "admin")
 }
 
 func registerLUARoutes() {
@@ -60,6 +61,7 @@ func registerLUARoutes() {
 				Base: nil,
 				Page: k.String("file"),
 			}, "LuaPage")
+			continue
 		}
 		if k.String("method") == http.MethodPost {
 			pigo.Post(k.String("path"), &controllers.LuaController{
@@ -68,6 +70,7 @@ func registerLUARoutes() {
 			}, "LuaPage")
 		}
 	}
+	log.Println("Parsed", len(pigo.Config.Array("routes")), "LUA routes")
 }
 
 func main() {

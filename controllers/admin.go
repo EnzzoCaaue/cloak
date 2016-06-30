@@ -38,3 +38,8 @@ func (base *AdminController) Dashboard(w http.ResponseWriter, req *http.Request,
 	base.Data["KnightTotal"] = adminInfo.Knights
 	base.Template = "admin.html"
 }
+
+// Server shows the TFS server manager
+func (base *AdminController) Server(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+    base.Template = "admin_server.html"
+}
