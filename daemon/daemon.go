@@ -25,7 +25,6 @@ type cloakaDaemons struct {
 
 type daemon interface {
 	tick()
-	name()
 }
 
 // RunDaemons runs all daemon tickers
@@ -55,7 +54,6 @@ func runDaemon(dm *cloakaDaemon) {
 	for {
 		select {
 		case <-dm.duration.C:
-			dm.dm.name()
 			dm.dm.tick()
 		}
 	}

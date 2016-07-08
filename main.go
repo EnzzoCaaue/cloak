@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"net/url"
+
 	"github.com/Cloakaac/cloak/command"
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/daemon"
@@ -9,9 +13,6 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"log"
-	"net/http"
-	"net/url"
 )
 
 func registerRoutes() {

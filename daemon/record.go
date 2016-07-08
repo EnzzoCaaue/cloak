@@ -19,7 +19,3 @@ func (r *recordDaemon) tick() {
 		log.Fatal(err)
 	}
 }
-
-func (r *recordDaemon) name() {
-	log.Println("Online record daemon called")
-}
