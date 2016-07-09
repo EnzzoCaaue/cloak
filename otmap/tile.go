@@ -5,3 +5,7 @@ type Tile struct {
 	items []Item
 	flags uint32
 }
+
+func (t *Tile) Position() Position {
+	return t.pos
+}

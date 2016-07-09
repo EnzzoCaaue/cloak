@@ -132,8 +132,12 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 					return
 				}
 
-				if nodeType != OTBMNodeTile && nodeType != OTBMNodeHouseTile {
+				/*if nodeType != OTBMNodeTile && nodeType != OTBMNodeHouseTile {
 					return fmt.Errorf("unknown tile node, expected OTBMTile or OTBMHouseTile, got: 0x%X", nodeType)
+				}*/
+
+				if nodeType != OTBMNodeHouseTile {
+					continue
 				}
 
 				var tile Tile
@@ -142,13 +146,13 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 				if x, err = nodeTile.getByte(); err != nil {
 					return
 				}
-				tile.pos.x = uint16(x) + basePos.x
+				tile.pos.X = uint16(x) + basePos.X
 
 				if y, err = nodeTile.getByte(); err != nil {
 					return
 				}
-				tile.pos.y = uint16(y) + basePos.y
-				tile.pos.z = basePos.z
+				tile.pos.Y = uint16(y) + basePos.Y
+				tile.pos.Z = basePos.Z
 
 				house := &House{}
 				if nodeType == OTBMNodeHouseTile {
@@ -157,8 +161,9 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 						return
 					}
 					if tmpHouse := otMap.getHouse(id); tmpHouse != nil {
-						otMap.Houses = append(otMap.Houses, *tmpHouse)
 						house = tmpHouse
+					} else {
+						otMap.addHouse(house)
 					}
 
 					house.ID = id
@@ -171,7 +176,6 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 					if tileAttribute, err = nodeTile.getByte(); err != nil {
 						return
 					}
-
 					switch tileAttribute {
 					case OTBMAttrTileFlags:
 						if tile.flags, err = nodeTile.getLong(); err != nil {
@@ -226,14 +230,11 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 							}
 
 							item.children = append(item.children, containerItem)
-							/*
-								if house != nil && newItem.isMovable {
-									fmt.Printf("Warning: Movable item found in house (x: %d, y: %d, z: %d)", int(tilePos.x), int(tilePos.y), int(tilePos.z))
-								}
-							*/
 						}
 					}
+					//tile.items = append(tile.items, item)
 				}
+				otMap.Tiles[tile.pos] = tile
 			}
 		} else if nodeType == OTBMNodeTowns {
 			for t := range node.children {

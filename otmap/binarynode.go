@@ -85,15 +85,15 @@ func (binaryNode *BinaryNode) getPosition() (Position, error) {
 	var err error
 	var pos Position
 
-	if pos.x, err = binaryNode.getShort(); err != nil {
+	if pos.X, err = binaryNode.getShort(); err != nil {
 		return pos, err
 	}
 
-	if pos.y, err = binaryNode.getShort(); err != nil {
+	if pos.Y, err = binaryNode.getShort(); err != nil {
 		return pos, err
 	}
 
-	if pos.z, err = binaryNode.getByte(); err != nil {
+	if pos.Z, err = binaryNode.getByte(); err != nil {
 		return pos, err
 	}
 
