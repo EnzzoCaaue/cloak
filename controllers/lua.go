@@ -2,18 +2,20 @@ package controllers
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"github.com/yuin/gopher-lua"
-	"net/http"
-	"time"
 )
 
 var (
 	luaPages = "pages"
 )
 
+// LuaController holds a lua page
 type LuaController struct {
 	Base *pigo.Controller
 	Page string
@@ -54,12 +56,15 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		base.Base.Error = err.Error()
 		return
 	}
-	base.Base.Data = util.TableToMap(controllerTable)
-	base.Base.Template = base.Base.Data["Template"].(string)
-	base.Base.Error = base.Base.Data["Error"].(string)
-	base.Base.JSON = base.Base.Data["Json"].(bool)
-	base.Base.Redirect = base.Base.Data["Redirect"].(string)
-	base.Base.Data = base.Base.Data["Data"].(map[string]interface{})
+	newData := util.TableToMap(controllerTable)
+	for i, v := range base.Base.Data {
+		newData["Data"].(map[string]interface{})[i] = v
+	}
+	base.Base.Template = newData["Template"].(string)
+	base.Base.Error = newData["Error"].(string)
+	base.Base.JSON = newData["Json"].(bool)
+	base.Base.Redirect = newData["Redirect"].(string)
+	base.Base.Data = newData["Data"].(map[string]interface{})
 }
 
 func (l *LuaVM) urlParam(luaVM *lua.LState) int {

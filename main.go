@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"sync"
+
 	"github.com/Cloakaac/cloak/command"
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/daemon"
@@ -131,15 +133,43 @@ func main() {
 		c.Hook["account"] = account
 		c.Data["logged"] = account != nil
 	})
-	registerRoutes()
-	registerLUARoutes()
-	util.ParseMonsters(pigo.Config.String("datapack"))
-	util.ParseConfig(pigo.Config.String("datapack"))
-	util.ParseStages(pigo.Config.String("datapack"))
-	util.ParseItems(pigo.Config.String("datapack"))
-	if err := models.ClearOnlineLogs(); err != nil {
-		log.Fatal(err)
-	}
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(8)
+	go func() {
+		registerRoutes()
+		waitGroup.Done()
+	}()
+	go func() {
+		registerLUARoutes()
+		waitGroup.Done()
+	}()
+	go func() {
+		util.ParseMonsters(pigo.Config.String("datapack"))
+		waitGroup.Done()
+	}()
+	go func() {
+		util.ParseConfig(pigo.Config.String("datapack"))
+		waitGroup.Done()
+	}()
+	go func() {
+		util.ParseStages(pigo.Config.String("datapack"))
+		waitGroup.Done()
+	}()
+	go func() {
+		util.ParseMap(pigo.Config.String("datapack"))
+		waitGroup.Done()
+	}()
+	go func() {
+		util.ParseItems(pigo.Config.String("datapack"))
+		waitGroup.Done()
+	}()
+	go func() {
+		if err := models.ClearOnlineLogs(); err != nil {
+			log.Fatal(err)
+		}
+		waitGroup.Done()
+	}()
+	waitGroup.Wait()
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()

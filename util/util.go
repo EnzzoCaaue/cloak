@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/Cloakaac/cloak/otmap"
 )
 
 const (
@@ -59,6 +61,10 @@ var (
 	Items = &ServerItems{
 		make(map[int]ItemDefinition),
 		&sync.RWMutex{},
+	}
+	// Map contains the server OTBM map
+	Map = &ServerMap{
+		&otmap.Map{},
 	}
 )
 
