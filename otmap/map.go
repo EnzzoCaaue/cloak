@@ -29,10 +29,13 @@ type Map struct {
 	rw        *sync.RWMutex
 }
 
+// Initialize creates an empty map
 func (otMap *Map) Initialize() {
+	otMap.rw = &sync.RWMutex{}
+	otMap.rw.Lock()
+	defer otMap.rw.Unlock()
 	otMap.Tiles = make(map[Position]Tile)
 	otMap.Waypoints = make(map[Position]string)
-	otMap.rw = &sync.RWMutex{}
 }
 
 func (otMap *Map) getHouse(id uint32) *House {
@@ -56,5 +59,7 @@ func (otMap *Map) addHouse(house *House) error {
 
 // GetTile returns a tile
 func (otMap *Map) GetTile(x uint16, y uint16, z uint8) Tile {
+	otMap.rw.RLock()
+	defer otMap.rw.RUnlock()
 	return otMap.Tiles[Position{x, y, z}]
 }

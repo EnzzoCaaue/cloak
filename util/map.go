@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"os"
 	"sync"
 
@@ -60,18 +62,23 @@ func parseHouses(path, houseFile string) error {
 }
 
 // ParseMap loads and parses the given OTBM file
-func ParseMap(path string) error {
+func ParseMap(path string) {
 	serverMap := &otmap.Map{}
 	serverMap.Initialize()
 	otbLoader := &otmap.OtbLoader{}
 	otbLoader.Load(path + "/data/items/items.otb")
 	if err := serverMap.ReadOTBM(path+"/data/world/forgotten.otbm", otbLoader); err != nil {
-		return err
+		log.Fatal(err)
 	}
-	parseHouses(path, serverMap.HouseFile)
+	if err := parseHouses(path, serverMap.HouseFile); err != nil {
+		log.Fatal(err)
+	}
 	for _, h := range serverMap.Houses {
 		houseData := Houses.GetHouse(h.ID)
 		houseImage := image.NewRGBA(image.Rect(int(houseData.EntryX)-20, int(houseData.EntryY)-20, int(houseData.EntryX)+20, int(houseData.EntryY)+20))
+		draw.Draw(houseImage, houseImage.Bounds(), &image.Uniform{
+			color.RGBA{0, 0, 0, 255},
+		}, image.ZP, draw.Src)
 		houseImage.Set(int(houseData.EntryX), int(houseData.EntryY), color.RGBA{
 			255,
 			0,
@@ -80,10 +87,13 @@ func ParseMap(path string) error {
 		})
 		for _, tile := range h.Tiles {
 			pos := tile.Position()
+			if pos.Z != uint8(houseData.EntryZ) {
+				continue
+			}
 			houseImage.Set(int(pos.X), int(pos.Y), color.RGBA{
-				216,
-				200,
-				10,
+				255,
+				255,
+				0,
 				255,
 			})
 		}
@@ -91,5 +101,4 @@ func ParseMap(path string) error {
 		defer imgFile.Close()
 		png.Encode(imgFile, houseImage)
 	}
-	return nil
 }
