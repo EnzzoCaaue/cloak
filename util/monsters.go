@@ -68,8 +68,8 @@ type monsterDefinition struct {
 
 // ParseMonsters parses monsters.xml
 func ParseMonsters(path string) {
-	Monsters.rw.Lock()
-	defer Monsters.rw.Unlock()
+	//Monsters.rw.Lock()
+	//defer Monsters.rw.Unlock()
 	Monsters.m = make(map[string]*Monster)
 	b, err := ioutil.ReadFile(path + "/data/monster/monsters.xml")
 	if err != nil {
@@ -86,6 +86,8 @@ func ParseMonsters(path string) {
 }
 
 func parseMonster(path, name, file string) {
+	Monsters.rw.Lock()
+	defer Monsters.rw.Unlock()
 	b, err := ioutil.ReadFile(path + "/data/monster/" + file)
 	if err != nil {
 		log.Println("Error while parsing monster:", name)

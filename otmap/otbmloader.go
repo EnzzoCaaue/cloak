@@ -233,7 +233,7 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader, parseItem bool
 								item.children = append(item.children, containerItem)
 							}
 						}
-						//tile.items = append(tile.items, item)
+						tile.items = append(tile.items, item)
 					}
 				}
 				otMap.rw.Lock()

@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"sync"
 
@@ -24,7 +25,7 @@ type House struct {
 	EntryY uint16 `xml:"entryy,attr"`
 	EntryZ uint16 `xml:"entryz,attr"`
 	Size   int    `xml:"size,attr"`
-	TownID int    `xml:"townid,attr"`
+	TownID uint32 `xml:"townid,attr"`
 }
 
 // HouseList holds the house array
@@ -87,6 +88,14 @@ func (s *ServerTowns) Exists(name string) bool {
 	return false
 }
 
+// GetRandom returns a random town
+func (s *ServerTowns) GetRandom() otmap.Town {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	rng := rand.Intn(len(s.List))
+	return s.List[rng]
+}
+
 // GetHouse gets a house by its ID
 func (s *ServerHouses) GetHouse(id uint32) *House {
 	s.rw.RLock()
@@ -109,6 +118,19 @@ func (s *ServerHouses) GetHouseByName(name string) *House {
 		}
 	}
 	return nil
+}
+
+// GetList returns the full list of houses by its town
+func (s *ServerHouses) GetList(id uint32) []*House {
+	list := []*House{}
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	for _, house := range s.List.Houses {
+		if house.TownID == id {
+			list = append(list, house)
+		}
+	}
+	return list
 }
 
 func parseHouses(path, houseFile string) error {
@@ -170,7 +192,10 @@ func ParseMap(path string) {
 			}
 		}
 		houseImage.Set(int(houseData.EntryX), int(houseData.EntryY), doorColor)
-		imgFile, _ := os.Create(fmt.Sprintf("%v/%v/%v.png", pigo.Config.String("template"), "public/houses", houseData.Name))
+		imgFile, err := os.Create(fmt.Sprintf("%v/%v/%v.png", pigo.Config.String("template"), "public/houses", houseData.Name))
+		if err != nil {
+			log.Fatal(err)
+		}
 		png.Encode(imgFile, houseImage)
 		imgFile.Close()
 	}
