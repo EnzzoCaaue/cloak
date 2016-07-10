@@ -3,12 +3,13 @@ package controllers
 import (
 	"crypto/sha1"
 	"fmt"
+	"net/http"
+
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"net/http"
 )
 
 type RegisterController struct {
@@ -29,13 +30,8 @@ type RegisterForm struct {
 
 // Register shows the register.html page
 func (base *RegisterController) Register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	towns, err := models.GetTowns()
-	if err != nil {
-		base.Error = "Error fetching town list"
-		return
-	}
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Towns"] = towns
+	base.Data["Towns"] = util.Towns.GetList()
 	base.Data["csrfToken"] = uniuri.New()
 	base.Template = "register.html"
 }
@@ -59,8 +55,7 @@ func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.R
 		base.Redirect = "/account/create"
 		return
 	}
-	town := models.NewTown(form.CharacterTown)
-	if !town.Exists() {
+	if !util.Towns.Exists(form.CharacterTown) {
 		base.Session.AddFlash("Invalid character town", "errors")
 		base.Redirect = "/account/create"
 		return
@@ -118,7 +113,7 @@ func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.R
 		player.LookType = pigo.Config.Key("register").Key("male").Int("looktype")
 		player.LookAddons = pigo.Config.Key("register").Key("male").Int("lookaddons")
 	}
-	player.Town = town.Get()
+	player.Town = util.Towns.Get(form.CharacterTown)
 	player.Stamina = pigo.Config.Key("register").Int("stamina")
 	player.SkillAxe = pigo.Config.Key("register").Key("skills").Int("axe")
 	player.SkillSword = pigo.Config.Key("register").Key("skills").Int("sword")

@@ -2,18 +2,21 @@ package otmap
 
 import "sync"
 
+// House used to represent server houses
 type House struct {
 	ID      uint32
 	DoorPos Position
 	Tiles   []Tile
 }
 
+// Town used to represent server towns
 type Town struct {
 	ID        uint32
 	Name      string
 	TemplePos Position
 }
 
+// Map used to represent the whole server map
 type Map struct {
 	Width  uint16
 	Height uint16

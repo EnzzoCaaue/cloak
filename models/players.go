@@ -1,6 +1,8 @@
 package models
 
 import (
+	"github.com/Cloakaac/cloak/otmap"
+	"github.com/Cloakaac/cloak/util"
 	"github.com/raggaer/pigo"
 )
 
@@ -24,7 +26,7 @@ type Player struct {
 	LookAddons  int
 	MagicLevel  int
 	Soul        int
-	Town        *Town
+	Town        *otmap.Town
 	Stamina     int
 	SkillFist   int
 	SkillClub   int
@@ -79,7 +81,7 @@ func GetTopPlayers(limit int) ([]*Player, error) {
 func NewPlayer() *Player {
 	player := &Player{}
 	player.Cloaka = &CloakaPlayer{}
-	player.Town = &Town{}
+	player.Town = &otmap.Town{}
 	return player
 }
 
@@ -90,8 +92,9 @@ func GetPlayerByName(name string) *Player {
 	if !player.Exists() {
 		return nil
 	}
-	row := pigo.Database.QueryRow("SELECT a.looktype, a.lookbody, a.lookhead, a.looklegs, a.lookfeet, a.lookaddons, a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, c.name, g.deleted FROM players a, accounts b, cloaka_towns c, cloaka_players g WHERE a.account_id = b.id AND a.town_id = c.id AND g.player_id = a.id AND a.name = ?", player.Name)
-	row.Scan(&player.LookType, &player.LookBody, &player.LookHead, &player.LookLegs, &player.LookFeet, &player.LookAddons, &player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Town.Name, &player.Cloaka.Deleted)
+	row := pigo.Database.QueryRow("SELECT a.town_id, a.looktype, a.lookbody, a.lookhead, a.looklegs, a.lookfeet, a.lookaddons, a.id, a.name, a.level, a.vocation, a.sex, a.lastlogin, b.premdays, g.deleted FROM players a, accounts b, cloaka_players g WHERE a.account_id = b.id AND g.player_id = a.id AND a.name = ?", player.Name)
+	row.Scan(&player.Town.ID, &player.LookType, &player.LookBody, &player.LookHead, &player.LookLegs, &player.LookFeet, &player.LookAddons, &player.ID, &player.Name, &player.Level, &player.Vocation, &player.Gender, &player.LastLogin, &player.Premdays, &player.Cloaka.Deleted)
+	player.Town.Name = util.Towns.GetByID(player.Town.ID)
 	return player
 }
 
@@ -163,7 +166,7 @@ func (player *Player) Exists() bool {
 
 // GetCharacters gets all account characters
 func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
-	rows, err := pigo.Database.Query("SELECT a.id, a.name, a.vocation, a.level, a.lastlogin, a.balance, a.sex, b.deleted, c.name FROM players a, cloaka_players b, cloaka_towns c WHERE a.account_id = ? AND b.player_id = a.id AND a.town_id = c.town_id ORDER BY a.id DESC", account.Account.ID)
+	rows, err := pigo.Database.Query("SELECT a.town_id, a.id, a.name, a.vocation, a.level, a.lastlogin, a.balance, a.sex, b.deleted FROM players a, cloaka_players b WHERE a.account_id = ? AND b.player_id = a.id ORDER BY a.id DESC", account.Account.ID)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -171,7 +174,8 @@ func (account *CloakaAccount) GetCharacters() ([]*Player, error) {
 	characters := []*Player{}
 	for rows.Next() {
 		player := NewPlayer()
-		rows.Scan(&player.ID, &player.Name, &player.Vocation, &player.Level, &player.LastLogin, &player.Balance, &player.Gender, &player.Cloaka.Deleted, &player.Town.Name)
+		rows.Scan(&player.Town.ID, &player.ID, &player.Name, &player.Vocation, &player.Level, &player.LastLogin, &player.Balance, &player.Gender, &player.Cloaka.Deleted)
+		player.Town.Name = util.Towns.GetByID(player.Town.ID)
 		characters = append(characters, player)
 	}
 	return characters, nil

@@ -3,16 +3,17 @@ package controllers
 import (
 	"crypto/sha1"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+	"time"
+
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"log"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 type AccountController struct {
@@ -227,13 +228,8 @@ func (base *AccountController) DeleteCharacter(w http.ResponseWriter, req *http.
 
 // AccountCreateCharacter shows the form to create an account character
 func (base *AccountController) AccountCreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	towns, err := models.GetTowns()
-	if err != nil {
-		base.Error = "Error while getting town list"
-		return
-	}
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Towns"] = towns
+	base.Data["Towns"] = util.Towns.GetList()
 	base.Template = "create_character.html"
 }
 
@@ -253,8 +249,7 @@ func (base *AccountController) CreateCharacter(w http.ResponseWriter, req *http.
 		base.Redirect = "/account/manage/create"
 		return
 	}
-	town := models.GetTownByName(form.Town)
-	if town == nil {
+	if !util.Towns.Exists(form.Town) {
 		base.Session.AddFlash("Unknown town name", "errors")
 		base.Redirect = "/account/manage/create"
 		return
@@ -287,7 +282,7 @@ func (base *AccountController) CreateCharacter(w http.ResponseWriter, req *http.
 		player.LookType = pigo.Config.Key("register").Key("male").Int("looktype")
 		player.LookAddons = pigo.Config.Key("register").Key("male").Int("lookaddons")
 	}
-	player.Town = town
+	player.Town = util.Towns.Get(form.Town)
 	player.Stamina = pigo.Config.Key("register").Int("stamina")
 	player.SkillAxe = pigo.Config.Key("register").Key("skills").Int("axe")
 	player.SkillSword = pigo.Config.Key("register").Key("skills").Int("sword")

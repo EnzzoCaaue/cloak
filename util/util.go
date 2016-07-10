@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/Cloakaac/cloak/otmap"
 )
 
 const (
@@ -63,6 +65,11 @@ var (
 	// Houses contains the server houses.xml
 	Houses = &ServerHouses{
 		&HouseList{},
+		&sync.RWMutex{},
+	}
+	// Towns contains the server town list
+	Towns = &ServerTowns{
+		[]otmap.Town{},
 		&sync.RWMutex{},
 	}
 )

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"sync"
 
@@ -54,6 +55,7 @@ func registerRoutes() {
 	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
 	pigo.Get("/admin/overview", &controllers.AdminController{}, "Dashboard", "logged", "admin")
 	pigo.Get("/admin/server", &controllers.AdminController{}, "Server", "logged", "admin")
+	pigo.Get("/houses/list", &controllers.HouseController{}, "List")
 }
 
 func registerLUARoutes() {
@@ -144,22 +146,27 @@ func main() {
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "Parsing monsters")
 		util.ParseMonsters(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "Parsing config LUA")
 		util.ParseConfig(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "Parsing stages")
 		util.ParseStages(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "Parsing map")
 		util.ParseMap(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "Parsing items")
 		util.ParseItems(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
@@ -173,4 +180,9 @@ func main() {
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()
+}
+
+func timeTrack(start time.Time, name string) {
+	elapsed := time.Since(start)
+	log.Printf("%s - %s", name, elapsed)
 }

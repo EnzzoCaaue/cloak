@@ -59,3 +59,15 @@ func GetTownByName(name string) *Town {
 	}
 	return town.Get()
 }
+
+// AddTown creates a new town into the database
+func AddTown(name string, id int64) (err error) {
+	_, err = pigo.Database.Exec("INSERT INTO cloaka_towns (town_id, name) VALUES (?, ?)", id, name)
+	return
+}
+
+// ClearTowns removes all towns from the database
+func ClearTowns() (err error) {
+	_, err = pigo.Database.Exec("DELETE FROM cloaka_towns")
+	return err
+}

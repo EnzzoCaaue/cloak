@@ -38,6 +38,54 @@ type ServerHouses struct {
 	rw   *sync.RWMutex
 }
 
+type ServerTowns struct {
+	List []otmap.Town
+	rw   *sync.RWMutex
+}
+
+// Get returns a town by its name
+func (s *ServerTowns) Get(name string) *otmap.Town {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	for _, town := range s.List {
+		if town.Name == name {
+			return &town
+		}
+	}
+	return nil
+}
+
+// GetByID returns a town by its ID
+func (s *ServerTowns) GetByID(id uint32) string {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	for _, town := range s.List {
+		if town.ID == id {
+			return town.Name
+		}
+	}
+	return ""
+}
+
+// GetList returns the whole town list
+func (s *ServerTowns) GetList() []otmap.Town {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	return s.List
+}
+
+// Exists checks if a town is valid
+func (s *ServerTowns) Exists(name string) bool {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	for _, town := range s.List {
+		if town.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // GetHouse gets a house by its ID
 func (s *ServerHouses) GetHouse(id uint32) *House {
 	s.rw.RLock()
@@ -53,7 +101,6 @@ func (s *ServerHouses) GetHouse(id uint32) *House {
 func parseHouses(path, houseFile string) error {
 	Houses.rw.Lock()
 	defer Houses.rw.Unlock()
-	Houses.List = &HouseList{}
 	b, err := ioutil.ReadFile(path + "/data/world/" + houseFile)
 	if err != nil {
 		return err
@@ -73,6 +120,9 @@ func ParseMap(path string) {
 	if err := parseHouses(path, serverMap.HouseFile); err != nil {
 		log.Fatal(err)
 	}
+	Towns.rw.Lock()
+	Towns.List = serverMap.Towns
+	Towns.rw.Unlock()
 	for _, h := range serverMap.Houses {
 		houseData := Houses.GetHouse(h.ID)
 		houseImage := image.NewRGBA(image.Rect(int(houseData.EntryX)-20, int(houseData.EntryY)-20, int(houseData.EntryX)+20, int(houseData.EntryY)+20))
