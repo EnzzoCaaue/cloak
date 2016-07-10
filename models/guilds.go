@@ -1,8 +1,6 @@
 package models
 
-import (
-	"github.com/raggaer/pigo"
-)
+import "github.com/raggaer/pigo"
 
 type Guild struct {
 	ID          int64

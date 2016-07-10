@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
+func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader, parseItem bool) (err error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return
@@ -171,70 +171,74 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 					house.Tiles = append(house.Tiles, tile)
 				}
 
-				for len(nodeTile.data) != 0 {
-					var tileAttribute uint8
-					if tileAttribute, err = nodeTile.getByte(); err != nil {
-						return
-					}
-					switch tileAttribute {
-					case OTBMAttrTileFlags:
-						if tile.flags, err = nodeTile.getLong(); err != nil {
+				if parseItem {
+					for len(nodeTile.data) != 0 {
+						var tileAttribute uint8
+						if tileAttribute, err = nodeTile.getByte(); err != nil {
 							return
 						}
-
-					case OTBMAttrItem:
-						// This is the ground item, it's always the bottom-level item in the
-						// tile.items array.  So to access it just use the 0 index.
-
-						var tileItem Item
-						if tileItem.serverID, err = nodeTile.getShort(); err != nil {
-							return
-						}
-
-						tile.items = append(tile.items, tileItem)
-
-					default:
-						return fmt.Errorf("unknown tile attribute: 0x%X", tileAttribute)
-					}
-				}
-
-				for i := range nodeTile.children {
-					nodeItem := nodeTile.children[i]
-					if nodeType, err = nodeItem.getByte(); err != nil {
-						return
-					}
-
-					if nodeType != OTBMNodeItem {
-						return fmt.Errorf("expected OTBMItem node in OTBMTile node, got: 0x%X", nodeType)
-					}
-
-					var item Item
-					if err = item.unserialize(&nodeItem); err != nil {
-						return
-					}
-
-					if item.isContainer() {
-						for c := range nodeItem.children {
-							nodeContainerItem := nodeItem.children[c]
-							if nodeType, err = nodeContainerItem.getByte(); err != nil {
+						switch tileAttribute {
+						case OTBMAttrTileFlags:
+							if tile.flags, err = nodeTile.getLong(); err != nil {
 								return
 							}
 
-							if nodeType != OTBMNodeItem {
-								return fmt.Errorf("expected OTBMItem node as child of a container, got: 0x%X", nodeType)
-							}
+						case OTBMAttrItem:
+							// This is the ground item, it's always the bottom-level item in the
+							// tile.items array.  So to access it just use the 0 index.
 
-							var containerItem Item
-							if err = containerItem.unserialize(&nodeContainerItem); err != nil {
+							var tileItem Item
+							if tileItem.serverID, err = nodeTile.getShort(); err != nil {
 								return
 							}
 
-							item.children = append(item.children, containerItem)
+							tile.items = append(tile.items, tileItem)
+
+						default:
+							return fmt.Errorf("unknown tile attribute: 0x%X", tileAttribute)
 						}
 					}
-					//tile.items = append(tile.items, item)
+
+					for i := range nodeTile.children {
+						nodeItem := nodeTile.children[i]
+						if nodeType, err = nodeItem.getByte(); err != nil {
+							return
+						}
+
+						if nodeType != OTBMNodeItem {
+							return fmt.Errorf("expected OTBMItem node in OTBMTile node, got: 0x%X", nodeType)
+						}
+
+						var item Item
+						if err = item.unserialize(&nodeItem); err != nil {
+							return
+						}
+
+						if item.isContainer() {
+							for c := range nodeItem.children {
+								nodeContainerItem := nodeItem.children[c]
+								if nodeType, err = nodeContainerItem.getByte(); err != nil {
+									return
+								}
+
+								if nodeType != OTBMNodeItem {
+									return fmt.Errorf("expected OTBMItem node as child of a container, got: 0x%X", nodeType)
+								}
+
+								var containerItem Item
+								if err = containerItem.unserialize(&nodeContainerItem); err != nil {
+									return
+								}
+
+								item.children = append(item.children, containerItem)
+							}
+						}
+						//tile.items = append(tile.items, item)
+					}
 				}
+				otMap.rw.Lock()
 				otMap.Tiles[tile.pos] = tile
+				otMap.rw.Unlock()
 			}
 		} else if nodeType == OTBMNodeTowns {
 			for t := range node.children {
@@ -264,7 +268,7 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 				town.TemplePos = pos
 				otMap.Towns = append(otMap.Towns, town)
 			}
-		} else if nodeType == OTBMNodeWaypoints && headerVersion > 1 {
+		} else if nodeType == OTBMNodeWaypoints && headerVersion > 1 && parseItem {
 			for w := range node.children {
 				nodeWaypoint := node.children[w]
 				if nodeType, err = nodeWaypoint.getByte(); err != nil {
@@ -284,8 +288,9 @@ func (otMap *Map) ReadOTBM(fileName string, otbLoader *OtbLoader) (err error) {
 				if pos, err = nodeWaypoint.getPosition(); err != nil {
 					return
 				}
-
+				otMap.rw.Lock()
 				otMap.Waypoints[pos] = name
+				otMap.rw.Unlock()
 			}
 		} else {
 			return fmt.Errorf("unknown OTBM attribute 0x%X", nodeType)

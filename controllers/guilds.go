@@ -1,11 +1,6 @@
 package controllers
 
 import (
-	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/julienschmidt/httprouter"
-	"github.com/nfnt/resize"
-	"github.com/raggaer/pigo"
 	"image"
 	"image/gif"
 	"io/ioutil"
@@ -13,6 +8,12 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
+	"github.com/julienschmidt/httprouter"
+	"github.com/nfnt/resize"
+	"github.com/raggaer/pigo"
 )
 
 type GuildController struct {
@@ -41,9 +42,9 @@ type guildInvitePlayer struct {
 
 type guildEditRanksForm struct {
 	Captcha     string `validate:"validCaptcha" alias:"Captcha check"`
-	ThirdLevel  string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 3"`
-	SecondLevel string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 2"`
-	FirstLevel  string `validate:min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 1"`
+	ThirdLevel  string `validate:"min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 3"`
+	SecondLevel string `validate:"min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 2"`
+	FirstLevel  string `validate:"min=4, regexp=^[A-Z a-z]+$" alias:"Rank Level 1"`
 }
 
 // ViewGuild shows a guild page

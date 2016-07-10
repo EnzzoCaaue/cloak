@@ -24,6 +24,7 @@ type House struct {
 	EntryY uint16 `xml:"entryy,attr"`
 	EntryZ uint16 `xml:"entryz,attr"`
 	Size   int    `xml:"size,attr"`
+	TownID int    `xml:"townid,attr"`
 }
 
 // HouseList holds the house array
@@ -98,6 +99,18 @@ func (s *ServerHouses) GetHouse(id uint32) *House {
 	return nil
 }
 
+// GetHouseByName gets a house by its name
+func (s *ServerHouses) GetHouseByName(name string) *House {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	for _, house := range s.List.Houses {
+		if house.Name == name {
+			return house
+		}
+	}
+	return nil
+}
+
 func parseHouses(path, houseFile string) error {
 	Houses.rw.Lock()
 	defer Houses.rw.Unlock()
@@ -114,41 +127,51 @@ func ParseMap(path string) {
 	serverMap.Initialize()
 	otbLoader := &otmap.OtbLoader{}
 	otbLoader.Load(path + "/data/items/items.otb")
-	if err := serverMap.ReadOTBM(path+"/data/world/forgotten.otbm", otbLoader); err != nil {
+	if err := serverMap.ReadOTBM(path+"/data/world/forgotten.otbm", otbLoader, false); err != nil {
 		log.Fatal(err)
 	}
 	if err := parseHouses(path, serverMap.HouseFile); err != nil {
 		log.Fatal(err)
 	}
 	Towns.rw.Lock()
+	defer Towns.rw.Unlock()
 	Towns.List = serverMap.Towns
-	Towns.rw.Unlock()
+	tileColor := color.RGBA{192, 192, 192, 255}
+	wallColor := color.RGBA{255, 0, 0, 255}
+	doorColor := color.RGBA{255, 255, 0, 255}
+	backgroundColor := color.RGBA{0, 0, 0, 255}
 	for _, h := range serverMap.Houses {
 		houseData := Houses.GetHouse(h.ID)
-		houseImage := image.NewRGBA(image.Rect(int(houseData.EntryX)-20, int(houseData.EntryY)-20, int(houseData.EntryX)+20, int(houseData.EntryY)+20))
+		houseImage := image.NewRGBA(image.Rect(int(houseData.EntryX)-32, int(houseData.EntryY)-32, int(houseData.EntryX)+32, int(houseData.EntryY)+32))
 		draw.Draw(houseImage, houseImage.Bounds(), &image.Uniform{
-			color.RGBA{0, 0, 0, 255},
+			backgroundColor,
 		}, image.ZP, draw.Src)
-		houseImage.Set(int(houseData.EntryX), int(houseData.EntryY), color.RGBA{
-			255,
-			0,
-			0,
-			255,
-		})
+		houseTiles := make(map[otmap.Position]bool, len(h.Tiles))
 		for _, tile := range h.Tiles {
 			pos := tile.Position()
 			if pos.Z != uint8(houseData.EntryZ) {
 				continue
 			}
-			houseImage.Set(int(pos.X), int(pos.Y), color.RGBA{
-				255,
-				255,
-				0,
-				255,
-			})
+			houseImage.Set(int(pos.X), int(pos.Y), tileColor)
+			houseTiles[pos] = true
 		}
+		for pos := range houseTiles {
+			if houseImage.At(int(pos.X)+1, int(pos.Y)+1) != tileColor {
+				houseImage.Set(int(pos.X)+1, int(pos.Y)+1, wallColor)
+			}
+			if houseImage.At(int(pos.X)+1, int(pos.Y)-1) != tileColor {
+				houseImage.Set(int(pos.X)+1, int(pos.Y)-1, wallColor)
+			}
+			if houseImage.At(int(pos.X)-1, int(pos.Y)+1) != tileColor {
+				houseImage.Set(int(pos.X)-1, int(pos.Y)+1, wallColor)
+			}
+			if houseImage.At(int(pos.X)-1, int(pos.Y)-1) != tileColor {
+				houseImage.Set(int(pos.X)-1, int(pos.Y)-1, wallColor)
+			}
+		}
+		houseImage.Set(int(houseData.EntryX), int(houseData.EntryY), doorColor)
 		imgFile, _ := os.Create(fmt.Sprintf("%v/%v/%v.png", pigo.Config.String("template"), "public/houses", houseData.Name))
-		defer imgFile.Close()
 		png.Encode(imgFile, houseImage)
+		imgFile.Close()
 	}
 }
