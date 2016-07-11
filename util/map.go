@@ -17,6 +17,10 @@ import (
 	"github.com/raggaer/pigo"
 )
 
+var (
+	otbPath = "/data/items/items.otb"
+)
+
 // House holds all information about a game house
 type House struct {
 	ID     uint32 `xml:"houseid,attr"`
@@ -148,7 +152,7 @@ func ParseMap(path string) {
 	serverMap := &otmap.Map{}
 	serverMap.Initialize()
 	otbLoader := &otmap.OtbLoader{}
-	otbLoader.Load(path + "/data/items/items.otb")
+	otbLoader.Load(path + otbPath)
 	if err := serverMap.ReadOTBM(path+"/data/world/forgotten.otbm", otbLoader, false); err != nil {
 		log.Fatal(err)
 	}
