@@ -6,6 +6,17 @@ Cloaka provides great performance and an easy to use scripting environment using
 
 It is made using [Pigo](https://github.com/Raggaer/Pigo) web-framework
 
+# Features
+
+Cloaka provides a whole new level of features to the AAC scene. Here is a small preview
+
+- LUA bindings. Make your custom pages using LUA
+- OTBM loader. Generate images of your server houses and much more
+- Load items.xml, monsters.xml, stages.xml, config.lua
+- No APACHE / NGINX / UniServer required. Cloaka uses its own HTTP server
+- Only one executable. Cloaka its only one file (apart from your html layout files). Easy to distribute and installed
+- Fast. Cloaka uses Go == Fast == Amazing
+
 # Commands
 
 Cloaka support console commnads (handy for development) such as
