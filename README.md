@@ -1,10 +1,8 @@
 # Cloaka
 
-Cloaka is an Automatic Account Creator for Open Tibia. 
+Cloaka is an Automatic Account Creator for Open Tibia. Brings a new level to the AAC scene.
 
 Cloaka provides great performance and an easy to use scripting environment using **lua**. Faster and less demanding than the PHP AACs out there.
-
-It is made using [Pigo](https://github.com/Raggaer/Pigo) web-framework
 
 # Features
 
@@ -13,8 +11,9 @@ Cloaka provides a whole new level of features to the AAC scene. Here is a small 
 - LUA bindings. Make your custom pages using LUA
 - OTBM loader. Generate images of your server houses and much more
 - Load items.xml, monsters.xml, stages.xml, config.lua
-- No APACHE / NGINX / UniServer required. Cloaka uses its own HTTP server
+- No APACHE / NGINX / UniServer required. Cloaka uses its own HTTP server.
 - Only one executable. Cloaka its only one file (apart from your html layout files). Easy to distribute and installed
+- Background services aka daemons
 - Fast. Cloaka uses Go == Fast == Amazing
 
 # Commands
@@ -37,9 +36,9 @@ Cloaka is only compatible with [The Forgotten Server](https://github.com/otland/
 
 # Download
 
-Currently there are no releases of **Cloak** you can however build it
+Currently there are no releases of Cloaka
 
-# How to build
+# Custom version
 
 To build your custom version of Cloaka you will need to have the following dependencies:
 
@@ -52,7 +51,7 @@ Once everything is installed you can simply do (to get the newer version)
 go get github.com/Cloakaac/cloak
 ```
 
-And finally
+Now you can freely edit Cloaka and build it later with
 
 ```
 go build
