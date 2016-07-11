@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -77,12 +78,9 @@ func registerLUARoutes() {
 			}, "LuaPage")
 		}
 	}
-	log.Println("Parsed", len(pigo.Config.Array("routes")), "LUA routes")
 }
 
 func main() {
-	template.Load()
-	log.Println("Template loaded")
 	pigo.Filter("logged", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
 		if c.Session.GetString("key") == "" {
 			http.Redirect(w, req, "/account/login", 301)
@@ -137,38 +135,57 @@ func main() {
 		c.Hook["account"] = account
 		c.Data["logged"] = account != nil
 	})
+	fmt.Println(`
+
+	▄████████  ▄█        ▄██████▄     ▄████████    ▄█   ▄█▄    ▄████████ 
+	███    ███ ███       ███    ███   ███    ███   ███ ▄███▀   ███    ███ 
+	███    █▀  ███       ███    ███   ███    ███   ███▐██▀     ███    ███ 
+	███        ███       ███    ███   ███    ███  ▄█████▀      ███    ███ 
+	███        ███       ███    ███ ▀███████████ ▀▀█████▄    ▀███████████ 
+	███    █▄  ███       ███    ███   ███    ███   ███▐██▄     ███    ███ 
+	███    ███ ███▌    ▄ ███    ███   ███    ███   ███ ▀███▄   ███    ███ 
+	████████▀  █████▄▄██  ▀██████▀    ███    █▀    ███   ▀█▀   ███    █▀  
+                    
+		   `)
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(8)
+	waitGroup.Add(9)
 	go func() {
+		defer timeTrack(time.Now(), "Template loaded")
+		template.Load()
+		waitGroup.Done()
+	}()
+	go func() {
+		defer timeTrack(time.Now(), "Routes loaded")
 		registerRoutes()
 		waitGroup.Done()
 	}()
 	go func() {
+		defer timeTrack(time.Now(), "LUA Routes loaded")
 		registerLUARoutes()
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Parsing monsters")
+		defer timeTrack(time.Now(), "Monsters loaded")
 		util.ParseMonsters(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Parsing config LUA")
+		defer timeTrack(time.Now(), "Config LUA loaded")
 		util.ParseConfig(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Parsing stages")
+		defer timeTrack(time.Now(), "Stages loaded")
 		util.ParseStages(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Parsing map")
+		defer timeTrack(time.Now(), "Map loaded")
 		util.ParseMap(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Parsing items")
+		defer timeTrack(time.Now(), "Items loaded")
 		util.ParseItems(pigo.Config.String("datapack"))
 		waitGroup.Done()
 	}()
@@ -179,6 +196,7 @@ func main() {
 		waitGroup.Done()
 	}()
 	waitGroup.Wait()
+	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n", pigo.Config.String("port"))
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()
@@ -186,5 +204,5 @@ func main() {
 
 func timeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
-	log.Printf("%s - %s", name, elapsed)
+	fmt.Printf(" >> %s - %s \r\n", name, elapsed)
 }

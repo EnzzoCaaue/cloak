@@ -10,3 +10,7 @@ domain-key.txt
 # Ignore my personal config.json
 
 config.json
+
+# Leak testing
+
+leak.txt
