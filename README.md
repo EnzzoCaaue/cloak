@@ -1,6 +1,6 @@
 # Cloaka
 
-Cloaka is an Automatic Account Creator for Open Tibia. Brings a new level to the AAC scene.
+Cloaka is an Automatic Account Creator for Open Tibia. Brings a new level to the AAC scene. Created by **Raggaer**
 
 Cloaka provides great performance and an easy to use scripting environment using **lua**. Faster and less demanding than the PHP AACs out there.
 
