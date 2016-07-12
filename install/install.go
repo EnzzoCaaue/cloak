@@ -127,7 +127,7 @@ type table struct {
 	sql  string
 }
 
-// Installer runs the installer to check if there are missing tables
+// Installer runs the installer to create the needed cloaka tables
 func Installer() {
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(len(cloakaTables.tables))

@@ -149,7 +149,9 @@ func main() {
                     
 	Open Tibia automatic account creator developed by Raggaer
 																`)
+	installerTime := time.Now()
 	install.Installer()
+	timeTrack(installerTime, "Installer check")
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(9)
 	go func() {
