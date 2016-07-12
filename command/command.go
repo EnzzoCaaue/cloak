@@ -3,6 +3,7 @@ package command
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -38,6 +39,7 @@ func (c *cloakaCommands) Add(arg string, cmd command) error {
 func ConsoleWatch() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
+		fmt.Printf(" > ")
 		cmd, _, err := reader.ReadLine()
 		if err != nil {
 			continue

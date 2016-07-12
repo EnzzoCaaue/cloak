@@ -12,6 +12,7 @@ import (
 	"github.com/Cloakaac/cloak/command"
 	"github.com/Cloakaac/cloak/controllers"
 	"github.com/Cloakaac/cloak/daemon"
+	"github.com/Cloakaac/cloak/install"
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
@@ -146,7 +147,9 @@ func main() {
 	███    ███ ███▌    ▄ ███    ███   ███    ███   ███ ▀███▄   ███    ███ 
 	████████▀  █████▄▄██  ▀██████▀    ███    █▀    ███   ▀█▀   ███    █▀  
                     
-		   `)
+	Open Tibia automatic account creator developed by Raggaer
+																`)
+	install.Installer()
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(9)
 	go func() {
