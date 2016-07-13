@@ -50,6 +50,7 @@ type ServerHouses struct {
 	rw   *sync.RWMutex
 }
 
+// ServerTowns contains the whole town list of the server
 type ServerTowns struct {
 	List []otmap.Town
 	rw   *sync.RWMutex

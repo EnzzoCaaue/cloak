@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/Cloakaac/cloak/models"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,7 +9,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Cloakaac/cloak/models"
+
 	"fmt"
+
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
@@ -29,23 +31,29 @@ func (base *CommunityController) Highscores(w http.ResponseWriter, req *http.Req
 		return
 	}
 	pageIndex, query, name := util.GetHighscoreQuery(page, highscoreType, 10)
-	list, err := models.GetHighscores(pageIndex, query)
-	if err != nil {
-		base.Error = "Error while getting highscore list"
-		return
-	}
-	if len(list) == 0 && page > 0 {
-		base.Redirect = fmt.Sprintf("/highscores/%v/%v",
-			highscoreType,
-			page-1,
-		)
-		return
+	if pigo.Cache.IsExpired("highscore" + name) {
+		list, err := models.GetHighscores(pageIndex, query)
+		if err != nil {
+			base.Error = "Error while getting highscore list"
+			return
+		}
+		if len(list) == 0 && page > 0 {
+			base.Redirect = fmt.Sprintf("/highscores/%v/%v",
+				highscoreType,
+				page-1,
+			)
+			return
+		}
+		pigo.Cache.Put("highscore"+name, 5*time.Minute, list)
+		base.Data["List"] = list
+	} else {
+		list := pigo.Cache.Get("highscore" + name).([]*models.HighscorePlayer)
+		base.Data["List"] = list
 	}
 	base.Data["PageNext"] = page + 1
 	base.Data["PageOld"] = page - 1
 	base.Data["SkillName"] = name
 	base.Data["Skill"] = highscoreType
-	base.Data["List"] = list
 	base.Data["CurrentRank"] = pageIndex
 	base.Data["OldRank"] = pageIndex - 10
 	base.Data["NextRank"] = pageIndex + 10

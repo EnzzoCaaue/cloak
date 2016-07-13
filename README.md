@@ -26,6 +26,7 @@ Cloaka support console commnads (handy for development) such as
 - reload config (will reload the config.json file into memory)
 - reload stages (will reload the stages.xml file into memory)
 - reload items (will reload the items.xml file into memory)
+- reload map (will reload the whole .otbm map house images)
 - exit (will terminate cloaka)
 
 Feel free to create your own commands

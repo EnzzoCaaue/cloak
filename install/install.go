@@ -134,11 +134,10 @@ func Installer() {
 	for _, t := range cloakaTables.tables {
 		go func(t table) {
 			if !t.isInstalled(cloakaTables.database) {
-				fmt.Printf(" >> Installing missing table %v - ", t.name)
+				fmt.Printf(" >> Installing missing table %v \r\n", t.name)
 				if err := t.install(); err != nil {
 					log.Fatal(err)
 				}
-				fmt.Printf("done \r\n")
 			}
 			waitGroup.Done()
 		}(t)
