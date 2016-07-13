@@ -18,7 +18,13 @@ import (
 )
 
 var (
-	otbPath = "/data/items/items.otb"
+	tileColor       = color.RGBA{192, 192, 192, 255}
+	wallColor       = color.RGBA{255, 0, 0, 255}
+	doorColor       = color.RGBA{255, 255, 0, 255}
+	backgroundColor = color.RGBA{0, 0, 0, 255}
+	otbPath         = "/data/items/items.otb"
+	otbmPath        = "/data/world/"
+	otbmExtension   = ".otbm"
 )
 
 // House holds all information about a game house
@@ -140,7 +146,7 @@ func (s *ServerHouses) GetList(id uint32) []*House {
 func parseHouses(path, houseFile string) error {
 	Houses.rw.Lock()
 	defer Houses.rw.Unlock()
-	b, err := ioutil.ReadFile(path + "/data/world/" + houseFile)
+	b, err := ioutil.ReadFile(path + otbmPath + houseFile)
 	if err != nil {
 		return err
 	}
@@ -153,7 +159,7 @@ func ParseMap(path string) {
 	serverMap.Initialize()
 	otbLoader := &otmap.OtbLoader{}
 	otbLoader.Load(path + otbPath)
-	if err := serverMap.ReadOTBM(path+"/data/world/forgotten.otbm", otbLoader, false); err != nil {
+	if err := serverMap.ReadOTBM(fmt.Sprintf("%v%v%v%v", path, otbmPath, Config.String("mapName"), otbmExtension), otbLoader, false); err != nil {
 		log.Fatal(err)
 	}
 	if err := parseHouses(path, serverMap.HouseFile); err != nil {
@@ -162,10 +168,6 @@ func ParseMap(path string) {
 	Towns.rw.Lock()
 	defer Towns.rw.Unlock()
 	Towns.List = serverMap.Towns
-	tileColor := color.RGBA{192, 192, 192, 255}
-	wallColor := color.RGBA{255, 0, 0, 255}
-	doorColor := color.RGBA{255, 255, 0, 255}
-	backgroundColor := color.RGBA{0, 0, 0, 255}
 	waitHouses := &sync.WaitGroup{}
 	waitHouses.Add(len(serverMap.Houses))
 	for _, h := range serverMap.Houses {
@@ -175,29 +177,16 @@ func ParseMap(path string) {
 			draw.Draw(houseImage, houseImage.Bounds(), &image.Uniform{
 				backgroundColor,
 			}, image.ZP, draw.Src)
-			houseTiles := make(map[otmap.Position]bool, len(h.Tiles))
+			houseTiles := make([]otmap.Position, len(h.Tiles))
 			for _, tile := range h.Tiles {
 				pos := tile.Position()
 				if pos.Z != uint8(houseData.EntryZ) {
 					continue
 				}
 				houseImage.Set(int(pos.X), int(pos.Y), tileColor)
-				houseTiles[pos] = true
+				houseTiles = append(houseTiles, pos)
 			}
-			for pos := range houseTiles {
-				if houseImage.At(int(pos.X)+1, int(pos.Y)+1) != tileColor {
-					houseImage.Set(int(pos.X)+1, int(pos.Y)+1, wallColor)
-				}
-				if houseImage.At(int(pos.X)+1, int(pos.Y)-1) != tileColor {
-					houseImage.Set(int(pos.X)+1, int(pos.Y)-1, wallColor)
-				}
-				if houseImage.At(int(pos.X)-1, int(pos.Y)+1) != tileColor {
-					houseImage.Set(int(pos.X)-1, int(pos.Y)+1, wallColor)
-				}
-				if houseImage.At(int(pos.X)-1, int(pos.Y)-1) != tileColor {
-					houseImage.Set(int(pos.X)-1, int(pos.Y)-1, wallColor)
-				}
-			}
+			drawWalls(houseTiles, houseImage)
 			houseImage.Set(int(houseData.EntryX), int(houseData.EntryY), doorColor)
 			imgFile, err := os.Create(fmt.Sprintf("%v/%v/%v.png", pigo.Config.String("template"), "public/houses", houseData.Name))
 			if err != nil {
@@ -209,4 +198,33 @@ func ParseMap(path string) {
 		}(h)
 	}
 	waitHouses.Wait()
+}
+
+func drawWalls(tiles []otmap.Position, houseImage *image.RGBA) {
+	for _, pos := range tiles {
+		if houseImage.At(int(pos.X)+1, int(pos.Y)+1) != tileColor {
+			houseImage.Set(int(pos.X)+1, int(pos.Y)+1, wallColor)
+		}
+		if houseImage.At(int(pos.X)+1, int(pos.Y)-1) != tileColor {
+			houseImage.Set(int(pos.X)+1, int(pos.Y)-1, wallColor)
+		}
+		if houseImage.At(int(pos.X)-1, int(pos.Y)+1) != tileColor {
+			houseImage.Set(int(pos.X)-1, int(pos.Y)+1, wallColor)
+		}
+		if houseImage.At(int(pos.X)-1, int(pos.Y)-1) != tileColor {
+			houseImage.Set(int(pos.X)-1, int(pos.Y)-1, wallColor)
+		}
+		if houseImage.At(int(pos.X)+1, int(pos.Y)) != tileColor {
+			houseImage.Set(int(pos.X)+1, int(pos.Y), wallColor)
+		}
+		if houseImage.At(int(pos.X), int(pos.Y)+1) != tileColor {
+			houseImage.Set(int(pos.X), int(pos.Y)+1, wallColor)
+		}
+		if houseImage.At(int(pos.X)-1, int(pos.Y)) != tileColor {
+			houseImage.Set(int(pos.X)-1, int(pos.Y), wallColor)
+		}
+		if houseImage.At(int(pos.X), int(pos.Y)-1) != tileColor {
+			houseImage.Set(int(pos.X), int(pos.Y)-1, wallColor)
+		}
+	}
 }
