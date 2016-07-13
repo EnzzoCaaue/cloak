@@ -260,28 +260,3 @@ func ParseMap(path string) {
 	}
 	waitHouses.Wait()
 }
-
-/*if houseImage.At(int(pos.X)+1, int(pos.Y)+1) != tileColor {
-	houseImage.Set(int(pos.X)+1, int(pos.Y)+1, wallColor)
-}
-if houseImage.At(int(pos.X)+1, int(pos.Y)-1) != tileColor {
-	houseImage.Set(int(pos.X)+1, int(pos.Y)-1, wallColor)
-}
-if houseImage.At(int(pos.X)-1, int(pos.Y)+1) != tileColor {
-	houseImage.Set(int(pos.X)-1, int(pos.Y)+1, wallColor)
-}
-if houseImage.At(int(pos.X)-1, int(pos.Y)-1) != tileColor {
-	houseImage.Set(int(pos.X)-1, int(pos.Y)-1, wallColor)
-}
-if houseImage.At(int(pos.X)+1, int(pos.Y)) != tileColor {
-	houseImage.Set(int(pos.X)+1, int(pos.Y), wallColor)
-}
-if houseImage.At(int(pos.X), int(pos.Y)+1) != tileColor {
-	houseImage.Set(int(pos.X), int(pos.Y)+1, wallColor)
-}
-if houseImage.At(int(pos.X)-1, int(pos.Y)) != tileColor {
-	houseImage.Set(int(pos.X)-1, int(pos.Y), wallColor)
-}
-if houseImage.At(int(pos.X), int(pos.Y)-1) != tileColor {
-	houseImage.Set(int(pos.X), int(pos.Y)-1, wallColor)
-}*/
