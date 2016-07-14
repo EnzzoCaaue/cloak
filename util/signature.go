@@ -2,8 +2,6 @@ package util
 
 import (
 	"bytes"
-	"github.com/golang/freetype"
-	"github.com/raggaer/pigo"
 	"image"
 	"image/draw"
 	_ "image/gif"
@@ -13,6 +11,9 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	"github.com/golang/freetype"
+	"github.com/raggaer/pigo"
 )
 
 // CreateSignature creates a player signature image
@@ -42,24 +43,15 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 	signatureTextDrawer.SetClip(backgroundRGBA.Bounds())
 	signatureTextDrawer.SetDst(backgroundRGBA)
 	signatureTextDrawer.SetSrc(image.Black)
-	_, err = signatureTextDrawer.DrawString("Name: "+name, freetype.Pt(20, 30))
-	if err != nil {
+	if _, err = signatureTextDrawer.DrawString("Name: "+name, freetype.Pt(20, 30)); err != nil {
 		return nil, err
-	}
-	_, err = signatureTextDrawer.DrawString("Gender: "+GetGender(gender), freetype.Pt(20, 50))
-	if err != nil {
+	} else if _, err = signatureTextDrawer.DrawString("Gender: "+GetGender(gender), freetype.Pt(20, 50)); err != nil {
 		return nil, err
-	}
-	_, err = signatureTextDrawer.DrawString("Vocation: "+GetVocation(vocation), freetype.Pt(20, 70))
-	if err != nil {
+	} else if _, err = signatureTextDrawer.DrawString("Vocation: "+GetVocation(vocation), freetype.Pt(20, 70)); err != nil {
 		return nil, err
-	}
-	_, err = signatureTextDrawer.DrawString("Level: "+strconv.Itoa(level), freetype.Pt(20, 90))
-	if err != nil {
+	} else if _, err = signatureTextDrawer.DrawString("Level: "+strconv.Itoa(level), freetype.Pt(20, 90)); err != nil {
 		return nil, err
-	}
-	_, err = signatureTextDrawer.DrawString("Last login: "+UnixToString(lastlogin), freetype.Pt(20, 110))
-	if err != nil {
+	} else if _, err = signatureTextDrawer.DrawString("Last login: "+UnixToString(lastlogin), freetype.Pt(20, 110)); err != nil {
 		return nil, err
 	}
 	buffer := &bytes.Buffer{}

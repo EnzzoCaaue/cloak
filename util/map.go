@@ -16,19 +16,14 @@ import (
 	"github.com/raggaer/pigo"
 )
 
-const (
-	tileSize = 4
-)
-
 var (
-	drawnPixels     = 0
 	tileColor       = color.RGBA{192, 192, 192, 255}
 	wallColor       = color.RGBA{255, 0, 0, 255}
 	doorColor       = color.RGBA{255, 255, 0, 255}
 	backgroundColor = color.RGBA{0, 0, 0, 255}
 	otbPath         = "/data/items/items.otb"
-	otbmPath        = "/data/world/"
-	otbmExtension   = ".otbm"
+	otbmPath        = "data/world"
+	otbmExtension   = "otbm"
 )
 
 // House holds all information about a game house
@@ -151,7 +146,7 @@ func (s *ServerHouses) GetList(id uint32) []*House {
 func parseHouses(path, houseFile string) error {
 	Houses.rw.Lock()
 	defer Houses.rw.Unlock()
-	b, err := ioutil.ReadFile(path + otbmPath + houseFile)
+	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v", path, otbmPath, houseFile))
 	if err != nil {
 		return err
 	}
@@ -164,7 +159,7 @@ func ParseMap(path string) {
 	serverMap.Initialize()
 	otbLoader := &otmap.OtbLoader{}
 	otbLoader.Load(path + otbPath)
-	if err := serverMap.ReadOTBM(fmt.Sprintf("%v%v%v%v", path, otbmPath, Config.String("mapName"), otbmExtension), otbLoader, false); err != nil {
+	if err := serverMap.ReadOTBM(fmt.Sprintf("%v/%v/%v.%v", path, otbmPath, Config.String("mapName"), otbmExtension), otbLoader, false); err != nil {
 		log.Fatal(err)
 	}
 	if err := parseHouses(path, serverMap.HouseFile); err != nil {
@@ -253,7 +248,9 @@ func ParseMap(path string) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			png.Encode(houseFile, houseImage)
+			if err = png.Encode(houseFile, houseImage); err != nil {
+				log.Fatal(err)
+			}
 			houseFile.Close()
 			waitHouses.Done()
 		}(h)
