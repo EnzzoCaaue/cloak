@@ -2,9 +2,15 @@ package util
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"sync"
+)
+
+const (
+	stagesPath      = "data/XML/stages"
+	stagesExtension = "xml"
 )
 
 // ServerStages holds all the server stages
@@ -35,7 +41,7 @@ func ParseStages(path string) {
 	Stages.rw.Lock()
 	defer Stages.rw.Unlock()
 	Stages.v = &stageDefinition{}
-	b, err := ioutil.ReadFile(path + "/data/XML/stages.xml")
+	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v.%v", path, stagesPath, stagesExtension))
 	if err != nil {
 		log.Fatal(err)
 	}

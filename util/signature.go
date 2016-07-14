@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/draw"
 	_ "image/gif"
@@ -16,9 +17,18 @@ import (
 	"github.com/raggaer/pigo"
 )
 
+const (
+	defaultSignature   = "signature"
+	signaturePath      = "public/images"
+	signatureExtension = "png"
+	fontsPath          = "public/fonts"
+	defaultFont        = "Aller_Bd"
+	fontsExtension     = "ttf"
+)
+
 // CreateSignature creates a player signature image
 func CreateSignature(name string, gender, vocation, level int, lastlogin int64) ([]byte, error) {
-	background, err := os.Open(pigo.Config.String("template") + "/public/images/signature.png")
+	background, err := os.Open(fmt.Sprintf("%v/%v/%v.%v", pigo.Config.String("template"), signaturePath, defaultSignature, signatureExtension))
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +38,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 		return nil, err
 	}
 	draw.Draw(backgroundRGBA, backgroundRGBA.Bounds(), backgroundDecoded, image.ZP, draw.Src)
-	fontBytes, err := ioutil.ReadFile(pigo.Config.String("template") + "/public/fonts/Aller_Bd.ttf")
+	fontBytes, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", pigo.Config.String("template"), fontsPath, defaultFont, fontsExtension))
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +69,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 	if err != nil {
 		return nil, err
 	}
-	signatureFile, err := os.Create(pigo.Config.String("template") + "/public/signatures/" + name + ".png")
+	signatureFile, err := os.Create(fmt.Sprintf("%v/%v/%v.%v", pigo.Config.String("template"), signaturePath, name, signatureExtension))
 	defer signatureFile.Close()
 	signatureFile.Write(buffer.Bytes())
 	return buffer.Bytes(), nil

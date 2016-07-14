@@ -3,11 +3,13 @@ package util
 import (
 	"bytes"
 	"encoding/xml"
-	"golang.org/x/net/html/charset"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
 	"sync"
+
+	"golang.org/x/net/html/charset"
 )
 
 const (
@@ -15,6 +17,9 @@ const (
 	itemDescriptionLabel = "description"
 	itemSlotLabel        = "slotType"
 	itemArmorLabel       = "armor"
+	itemsPath            = "data/items"
+	itemsFile            = "items"
+	itemsExtension       = "xml"
 )
 
 // ServerItems holds all server items
@@ -45,7 +50,7 @@ func ParseItems(path string) {
 	Items.rw.Lock()
 	defer Items.rw.Unlock()
 	Items.Items = make(map[int]ItemDefinition)
-	b, err := ioutil.ReadFile(path + "/data/items/items.xml")
+	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", path, itemsPath, itemsFile, itemsExtension))
 	if err != nil {
 		log.Fatal(err)
 	}

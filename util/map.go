@@ -16,14 +16,17 @@ import (
 	"github.com/raggaer/pigo"
 )
 
+const (
+	otbPath       = "/data/items/items.otb"
+	otbmPath      = "data/world"
+	otbmExtension = "otbm"
+)
+
 var (
 	tileColor       = color.RGBA{192, 192, 192, 255}
 	wallColor       = color.RGBA{255, 0, 0, 255}
 	doorColor       = color.RGBA{255, 255, 0, 255}
 	backgroundColor = color.RGBA{0, 0, 0, 255}
-	otbPath         = "/data/items/items.otb"
-	otbmPath        = "data/world"
-	otbmExtension   = "otbm"
 )
 
 // House holds all information about a game house

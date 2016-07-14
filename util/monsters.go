@@ -2,9 +2,16 @@ package util
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"sync"
+)
+
+const (
+	monstersExtension = "xml"
+	monstersFile      = "monsters"
+	monstersPath      = "data/monster"
 )
 
 // ServerMonsters holds all server monsters
@@ -71,7 +78,7 @@ func ParseMonsters(path string) {
 	//Monsters.rw.Lock()
 	//defer Monsters.rw.Unlock()
 	Monsters.m = make(map[string]*Monster)
-	b, err := ioutil.ReadFile(path + "/data/monster/monsters.xml")
+	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", path, monstersPath, monstersFile, monstersExtension))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +95,7 @@ func ParseMonsters(path string) {
 func parseMonster(path, name, file string) {
 	Monsters.rw.Lock()
 	defer Monsters.rw.Unlock()
-	b, err := ioutil.ReadFile(path + "/data/monster/" + file)
+	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v", path, monstersPath, file))
 	if err != nil {
 		log.Println("Error while parsing monster:", name)
 		return
