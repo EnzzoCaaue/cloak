@@ -25,10 +25,7 @@ func Load() {
 			return template.HTML(msg)
 		},
 		"accountSecurity": func(twofactor int, key string) bool {
-			if twofactor != 0 && len(key) > 0 {
-				return true
-			}
-			return false
+			return (twofactor != 0 && len(key) > 0)
 		},
 		"hasRecoveryKey": func(key string) bool {
 			return len(key) > 0
@@ -55,22 +52,13 @@ func Load() {
 			return timeString
 		},
 		"currentMenu": func(active string, key string) bool {
-			if active == key {
-				return true
-			}
-			return false
+			return active == key
 		},
 		"isPremium": func(days int) bool {
-			if days > 0 {
-				return true
-			}
-			return false
+			return days > 0 {
 		},
 		"isAdmin": func(admin int) bool {
-			if admin > 0 {
-				return true
-			}
-			return false
+			return admin > 0
 		},
 		"premiumDaysString": func(days int) string {
 			daysStr := strconv.Itoa(days)
@@ -87,24 +75,13 @@ func Load() {
 			return nameScape
 		},
 		"isAlive": func(time int) bool {
-			if time <= 0 {
-				return true
-			}
-			return false
+			return time <= 0
 		},
 		"maskedText": func(text string) string {
-			i := len(text)
-			s := ""
-			for x := 0; x < i; x++ {
-				s = s + "*"
-			}
-			return s
+			return strings.Repeat("*", len(text))
 		},
 		"isEven": func(number int) bool {
-			if number%2 == 0 {
-				return true
-			}
-			return false
+			return number % 2 == 0
 		},
 		"isLogged": func() bool {
 			return true
@@ -116,10 +93,7 @@ func Load() {
 			return ""
 		},
 		"isNotCurrentCharacter": func(current string, name string) bool {
-			if current == name {
-				return false
-			}
-			return true
+			return current != name
 		},
 		"getCaptchaKey": func() string {
 			return pigo.Config.Key("captcha").String("public")
@@ -128,10 +102,7 @@ func Load() {
 			return strings.Split(comment, "\n")
 		},
 		"showMostDamage": func(killer string, mostdamager string) bool {
-			if killer != mostdamager {
-				return true
-			}
-			return false
+			return killer != mostdamager
 		},
 		"longToShort": func(msg string) string {
 			if len(msg) > 30 {
