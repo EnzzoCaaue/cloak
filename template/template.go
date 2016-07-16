@@ -58,9 +58,6 @@ func Load() {
 		"isPremium": func(days int) bool {
 			return days > 0
 		},
-		"isAdmin": func(admin int) bool {
-			return admin > 0
-		},
 		"premiumDaysString": func(days int) string {
 			daysStr := strconv.Itoa(days)
 			str := "You have " + daysStr
@@ -83,9 +80,6 @@ func Load() {
 		},
 		"isEven": func(number int) bool {
 			return number%2 == 0
-		},
-		"isLogged": func() bool {
-			return true
 		},
 		"isCurrentSkill": func(current string, skill string) string {
 			if current == skill {
