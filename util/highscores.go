@@ -12,7 +12,7 @@ func GetHighscoreQuery(page int, highscoreType string, per int) (int, string, st
 	switch highscoreType {
 	case "level":
 		skillName = "Experience"
-		query = fmt.Sprintf("SELECT name, level FROM players ORDER BY level DESC LIMIT %v, %v",
+		query = fmt.Sprintf("SELECT name, level FROM players ORDER BY experience DESC LIMIT %v, %v",
 			pageIndex,
 			per,
 		)
