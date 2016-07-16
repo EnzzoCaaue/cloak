@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+	"runtime"
+	"strconv"
+
 	"github.com/Cloakaac/cloak/models"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"net/http"
-	"runtime"
 )
 
 type AdminController struct {
@@ -42,4 +44,28 @@ func (base *AdminController) Dashboard(w http.ResponseWriter, req *http.Request,
 // Server shows the TFS server manager
 func (base *AdminController) Server(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	base.Template = "admin_server.html"
+}
+
+// ArticleList shows the news admin manager
+func (base *AdminController) ArticleList(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	articles, err := models.GetArticles(100)
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Data["Success"] = base.Session.GetFlashes("success")
+	base.Data["News"] = articles
+	base.Template = "admin_news.html"
+}
+
+// ArticleEdit shows the form to edit an article
+func (base *AdminController) ArticleEdit(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	articleID, err := strconv.ParseInt(ps.ByName("id"), 10, 64)
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Data["Article"] = models.GetArticle(articleID)
+	base.Template = "admin_news_edit.html"
+
 }

@@ -57,6 +57,8 @@ func registerRoutes() {
 	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
 	pigo.Get("/admin/overview", &controllers.AdminController{}, "Dashboard", "logged", "admin")
 	pigo.Get("/admin/server", &controllers.AdminController{}, "Server", "logged", "admin")
+	pigo.Get("/admin/news", &controllers.AdminController{}, "ArticleList", "logged", "admin")
+	pigo.Get("/admin/news/edit/:id", &controllers.AdminController{}, "ArticleEdit", "logged", "admin")
 	pigo.Get("/houses/list", &controllers.HouseController{}, "List")
 	pigo.Get("/houses/view/:name", &controllers.HouseController{}, "View")
 	pigo.Post("/houses/list", &controllers.HouseController{}, "ListName")

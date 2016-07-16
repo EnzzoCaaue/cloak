@@ -19,7 +19,7 @@ import (
 
 const (
 	defaultSignature   = "signature"
-	signaturePath      = "public/images"
+	signaturePath      = "public/signatures"
 	signatureExtension = "png"
 	fontsPath          = "public/fonts"
 	defaultFont        = "Aller_Bd"
