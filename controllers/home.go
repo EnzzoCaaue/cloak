@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/Cloakaac/cloak/models"
-	"github.com/julienschmidt/httprouter"
-	"github.com/raggaer/pigo"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/Cloakaac/cloak/models"
+	"github.com/julienschmidt/httprouter"
+	"github.com/raggaer/pigo"
 )
 
 const (
