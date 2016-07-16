@@ -24,7 +24,7 @@ type Record struct {
 
 // GetAdminInformation returns dashboard information
 func GetAdminInformation() *AdminInformation {
-	row := pigo.Database.QueryRow("SELECT (SELECT COUNT(*) FROM accounts) as accounts, (SELECT COUNT(*) FROM players) players, (SELECT COUNT(*) FROM players WHERE vocation IN(1, 5)) as sorcerers, (SELECT COUNT(*) FROM players WHERE vocation IN (2, 6)) as druids, (sELECT COUNT(*) FROM players WHERE vocation IN (3, 7)) as paladins, (SELECT COUNT(*) FROM players WHERE vocation IN (4, 8)) as knights, (SELECT COUNT(*) FROM players WHERE sex = 1) as males, (SELECT COUNT(*) FROM players WHERE sex = 0) as females")
+	row := pigo.Database.QueryRow("SELECT (SELECT COUNT(1) FROM accounts) as accounts, (SELECT COUNT(1) FROM players) players, (SELECT COUNT(1) FROM players WHERE vocation IN(1, 5)) as sorcerers, (SELECT COUNT(1) FROM players WHERE vocation IN (2, 6)) as druids, (SELECT COUNT(1) FROM players WHERE vocation IN (3, 7)) as paladins, (SELECT COUNT(1) FROM players WHERE vocation IN (4, 8)) as knights, (SELECT COUNT(1) FROM players WHERE sex = 1) as males, (SELECT COUNT(1) FROM players WHERE sex = 0) as females")
 	info := &AdminInformation{}
 	row.Scan(&info.Accounts, &info.Players, &info.Sorcerers, &info.Druids, &info.Paladins, &info.Knights, &info.Males, &info.Females)
 	return info
@@ -38,7 +38,7 @@ func ClearOnlineLogs() error {
 
 // GetOnlineCount returns the current online number of players
 func GetOnlineCount() int {
-	row := pigo.Database.QueryRow("SELECT COUNT(*) FROM players_online")
+	row := pigo.Database.QueryRow("SELECT COUNT(1) FROM players_online")
 	total := 0
 	row.Scan(&total)
 	return total

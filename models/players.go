@@ -64,7 +64,7 @@ type HighscorePlayer struct {
 
 // GetTopPlayers gets sidebar top players
 func GetTopPlayers(limit int) ([]*Player, error) {
-	rows, err := pigo.Database.Query("SELECT name, level FROM players ORDER BY level DESC LIMIT ?", limit)
+	rows, err := pigo.Database.Query("SELECT name, level FROM players ORDER BY experience DESC LIMIT ?", limit)
 	if err != nil {
 		return nil, err
 	}
