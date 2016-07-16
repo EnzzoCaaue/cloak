@@ -2,14 +2,15 @@ package template
 
 import (
 	"fmt"
-	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
 	"html/template"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
+	"github.com/raggaer/pigo"
 )
 
 // Load loads the AAC template
@@ -55,7 +56,7 @@ func Load() {
 			return active == key
 		},
 		"isPremium": func(days int) bool {
-			return days > 0 {
+			return days > 0
 		},
 		"isAdmin": func(admin int) bool {
 			return admin > 0
@@ -81,7 +82,7 @@ func Load() {
 			return strings.Repeat("*", len(text))
 		},
 		"isEven": func(number int) bool {
-			return number % 2 == 0
+			return number%2 == 0
 		},
 		"isLogged": func() bool {
 			return true

@@ -69,3 +69,12 @@ func (base *AdminController) ArticleEdit(w http.ResponseWriter, req *http.Reques
 	base.Template = "admin_news_edit.html"
 
 }
+
+// ArticleEditProcess process the article edit form
+func (base *AdminController) ArticleEditProcess(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	/*articleID, err := strconv.ParseInt(ps.ByName("id"), 10, 64)
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}*/
+}
