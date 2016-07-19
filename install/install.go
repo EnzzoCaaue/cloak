@@ -104,7 +104,7 @@ var (
 				"cloaka_shop_items",
 				`CREATE TABLE cloaka_shop_items (
                 id int(11) NOT NULL AUTO_INCREMENT,
-                categorie_id int(11) DEFAULT NULL,
+                category_id int(11) DEFAULT NULL,
                 item_id int(11) DEFAULT NULL,
                 price int(11) DEFAULT NULL,
                 name varchar(25) DEFAULT NULL,

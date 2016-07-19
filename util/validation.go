@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/raggaer/pigo"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -11,6 +10,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/raggaer/pigo"
 )
 
 var (
@@ -43,6 +44,9 @@ func Validate(f interface{}) []error {
 
 func valid(tag, alias, value string) (bool, error) {
 	parsedTags := strings.Split(strings.TrimSpace(tag), "=")
+	if pigo.Config.String("mode") == "DEV" {
+		return true, nil
+	}
 	switch parsedTags[0] {
 	case "min":
 		minValue, _ := strconv.Atoi(parsedTags[1])
@@ -67,7 +71,7 @@ func valid(tag, alias, value string) (bool, error) {
 			return false, fmt.Errorf("%v: %v", alias, "Invalid vocation")
 		}
 	case "validCaptcha":
-		if !validateCaptcha(value) && pigo.Config.String("mode") != "DEV" {
+		if !validateCaptcha(value) {
 			return false, fmt.Errorf("%v: %v", alias, "Wrong captcha response")
 		}
 	}

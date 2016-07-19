@@ -63,6 +63,7 @@ func registerRoutes() {
 	pigo.Get("/houses/list", &controllers.HouseController{}, "List")
 	pigo.Get("/houses/view/:name", &controllers.HouseController{}, "View")
 	pigo.Post("/houses/list", &controllers.HouseController{}, "ListName")
+	pigo.Get("/shop/overview", &controllers.ShopController{}, "ShopView")
 }
 
 func registerLUARoutes() {

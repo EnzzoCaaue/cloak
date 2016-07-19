@@ -2,14 +2,16 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
-	"github.com/julienschmidt/httprouter"
-	"github.com/raggaer/pigo"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/Cloakaac/cloak/models"
+	"github.com/Cloakaac/cloak/util"
+	"github.com/julienschmidt/httprouter"
+	"github.com/raggaer/pigo"
 )
 
 const (
@@ -180,4 +182,24 @@ func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Reque
 	}
 	base.Session.AddFlash("Payment completed. We added "+strconv.Itoa(totalCoins)+" coins to your account. Enjoy!", "success")
 	base.Redirect = "/buypoints/paypal"
+}
+
+// ShopView loads and shows the "donation" shop
+func (base *ShopController) ShopView(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	categories, err := models.GetCategories()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	randomCategory := rand.Intn(len(categories))
+	categories[randomCategory].Active = true
+	offers, err := categories[randomCategory].GetOffers()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Data["Offers"] = offers
+	base.Data["Categories"] = categories
+	base.Template = "shop.html"
 }

@@ -75,8 +75,6 @@ type monsterDefinition struct {
 
 // ParseMonsters parses monsters.xml
 func ParseMonsters(path string) {
-	//Monsters.rw.Lock()
-	//defer Monsters.rw.Unlock()
 	Monsters.m = make(map[string]*Monster)
 	b, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", path, monstersPath, monstersFile, monstersExtension))
 	if err != nil {
