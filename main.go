@@ -157,7 +157,7 @@ func main() {
 	install.Installer()
 	timeTrack(installerTime, "Installer check")
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(9)
+	waitGroup.Add(10)
 	go func() {
 		defer timeTrack(time.Now(), "Template loaded")
 		template.Load()
@@ -202,6 +202,11 @@ func main() {
 		if err := models.ClearOnlineLogs(); err != nil {
 			log.Fatal(err)
 		}
+		waitGroup.Done()
+	}()
+	go func() {
+		defer timeTrack(time.Now(), "Sprite file loaded")
+		util.ParseSpr("G:/Games/tibia1090/tibia.spr")
 		waitGroup.Done()
 	}()
 	waitGroup.Wait()
