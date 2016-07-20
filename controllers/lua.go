@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Cloakaac/cloak/util"
@@ -38,13 +40,11 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	}
 	luaVM := lua.NewState()
 	defer luaVM.Close()
-	controllerTable := &lua.LTable{}
-	controllerTable.RawSetString("Data", &lua.LTable{})
-	controllerTable.RawSetString("Template", lua.LString(""))
-	controllerTable.RawSetString("Json", lua.LBool(false))
-	controllerTable.RawSetString("Error", lua.LString(""))
-	controllerTable.RawSetString("Redirect", lua.LString(""))
-	luaVM.SetGlobal("base", controllerTable)
+	luaVM.SetGlobal("template", lua.LString(""))
+	luaVM.SetGlobal("json", lua.LBool(false))
+	luaVM.SetGlobal("error", lua.LString(""))
+	luaVM.SetGlobal("redirect", lua.LString(""))
+	luaVM.SetGlobal("data", &lua.LTable{})
 	luaVM.SetGlobal("query", luaVM.NewFunction(query))
 	luaVM.SetGlobal("urlParam", luaVM.NewFunction(vm.urlParam))
 	err := luaVM.DoFile(fmt.Sprintf(
@@ -57,15 +57,21 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		base.Base.Error = err.Error()
 		return
 	}
-	newData := util.TableToMap(controllerTable)
+	newData := util.TableToMap(luaVM.GetGlobal("data").(*lua.LTable))
+	log.Println(newData)
 	for i, v := range base.Base.Data {
-		newData["Data"].(map[string]interface{})[i] = v
+		newData[i] = v
 	}
-	base.Base.Template = newData["Template"].(string)
-	base.Base.Error = newData["Error"].(string)
-	base.Base.JSON = newData["Json"].(bool)
-	base.Base.Redirect = newData["Redirect"].(string)
-	base.Base.Data = newData["Data"].(map[string]interface{})
+	json, err := strconv.ParseBool(luaVM.GetGlobal("json").String())
+	if err != nil {
+		base.Base.Error = err.Error()
+		return
+	}
+	base.Base.Data["Json"] = json
+	base.Base.Template = luaVM.GetGlobal("template").String()
+	base.Base.Error = luaVM.GetGlobal("redirect").String()
+	base.Base.Redirect = luaVM.GetGlobal("redirect").String()
+	base.Base.Data = newData
 }
 
 func (l *LuaVM) urlParam(luaVM *lua.LState) int {

@@ -2,12 +2,12 @@
 
 *.exe
 
-# Ignore my testing ssl certs
+# Ignore my ssl cert and key
 
 domain-crt.txt
 domain-key.txt
 
-# Ignore my personal config.json
+# Ignore my personal configuration files
 
 config.json
 config.toml

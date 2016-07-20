@@ -8,13 +8,14 @@ Cloaka provides great performance and an easy to use scripting environment using
 
 Cloaka provides a whole new level of features to the AAC scene. Here is a small preview
 
-- LUA bindings. Make your custom pages using LUA
+- LUA bindings. Make your custom pages using your favourite scripting languague
 - OTBM loader. Generate images of your server houses and much more
 - Load items.xml, monsters.xml, stages.xml, config.lua
 - No APACHE / NGINX / UniServer required. Cloaka uses its own HTTP server.
 - Only one executable. Cloaka its only one file (apart from your html layout files). Easy to distribute and installed
 - Background services aka daemons
 - Fast. Cloaka uses Go == Fast == Amazing
+- Minimal set-up. Cloaka installs on its own and reads values from your config.lua to provide almost no configuration needed
 
 # Commands
 
@@ -37,7 +38,7 @@ Cloaka is only compatible with [The Forgotten Server](https://github.com/otland/
 
 # Download
 
-Currently there are no releases of Cloaka
+Sadly there are currently no releases of Cloaka
 
 # Custom version
 
