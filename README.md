@@ -43,7 +43,7 @@ Currently there are no releases of Cloaka
 
 To build your custom version of Cloaka you will need to have the following dependencies:
 
-+ Go 1.5 or greater
++ Go 1.6 or greater
 + Git
 
 Once everything is installed you can simply do (to get the newer version)
