@@ -161,7 +161,7 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 }
 
 // ServerOverview shows all the server information
-func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Template = "server_overview.html"
 	base.Data["Name"] = util.Config.String("serverName")
 	base.Data["WorldType"] = util.Config.String("worldType")
@@ -177,4 +177,15 @@ func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http
 	base.Data["FreePremium"] = util.Config.Bool("freePremium")
 	base.Data["StagesEnabled"] = util.Stages.IsEnabled()
 	base.Data["Stages"] = util.Stages.GetAll()
+}
+
+// ServerOnline shows online players
+func (base *CommunityController) ServerOnline(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	list, err := models.GetOnlinePlayers()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Data["List"] = list
+	base.Template = "online.html"
 }

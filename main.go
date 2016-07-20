@@ -33,6 +33,7 @@ func registerRoutes() {
 	pigo.Get("/account/logout", &controllers.AccountController{}, "AccountLogout", "logged")
 	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView")
 	pigo.Get("/community/overview", &controllers.CommunityController{}, "ServerOverview")
+	pigo.Get("/community/online", &controllers.CommunityController{}, "ServerOnline")
 	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView")
 	pigo.Get("/account/manage/recovery", &controllers.AccountController{}, "AccountSetRecovery", "logged")
 	pigo.Get("/account/manage/twofactor", &controllers.AccountController{}, "AccountTwoFactor", "logged")

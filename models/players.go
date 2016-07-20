@@ -62,6 +62,23 @@ type HighscorePlayer struct {
 	Place int
 }
 
+// GetOnlinePlayers gets all players_online
+func GetOnlinePlayers() ([]*Player, error) {
+	rows, err := pigo.Database.Query("SELECT a.id, a.name, a.level, a.vocation FROM players a, players_online b WHERE b.player_id = a.id")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	players := []*Player{}
+	for rows.Next() {
+		player := NewPlayer()
+		rows.Scan(&player.ID, &player.Name, &player.Level, &player.Vocation)
+		player.GetGuild()
+		players = append(players, player)
+	}
+	return players, nil
+}
+
 // GetTopPlayers gets sidebar top players
 func GetTopPlayers(limit int) ([]*Player, error) {
 	rows, err := pigo.Database.Query("SELECT name, level FROM players ORDER BY experience DESC LIMIT ?", limit)
