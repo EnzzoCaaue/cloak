@@ -66,7 +66,12 @@ func (base *AdminController) ArticleEdit(w http.ResponseWriter, req *http.Reques
 		base.Error = err.Error()
 		return
 	}
-	base.Data["Article"] = models.GetArticle(articleID)
+	article := models.GetArticle(articleID)
+	if article.ID == -1 {
+		base.Redirect = "/admin/news"
+		return
+	}
+	base.Data["Article"] = article
 	base.Template = "admin_news_edit.html"
 
 }

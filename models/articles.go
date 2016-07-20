@@ -18,7 +18,9 @@ type Article struct {
 
 // NewArticle returns a new article pointer
 func NewArticle() *Article {
-	return &Article{}
+	return &Article{
+		ID: -1,
+	}
 }
 
 // GetArticles gets all database articles
@@ -30,7 +32,7 @@ func GetArticles(count int) ([]*Article, error) {
 		return nil, err
 	}
 	for rows.Next() {
-		article := &Article{}
+		article := NewArticle()
 		rows.Scan(&article.ID, &article.Title, &article.Text, &article.Created, &article.Type)
 		article.TextHTML = template.HTML(article.Text)
 		articles = append(articles, article)
@@ -41,7 +43,7 @@ func GetArticles(count int) ([]*Article, error) {
 // GetArticle gets an article by its ID
 func GetArticle(id int64) *Article {
 	row := pigo.Database.QueryRow("SELECT id, title, text, created, type FROM cloaka_news WHERE id = ?", id)
-	article := &Article{}
+	article := NewArticle()
 	row.Scan(&article.ID, &article.Title, &article.Text, &article.Created, &article.Type)
 	return article
 }
