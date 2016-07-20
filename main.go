@@ -209,11 +209,11 @@ func main() {
 	}()
 	go func() {
 		defer timeTrack(time.Now(), "Sprite file loaded")
-		util.ParseSpr("G:/Games/tibia1090/tibia.spr")
+		util.ParseSpr("G:/Games/tibia1090/tibia.spr") // wip
 		waitGroup.Done()
 	}()
 	waitGroup.Wait()
-	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n", pigo.Config.String("port"))
+	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n\r\n", pigo.Config.String("port"))
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()

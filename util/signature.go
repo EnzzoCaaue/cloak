@@ -53,9 +53,9 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 	signatureTextDrawer.SetClip(backgroundRGBA.Bounds())
 	signatureTextDrawer.SetDst(backgroundRGBA)
 	signatureTextDrawer.SetSrc(image.Black)
-	if _, err = signatureTextDrawer.DrawString("Name: "+name, freetype.Pt(20, 30)); err != nil {
+	if _, err := signatureTextDrawer.DrawString(Config.String("serverName"), freetype.Pt(20, 30)); err != nil {
 		return nil, err
-	} else if _, err = signatureTextDrawer.DrawString("Gender: "+GetGender(gender), freetype.Pt(20, 50)); err != nil {
+	} else if _, err = signatureTextDrawer.DrawString("Name: "+name, freetype.Pt(20, 50)); err != nil {
 		return nil, err
 	} else if _, err = signatureTextDrawer.DrawString("Vocation: "+GetVocation(vocation), freetype.Pt(20, 70)); err != nil {
 		return nil, err
