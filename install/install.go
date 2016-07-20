@@ -137,7 +137,7 @@ func Installer(db string) {
 			if !t.isInstalled(cloakaTables.database) {
 				fmt.Printf(" >> Installing missing table %v \r\n", t.name)
 				if err := t.install(); err != nil {
-					log.Fatal(err)
+					log.Println(err)
 				}
 			}
 			waitGroup.Done()

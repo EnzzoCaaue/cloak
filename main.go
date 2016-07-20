@@ -188,11 +188,6 @@ func main() {
 		util.ParseMonsters(viper.GetString("datapack"))
 		waitGroup.Done()
 	}()
-	/*go func() {
-		defer timeTrack(time.Now(), "Config LUA loaded")
-		util.ParseConfig(viper.GetString("datapack"))
-		waitGroup.Done()
-	}()*/
 	go func() {
 		defer timeTrack(time.Now(), "Stages loaded")
 		util.ParseStages(viper.GetString("datapack"))
