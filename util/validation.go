@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -44,7 +44,7 @@ func Validate(f interface{}) []error {
 
 func valid(tag, alias, value string) (bool, error) {
 	parsedTags := strings.Split(strings.TrimSpace(tag), "=")
-	if pigo.Config.String("mode") == "DEV" {
+	if viper.GetString("mode") == "DEV" {
 		return true, nil
 	}
 	switch parsedTags[0] {
@@ -116,7 +116,7 @@ func validateVocation(val string) bool {
 func validateCaptcha(val string) bool {
 	resp, err := http.PostForm(captchaVerificationURL, url.Values{
 		"secret": {
-			pigo.Config.Key("captcha").String("secret"),
+			viper.GetString("captcha.secret"),
 		},
 		"response": {
 			val,

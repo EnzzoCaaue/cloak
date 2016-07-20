@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/Cloakaac/cloak/otmap"
-	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -247,7 +247,7 @@ func ParseMap(path string) {
 			x := int(houseData.EntryX-houseTopX) + houseOffset
 			y := int(houseData.EntryY-houseTopY) + houseOffset
 			houseImage.Set(x, y, doorColor)
-			houseFile, err := os.Create(fmt.Sprintf("%v/%v/%v.png", pigo.Config.String("template"), "public/houses", houseData.Name))
+			houseFile, err := os.Create(fmt.Sprintf("%v/%v/%v.png", viper.GetString("template"), "public/houses", houseData.Name))
 			if err != nil {
 				log.Fatal(err)
 			}

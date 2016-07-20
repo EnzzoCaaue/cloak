@@ -1,9 +1,11 @@
 package command
 
 import (
+	"log"
+
 	"github.com/Cloakaac/cloak/util"
 	"github.com/raggaer/pigo"
-	"log"
+	"github.com/spf13/viper"
 )
 
 type reloadConfig struct{}
@@ -16,11 +18,11 @@ func init() {
 }
 
 func (r *reloadConfig) exec() {
-	pigo.ParseConfig("config.json")
+	pigo.ParseConfig("config")
 	log.Println("Config loaded")
 }
 
 func (r *reloadConfigLUA) exec() {
-	util.ParseConfig(pigo.Config.String("datapack"))
+	util.ParseConfig(viper.GetString("datapack"))
 	log.Println("Config LUA loaded")
 }

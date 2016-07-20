@@ -1,9 +1,10 @@
 package command
 
 import (
-	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
 	"log"
+
+	"github.com/Cloakaac/cloak/util"
+	"github.com/spf13/viper"
 )
 
 type reloadStages struct{}
@@ -13,6 +14,6 @@ func init() {
 }
 
 func (r *reloadStages) exec() {
-	util.ParseStages(pigo.Config.String("datapack"))
+	util.ParseStages(viper.GetString("datapack"))
 	log.Println("Stages loaded")
 }

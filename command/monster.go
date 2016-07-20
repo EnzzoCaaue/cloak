@@ -1,9 +1,10 @@
 package command
 
 import (
-	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
 	"log"
+
+	"github.com/Cloakaac/cloak/util"
+	"github.com/spf13/viper"
 )
 
 type reloadMonster struct{}
@@ -13,6 +14,6 @@ func init() {
 }
 
 func (r *reloadMonster) exec() {
-	util.ParseMonsters(pigo.Config.String("datapack"))
+	util.ParseMonsters(viper.GetString("datapack"))
 	log.Println("Monsters loaded")
 }

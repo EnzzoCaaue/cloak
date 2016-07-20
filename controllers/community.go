@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Cloakaac/cloak/models"
+	"github.com/spf13/viper"
 
 	"fmt"
 
@@ -95,7 +96,7 @@ func (base *CommunityController) SignatureView(w http.ResponseWriter, req *http.
 		base.Error = "Unknown character name"
 		return
 	}
-	signatureFile, err := os.Open(pigo.Config.String("template") + "/public/signatures/" + player.Name + ".png")
+	signatureFile, err := os.Open(viper.GetString("template") + "/public/signatures/" + player.Name + ".png")
 	if err != nil { // No signature
 		signature, err := util.CreateSignature(player.Name, player.Gender, player.Vocation, player.Level, player.LastLogin)
 		if err != nil {
@@ -151,7 +152,7 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 		return
 	}
 	log.Println(player.LookBody)
-	outfit, err := util.Outfit(pigo.Config.String("template"), player.LookType, player.LookHead, player.LookBody, player.LookLegs, player.LookFeet, player.LookAddons)
+	outfit, err := util.Outfit(viper.GetString("template"), player.LookType, player.LookHead, player.LookBody, player.LookLegs, player.LookFeet, player.LookAddons)
 	if err != nil {
 		base.Error = err.Error()
 		return

@@ -1,0 +1,73 @@
+port = "1443"
+mode = "DEV"
+datapack = ""
+template =  ""
+static = "/public/"
+
+[https]
+enabled = true
+cert = "domain-crt.txt"
+key = "domain-key.txt"
+
+[cache]
+enabled = true
+type = "memory"
+
+[[routes]]
+path = "/community/activity"
+method = "GET"
+file = "activity.lua"
+
+[paypal]
+currency = "EUR"
+mode = "sandbox"
+public = ""
+secret = ""
+promo = 10
+description = "Cloaka donation"
+
+[paypal.payment]
+points = 5
+min = 10
+max = 100
+
+[captcha]
+public = ""
+secret = ""
+
+[register]
+experience = 4200
+health = 42
+healthMax = 42
+level = 8
+mana = 0
+manaMax = 0
+premdays = 100
+stamina = 4200
+
+[register.female]
+lookaddons = 10
+lookbody = 10
+lookfeet = 10
+lookhead = 10
+looktype = 10
+
+[register.male]
+lookaddons = 10
+lookbody = 10
+lookfeet = 10
+lookhead = 10
+looktype = 10
+
+[register.skills]
+axe = 10
+club = 10
+dist = 10
+fish = 10
+fist = 10
+shield = 10
+sword = 10
+
+
+
+

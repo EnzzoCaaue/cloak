@@ -18,6 +18,7 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 func registerRoutes() {
@@ -70,19 +71,19 @@ func registerRoutes() {
 }
 
 func registerLUARoutes() {
-	routes := pigo.Config.Array("routes")
-	for _, k := range routes {
-		if k.String("method") == http.MethodGet {
-			pigo.Get(k.String("path"), &controllers.LuaController{
+	routes := viper.Get("routes").([]map[string]interface{})
+	for _, route := range routes {
+		if route["method"].(string) == http.MethodGet {
+			pigo.Get(route["path"].(string), &controllers.LuaController{
 				Base: nil,
-				Page: k.String("file"),
+				Page: route["file"].(string),
 			}, "LuaPage")
 			continue
 		}
-		if k.String("method") == http.MethodPost {
-			pigo.Post(k.String("path"), &controllers.LuaController{
+		if route["method"].(string) == http.MethodPost {
+			pigo.Post(route["path"].(string), &controllers.LuaController{
 				Base: nil,
-				Page: k.String("file"),
+				Page: route["file"].(string),
 			}, "LuaPage")
 		}
 	}
@@ -156,11 +157,17 @@ func main() {
                     
 	Open Tibia automatic account creator developed by Raggaer
 																`)
+	util.ParseConfig(viper.GetString("datapack"))
+	viper.Set("database.database", util.Config.String("mysqlDatabase"))
+	viper.Set("database.user", util.Config.String("mysqlUser"))
+	viper.Set("database.password", util.Config.String("mysqlPass"))
+	viper.Set("database.type", "mysql")
+	pigo.MysqlConnect()
 	installerTime := time.Now()
-	install.Installer()
+	install.Installer(viper.GetString("database.database"))
 	timeTrack(installerTime, "Installer check")
 	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(10)
+	waitGroup.Add(9)
 	go func() {
 		defer timeTrack(time.Now(), "Template loaded")
 		template.Load()
@@ -178,27 +185,27 @@ func main() {
 	}()
 	go func() {
 		defer timeTrack(time.Now(), "Monsters loaded")
-		util.ParseMonsters(pigo.Config.String("datapack"))
+		util.ParseMonsters(viper.GetString("datapack"))
 		waitGroup.Done()
 	}()
-	go func() {
+	/*go func() {
 		defer timeTrack(time.Now(), "Config LUA loaded")
-		util.ParseConfig(pigo.Config.String("datapack"))
+		util.ParseConfig(viper.GetString("datapack"))
 		waitGroup.Done()
-	}()
+	}()*/
 	go func() {
 		defer timeTrack(time.Now(), "Stages loaded")
-		util.ParseStages(pigo.Config.String("datapack"))
+		util.ParseStages(viper.GetString("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
 		defer timeTrack(time.Now(), "Map loaded")
-		util.ParseMap(pigo.Config.String("datapack"))
+		util.ParseMap(viper.GetString("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
 		defer timeTrack(time.Now(), "Items loaded")
-		util.ParseItems(pigo.Config.String("datapack"))
+		util.ParseItems(viper.GetString("datapack"))
 		waitGroup.Done()
 	}()
 	go func() {
@@ -209,11 +216,11 @@ func main() {
 	}()
 	go func() {
 		defer timeTrack(time.Now(), "Sprite file loaded")
-		util.ParseSpr("G:/Games/tibia1090/tibia.spr") // wip
+		//util.ParseSpr("G:/Games/tibia1090/tibia.spr") // wip
 		waitGroup.Done()
 	}()
 	waitGroup.Wait()
-	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n\r\n", pigo.Config.String("port"))
+	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n\r\n", viper.GetString("port"))
 	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()

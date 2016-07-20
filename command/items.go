@@ -1,9 +1,10 @@
 package command
 
 import (
-	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
 	"log"
+
+	"github.com/Cloakaac/cloak/util"
+	"github.com/spf13/viper"
 )
 
 type reloadItems struct{}
@@ -13,6 +14,6 @@ func init() {
 }
 
 func (r *reloadItems) exec() {
-	util.ParseItems(pigo.Config.String("datapack"))
+	util.ParseItems(viper.GetString("datapack"))
 	log.Println("Items loaded")
 }

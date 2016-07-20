@@ -10,6 +10,7 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 type RegisterController struct {
@@ -73,7 +74,7 @@ func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.R
 		return
 	}
 	account.Account.Password = fmt.Sprintf("%x", sha1.Sum([]byte(form.Password)))
-	account.Account.Premdays = pigo.Config.Key("Register").Int("Premdays")
+	account.Account.Premdays = viper.GetInt("Register.Premdays")
 	account.Account.Email = form.Email
 	err := account.Account.Save()
 	if err != nil {
@@ -93,36 +94,36 @@ func (base *RegisterController) CreateAccount(w http.ResponseWriter, req *http.R
 		base.Redirect = "/account/create"
 		return
 	}
-	player.Level = pigo.Config.Key("register").Int("level")
-	player.Health = pigo.Config.Key("register").Int("health")
-	player.HealthMax = pigo.Config.Key("register").Int("healthmax")
-	player.Mana = pigo.Config.Key("register").Int("mana")
-	player.ManaMax = pigo.Config.Key("register").Int("manamax")
+	player.Level = viper.GetInt("register.level")
+	player.Health = viper.GetInt("register.health")
+	player.HealthMax = viper.GetInt("register.healthmax")
+	player.Mana = viper.GetInt("register.mana")
+	player.ManaMax = viper.GetInt("register.manamax")
 	player.Vocation = util.Vocation(form.CharacterVocation)
 	player.Gender = util.Gender(form.CharacterSex)
 	if player.Gender == 0 {
-		player.LookBody = pigo.Config.Key("register").Key("female").Int("lookbody")
-		player.LookFeet = pigo.Config.Key("register").Key("female").Int("lookfeet")
-		player.LookHead = pigo.Config.Key("register").Key("female").Int("lookhead")
-		player.LookType = pigo.Config.Key("register").Key("female").Int("looktype")
-		player.LookAddons = pigo.Config.Key("register").Key("female").Int("lookaddons")
+		player.LookBody = viper.GetInt("register.female.lookbody")
+		player.LookFeet = viper.GetInt("register.female.lookfeet")
+		player.LookHead = viper.GetInt("register.female.lookhead")
+		player.LookType = viper.GetInt("register.female.looktype")
+		player.LookAddons = viper.GetInt("register.female.lookaddons")
 	} else {
-		player.LookBody = pigo.Config.Key("register").Key("male").Int("lookbody")
-		player.LookFeet = pigo.Config.Key("register").Key("male").Int("lookfeet")
-		player.LookHead = pigo.Config.Key("register").Key("male").Int("lookhead")
-		player.LookType = pigo.Config.Key("register").Key("male").Int("looktype")
-		player.LookAddons = pigo.Config.Key("register").Key("male").Int("lookaddons")
+		player.LookBody = viper.GetInt("register.male.lookbody")
+		player.LookFeet = viper.GetInt("register.male.lookfeet")
+		player.LookHead = viper.GetInt("register.male.lookhead")
+		player.LookType = viper.GetInt("register.male.looktype")
+		player.LookAddons = viper.GetInt("register.male.lookaddons")
 	}
 	player.Town = util.Towns.Get(form.CharacterTown)
-	player.Stamina = pigo.Config.Key("register").Int("stamina")
-	player.SkillAxe = pigo.Config.Key("register").Key("skills").Int("axe")
-	player.SkillSword = pigo.Config.Key("register").Key("skills").Int("sword")
-	player.SkillClub = pigo.Config.Key("register").Key("skills").Int("club")
-	player.SkillDist = pigo.Config.Key("register").Key("skills").Int("dist")
-	player.SkillFish = pigo.Config.Key("register").Key("skills").Int("fish")
-	player.SkillFist = pigo.Config.Key("register").Key("skills").Int("fist")
-	player.SkillShield = pigo.Config.Key("register").Key("skills").Int("shield")
-	player.Experience = pigo.Config.Key("register").Int("experience")
+	player.Stamina = viper.GetInt("register.stamina")
+	player.SkillAxe = viper.GetInt("register.skills.axe")
+	player.SkillSword = viper.GetInt("register.skills.sword")
+	player.SkillClub = viper.GetInt("register.skills.club")
+	player.SkillDist = viper.GetInt("register.skills.dist")
+	player.SkillFish = viper.GetInt("register.skills.fish")
+	player.SkillFist = viper.GetInt("register.skills.fist")
+	player.SkillShield = viper.GetInt("register.skills.shield")
+	player.Experience = viper.GetInt("register.experience")
 	err = player.Save()
 	if err != nil {
 		base.Error = "Error while saving player"

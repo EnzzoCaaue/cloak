@@ -14,6 +14,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/nfnt/resize"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 type GuildController struct {
@@ -155,7 +156,7 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 		base.Redirect = "/guilds/view/" + ps.ByName("name")
 		return
 	}
-	logoImage, err := os.Create(pigo.Config.String("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
+	logoImage, err := os.Create(viper.GetString("template") + "/public/guilds/" + ps.ByName("name") + ".gif")
 	if err != nil {
 		base.Error = "Error while trying to open guild logo image"
 		return
@@ -163,9 +164,9 @@ func (base *GuildController) GuildLogo(w http.ResponseWriter, req *http.Request,
 	defer logoImage.Close()
 	resizedLogo := resize.Resize(64, 64, logoGif, resize.Lanczos3)
 	err = gif.Encode(logoImage, resizedLogo, &gif.Options{
-		256,
-		nil,
-		nil,
+		NumColors: 256,
+		Quantizer: nil,
+		Drawer:    nil,
 	})
 	if err != nil {
 		base.Error = "Error while encoding your guild logo"
@@ -277,12 +278,12 @@ func (base *GuildController) CreateGuild(w http.ResponseWriter, req *http.Reques
 		base.Error = "Error while saving your guild"
 		return
 	}
-	logo, err := ioutil.ReadFile(pigo.Config.String("template") + "/public/images/logo.gif")
+	logo, err := ioutil.ReadFile(viper.GetString("template") + "/public/images/logo.gif")
 	if err != nil {
 		base.Error = "Error reading default guild logo"
 		return
 	}
-	guildLogo, err := os.Create(pigo.Config.String("template") + "/public/guilds/" + url.QueryEscape(guild.Name) + ".gif")
+	guildLogo, err := os.Create(viper.GetString("template") + "/public/guilds/" + url.QueryEscape(guild.Name) + ".gif")
 	if err != nil {
 		base.Error = "Error creating your guild logo image"
 		return

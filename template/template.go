@@ -11,6 +11,7 @@ import (
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 // Load loads the AAC template
@@ -91,7 +92,7 @@ func Load() {
 			return current != name
 		},
 		"getCaptchaKey": func() string {
-			return pigo.Config.Key("captcha").String("public")
+			return viper.GetString("captcha.public")
 		},
 		"parseComment": func(comment string) []string {
 			return strings.Split(comment, "\n")

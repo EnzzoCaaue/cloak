@@ -8,6 +8,7 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -48,7 +49,7 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	luaVM.SetGlobal("urlParam", luaVM.NewFunction(vm.urlParam))
 	err := luaVM.DoFile(fmt.Sprintf(
 		"%v/%v/%v",
-		pigo.Config.String("template"),
+		viper.GetString("template"),
 		luaPages,
 		base.Page,
 	))

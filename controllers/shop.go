@@ -12,6 +12,7 @@ import (
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -42,7 +43,7 @@ type ShopController struct {
 }
 
 func init() {
-	if pigo.Config.Key("paypal").String("mode") == sandbox {
+	if viper.GetString("paypal.mode") == sandbox {
 		baseURL = "https://api.sandbox.paypal.com"
 	} else {
 		baseURL = "https://api.paypal.com"
@@ -53,10 +54,10 @@ func init() {
 func (base *ShopController) Paypal(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Data["Errors"] = base.Session.GetFlashes("errors")
 	base.Data["Success"] = base.Session.GetFlashes("success")
-	base.Data["Points"] = pigo.Config.Key("paypal").Key("payment").Float("points")
-	base.Data["Min"] = pigo.Config.Key("paypal").Key("payment").Float("min")
-	base.Data["Max"] = pigo.Config.Key("paypal").Key("payment").Float("max")
-	base.Data["Promo"] = pigo.Config.Key("paypal").Float("promo")
+	base.Data["Points"] = viper.GetInt("paypal.payment.points")
+	base.Data["Min"] = viper.GetInt("paypal.payment.min")
+	base.Data["Max"] = viper.GetInt("paypal.payment.max")
+	base.Data["Promo"] = viper.GetInt("paypal.promo")
 	base.Template = "paypal.html"
 }
 
@@ -72,18 +73,18 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		base.Redirect = "/buypoints/paypal"
 		return
 	}
-	payAmount, err := strconv.ParseFloat(req.FormValue("pay"), 64)
+	payAmount, err := strconv.Atoi(req.FormValue("pay"))
 	if err != nil {
 		base.Session.AddFlash("Payment amount needs to be a number", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return
 	}
-	if payAmount > pigo.Config.Key("paypal").Key("payment").Float("max") {
+	if payAmount > viper.GetInt("paypal.payment.max") {
 		base.Session.AddFlash("Payment amount is too high", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return
 	}
-	if payAmount < pigo.Config.Key("paypal").Key("payment").Float("min") {
+	if payAmount < viper.GetInt("paypal.payment.min") {
 		base.Session.AddFlash("Payment amount is too low", "errors")
 		base.Redirect = "/buypoints/paypal"
 		return
@@ -91,7 +92,7 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 	timeNow := time.Now().Unix()
 	if paypalToken.PaypalToken == nil || (timeNow+paypalToken.PaypalToken.ExpiresIn) < timeNow {
 		paypalToken.rw.Lock()
-		token, err := util.GetPaypalToken(baseURL, pigo.Config.Key("paypal").String("public"), pigo.Config.Key("paypal").String("private"))
+		token, err := util.GetPaypalToken(baseURL, viper.GetString("paypal.public"), viper.GetString("paypal.private"))
 		if err != nil {
 			base.Error = err.Error()
 			return
@@ -100,7 +101,7 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		paypalToken.rw.Unlock()
 	}
 	hostURL := ""
-	if pigo.Config.Key("https").Bool("enabled") {
+	if viper.GetBool("https.enabled") {
 		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
 	} else {
 		hostURL = fmt.Sprintf("%v://%v", "https", req.Host)
@@ -112,8 +113,8 @@ func (base *ShopController) PaypalPay(w http.ResponseWriter, req *http.Request, 
 		baseURL,
 		paypalToken.PaypalToken.Token,
 		req.FormValue("pay"),
-		pigo.Config.Key("paypal").String("description"),
-		pigo.Config.Key("paypal").String("currency"),
+		viper.GetString("paypal.description"),
+		viper.GetString("paypal.currency"),
 	)
 	if err != nil {
 		base.Session.AddFlash("Something went wrong while creating your payment", "errors")
@@ -169,11 +170,11 @@ func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	totalCoins := 0
-	if pigo.Config.Key("paypal").Float("promo") > 0 {
-		totalCoinsNoPromo := paid * pigo.Config.Key("paypal").Key("payment").Float("points")
-		totalCoins = int(((pigo.Config.Key("paypal").Float("promo") * totalCoinsNoPromo) / 100) + totalCoinsNoPromo)
+	if viper.GetInt("paypal.promo") > 0 {
+		totalCoinsNoPromo := paid * viper.GetFloat64("paypal.payment.points")
+		totalCoins = int(((viper.GetFloat64("paypal.promo") * totalCoinsNoPromo) / 100) + totalCoinsNoPromo)
 	} else {
-		totalCoins = int(paid * pigo.Config.Key("paypal").Key("payment").Float("points"))
+		totalCoins = int(paid * viper.GetFloat64("paypal.payment.points"))
 	}
 	err = base.Hook["account"].(*models.CloakaAccount).UpdatePoints(totalCoins)
 	if err != nil {

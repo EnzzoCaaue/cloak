@@ -3,13 +3,15 @@ package controllers
 import (
 	"crypto/sha1"
 	"fmt"
+	"net/http"
+
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
-	"net/http"
+	"github.com/spf13/viper"
 )
 
 type LoginController struct {
@@ -53,7 +55,7 @@ func (base *LoginController) SignIn(w http.ResponseWriter, req *http.Request, _ 
 		base.Redirect = "/account/login"
 		return
 	}
-	if account.TwoFactor > 0 && pigo.Config.String("mode") != "DEV" {
+	if account.TwoFactor > 0 && viper.GetString("mode") != "DEV" {
 		otpConfig := &dgoogauth.OTPConfig{
 			Secret:      account.Account.SecretKey,
 			WindowSize:  3,

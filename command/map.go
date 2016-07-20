@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
+	"github.com/spf13/viper"
 )
 
 type reloadMap struct{}
@@ -14,6 +14,6 @@ func init() {
 }
 
 func (r *reloadMap) exec() {
-	util.ParseMap(pigo.Config.String("datapack"))
+	util.ParseMap(viper.GetString("datapack"))
 	log.Println("Map loaded")
 }

@@ -10,7 +10,7 @@ import (
 
 var (
 	cloakaTables = cloakaDatabase{
-		pigo.Config.Key("database").String("database"),
+		"",
 		[]table{
 			table{
 				"cloaka_buypoints_paypal",
@@ -128,7 +128,8 @@ type table struct {
 }
 
 // Installer runs the installer to create the needed cloaka tables
-func Installer() {
+func Installer(db string) {
+	cloakaTables.database = db
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(len(cloakaTables.tables))
 	for _, t := range cloakaTables.tables {
