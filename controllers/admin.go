@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"runtime"
 	"strconv"
+	"time"
 
 	"github.com/Cloakaac/cloak/models"
 	"github.com/julienschmidt/httprouter"
@@ -72,9 +73,38 @@ func (base *AdminController) ArticleEdit(w http.ResponseWriter, req *http.Reques
 
 // ArticleEditProcess process the article edit form
 func (base *AdminController) ArticleEditProcess(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	/*articleID, err := strconv.ParseInt(ps.ByName("id"), 10, 64)
+	articleID, err := strconv.ParseInt(ps.ByName("id"), 10, 64)
 	if err != nil {
 		base.Error = err.Error()
 		return
-	}*/
+	}
+	article := models.NewArticle()
+	article.ID = articleID
+	article.Text = req.FormValue("text")
+	article.Title = req.FormValue("title")
+	if err := article.Update(); err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Session.AddFlash("Article edited successfully", "success")
+	base.Redirect = "/admin/news"
+}
+
+// ArticleCreate shows the form to create a new article
+func (base *AdminController) ArticleCreate(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	base.Template = "admin_news_create.html"
+}
+
+// ArticleCreateProcess process the article create form
+func (base *AdminController) ArticleCreateProcess(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	article := models.NewArticle()
+	article.Text = req.FormValue("text")
+	article.Title = req.FormValue("title")
+	article.Created = time.Now().Unix()
+	if err := article.Insert(); err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Session.AddFlash("Article created successfully", "success")
+	base.Redirect = "/admin/news"
 }

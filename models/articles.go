@@ -16,6 +16,11 @@ type Article struct {
 	Type     int
 }
 
+// NewArticle returns a new article pointer
+func NewArticle() *Article {
+	return &Article{}
+}
+
 // GetArticles gets all database articles
 func GetArticles(count int) ([]*Article, error) {
 	articles := []*Article{}
@@ -39,4 +44,16 @@ func GetArticle(id int64) *Article {
 	article := &Article{}
 	row.Scan(&article.ID, &article.Title, &article.Text, &article.Created, &article.Type)
 	return article
+}
+
+// Update updates an article by its ID
+func (a *Article) Update() error {
+	_, err := pigo.Database.Exec("UPDATE cloaka_news SET title = ?, text = ? WHERE id = ?", a.Title, a.Text, a.ID)
+	return err
+}
+
+// Insert adds a new article to the database
+func (a *Article) Insert() error {
+	_, err := pigo.Database.Exec("INSERT INTO cloaka_news (text, title, created) VALUES (?, ?, ?)", a.Text, a.Title, a.Created)
+	return err
 }
