@@ -5,9 +5,9 @@ template =  ""
 static = "/public/"
 
 [https]
-enabled = true
-cert = "domain-crt.txt"
-key = "domain-key.txt"
+enabled = false
+cert = ""
+key = ""
 
 [cache]
 enabled = true
