@@ -18,6 +18,13 @@ type Offer struct {
 	Description string
 }
 
+// NewCategory returns a new shop category instance
+func NewCategory() *Category {
+	return &Category{
+		ID: -1,
+	}
+}
+
 // GetCategories returns all shop categories
 func GetCategories() ([]*Category, error) {
 	rows, err := pigo.Database.Query("SELECT id, name, description FROM cloaka_shop_categories")
@@ -48,4 +55,18 @@ func (cat *Category) GetOffers() ([]*Offer, error) {
 		items = append(items, item)
 	}
 	return items, nil
+}
+
+// GetCategory retrieves a category from the database
+func GetCategory(cat string) *Category {
+	row := pigo.Database.QueryRow("SELECT id, name, description FROM cloaka_shop_categories WHERE name = ?", cat)
+	category := NewCategory()
+	row.Scan(&category.ID, &category.Name, &category.Description)
+	return category
+}
+
+// Insert creates a new category in the database
+func (cat *Category) Insert() error {
+	_, err := pigo.Database.Exec("INSERT INTO cloaka_shop_categories (name, description) VALUES (?, ?)", cat.Name, cat.Description)
+	return err
 }

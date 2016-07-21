@@ -99,12 +99,12 @@ func (base *AdminController) ArticleEditProcess(w http.ResponseWriter, req *http
 }
 
 // ArticleCreate shows the form to create a new article
-func (base *AdminController) ArticleCreate(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (base *AdminController) ArticleCreate(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Template = "admin_news_create.html"
 }
 
 // ArticleCreateProcess process the article create form
-func (base *AdminController) ArticleCreateProcess(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (base *AdminController) ArticleCreateProcess(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	article := models.NewArticle()
 	article.Text = req.FormValue("text")
 	article.Title = req.FormValue("title")
@@ -136,4 +136,41 @@ func (base *AdminController) ArticleDelete(w http.ResponseWriter, req *http.Requ
 	}
 	base.Session.AddFlash("Article deleted successfully", "success")
 	base.Redirect = "/admin/news"
+}
+
+// ShopCategories shows the donation shop categories
+func (base *AdminController) ShopCategories(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	categories, err := models.GetCategories()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Data["Success"] = base.Session.GetFlashes("success")
+	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data["Categories"] = categories
+	base.Template = "admin_shop_categories.html"
+}
+
+// CreateCategory shows the form to create a new shop category
+func (base *AdminController) CreateCategory(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	base.Template = "admin_shop_categories_create.html"
+}
+
+// CreateCategoryProcess creates a new shop category
+func (base *AdminController) CreateCategoryProcess(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	category := models.GetCategory(req.FormValue("name"))
+	if category.ID != -1 {
+		base.Session.AddFlash("Category name already in use", "errors")
+		base.Redirect = "/admin/shop/categories"
+		return
+	}
+	category.Name = req.FormValue("name")
+	category.Description = req.FormValue("desc")
+	err := category.Insert()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Session.AddFlash("Category created successfully", "success")
+	base.Redirect = "/admin/shop/categories"
 }
