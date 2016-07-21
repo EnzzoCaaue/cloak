@@ -131,5 +131,8 @@ func Load() {
 			}
 			return false
 		},
+		"csrfField": func(token string) template.HTML {
+			return template.HTML(fmt.Sprintf("<input type='hidden' name='_csrf' value = '%v'>", token))
+		},
 	})
 }

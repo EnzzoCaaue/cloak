@@ -16,62 +16,243 @@ import (
 	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/template"
 	"github.com/Cloakaac/cloak/util"
+	"github.com/dchest/uniuri"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raggaer/pigo"
 	"github.com/spf13/viper"
 )
 
 func registerRoutes() {
+	pigo.Group([]string{"guest"},
+		pigo.Route{
+			Path:       "/account/login",
+			Controller: &controllers.LoginController{},
+			Call:       "Login",
+			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
+		},
+		pigo.Route{
+			Path:       "/account/login",
+			Controller: &controllers.LoginController{},
+			Call:       "SignIn",
+			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
+		},
+		pigo.Route{
+			Path:       "/account/create",
+			Controller: &controllers.RegisterController{},
+			Call:       "CreateAccount",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/account/create",
+			Controller: &controllers.RegisterController{},
+			Call:       "Register",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/lost",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountLost",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/lost/password",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountLostPassword",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/account/lost/name",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountLostName",
+			Method:     http.MethodPost,
+		},
+	)
+	pigo.Group([]string{"logged", "admin"},
+		pigo.Route{
+			Path:       "/admin/overview",
+			Controller: &controllers.AdminController{},
+			Call:       "Dashboard",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/news",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleList",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/news/edit/:id",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleEdit",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/news/edit/:id",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleEditProcess",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/admin/news/create",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleCreate",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/news/create",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleCreateProcess",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/admin/news/delete/:id",
+			Controller: &controllers.AdminController{},
+			Call:       "ArticleDelete",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/shop/categories",
+			Controller: &controllers.AdminController{},
+			Call:       "ShopCategories",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/shop/categories/create",
+			Controller: &controllers.AdminController{},
+			Call:       "CreateCategory",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/admin/shop/categories/create",
+			Controller: &controllers.AdminController{},
+			Call:       "CreateCategoryProcess",
+			Method:     http.MethodPost,
+		},
+	)
+	pigo.Group([]string{"logged", "guildOwner"},
+		pigo.Route{
+			Path:       "/guilds/logo/:name",
+			Controller: &controllers.GuildController{},
+			Call:       "GuildLogo",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/guilds/motd/:name",
+			Controller: &controllers.GuildController{},
+			Call:       "GuildMotd",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/guilds/ranks/:name",
+			Controller: &controllers.GuildController{},
+			Call:       "GuildRanks",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/guilds/invite/:name",
+			Controller: &controllers.GuildController{},
+			Call:       "GuildInvite",
+			Method:     http.MethodPost,
+		},
+	)
+	pigo.Group([]string{"logged"},
+		pigo.Route{
+			Path:       "/guilds/create",
+			Controller: &controllers.GuildController{},
+			Call:       "CreateGuild",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/account/manage",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountManage",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/logout",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountLogout",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/lost/password",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountSetRecovery",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/manage/recovery",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountSetRecovery",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/manage/twofactor",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountTwoFactor",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/manage/twofactor",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountSetTwoFactor",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/account/manage/delete/:name",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountDeleteCharacter",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/manage/delete/:name",
+			Controller: &controllers.AccountController{},
+			Call:       "DeleteCharacter",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/account/manage/create",
+			Controller: &controllers.AccountController{},
+			Call:       "AccountCreateCharacter",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/account/manage/create",
+			Controller: &controllers.AccountController{},
+			Call:       "CreateCharacter",
+			Method:     http.MethodPost,
+		},
+		pigo.Route{
+			Path:       "/buypoints/paypal",
+			Controller: &controllers.ShopController{},
+			Call:       "Paypal",
+			Method:     http.MethodGet,
+		},
+		pigo.Route{
+			Path:       "/buypoints/paypal",
+			Controller: &controllers.ShopController{},
+			Call:       "PaypalPay",
+			Method:     http.MethodPost,
+		},
+	)
 	pigo.Get("/credits", &controllers.HomeController{}, "Credits")
 	pigo.Get("/", &controllers.HomeController{}, "Home")
-	pigo.Get("/account/login", &controllers.LoginController{}, "Login", "guest")
-	pigo.Post("/account/login", &controllers.LoginController{}, "SignIn", "guest", "csrf")
-	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList")
-	pigo.Post("/guilds/create", &controllers.GuildController{}, "CreateGuild", "logged")
-	pigo.Get("/account/create", &controllers.RegisterController{}, "Register", "guest")
-	pigo.Post("/account/create", &controllers.RegisterController{}, "CreateAccount", "guest", "csrf")
-	pigo.Get("/account/manage", &controllers.AccountController{}, "AccountManage", "logged")
-	pigo.Get("/account/logout", &controllers.AccountController{}, "AccountLogout", "logged")
-	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView")
-	pigo.Get("/community/overview", &controllers.CommunityController{}, "ServerOverview")
-	pigo.Get("/community/online", &controllers.CommunityController{}, "ServerOnline")
-	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView")
-	pigo.Get("/account/manage/recovery", &controllers.AccountController{}, "AccountSetRecovery", "logged")
-	pigo.Get("/account/manage/twofactor", &controllers.AccountController{}, "AccountTwoFactor", "logged")
-	pigo.Post("/account/manage/twofactor", &controllers.AccountController{}, "AccountSetTwoFactor", "logged")
-	pigo.Get("/account/manage/delete/:name", &controllers.AccountController{}, "AccountDeleteCharacter", "logged")
-	pigo.Post("/account/manage/delete/:name", &controllers.AccountController{}, "DeleteCharacter", "logged")
-	pigo.Get("/account/manage/create", &controllers.AccountController{}, "AccountCreateCharacter", "logged")
-	pigo.Post("/account/manage/create", &controllers.AccountController{}, "CreateCharacter", "logged")
-	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter")
-	pigo.Get("/account/lost", &controllers.AccountController{}, "AccountLost", "guest")
-	pigo.Post("/account/lost/password", &controllers.AccountController{}, "AccountLostPassword", "guest")
-	pigo.Post("/account/lost/name", &controllers.AccountController{}, "AccountLostName", "guest")
-	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild")
-	pigo.Post("/guilds/logo/:name", &controllers.GuildController{}, "GuildLogo", "logged", "guildOwner")
-	pigo.Post("/guilds/motd/:name", &controllers.GuildController{}, "GuildMotd", "logged", "guildOwner")
-	pigo.Post("/guilds/ranks/:name", &controllers.GuildController{}, "GuildRanks", "logged", "guildOwner")
-	pigo.Post("/guilds/invite/:name", &controllers.GuildController{}, "GuildInvite", "logged", "guildOwner")
-	pigo.Get("/outfit/:name", &controllers.CommunityController{}, "OutfitView")
-	pigo.Get("/buypoints/paypal", &controllers.ShopController{}, "Paypal", "logged")
-	pigo.Post("/buypoints/paypal", &controllers.ShopController{}, "PaypalPay", "logged")
 	pigo.Get("/buypoints/paypal/process", &controllers.ShopController{}, "PaypalProcess")
 	pigo.Get("/highscores/:type/:page", &controllers.CommunityController{}, "Highscores")
-	pigo.Get("/admin/overview", &controllers.AdminController{}, "Dashboard", "logged", "admin")
-	pigo.Get("/admin/server", &controllers.AdminController{}, "Server", "logged", "admin")
-	pigo.Get("/admin/news", &controllers.AdminController{}, "ArticleList", "logged", "admin")
-	pigo.Get("/admin/news/edit/:id", &controllers.AdminController{}, "ArticleEdit", "logged", "admin")
-	pigo.Post("/admin/news/edit/:id", &controllers.AdminController{}, "ArticleEditProcess", "logged", "admin")
-	pigo.Get("/admin/news/create", &controllers.AdminController{}, "ArticleCreate", "logged", "admin")
-	pigo.Post("/admin/news/create", &controllers.AdminController{}, "ArticleCreateProcess", "logged", "admin")
-	pigo.Get("/admin/news/delete/:id", &controllers.AdminController{}, "ArticleDelete", "logged", "admin")
-	pigo.Get("/admin/shop/categories", &controllers.AdminController{}, "ShopCategories", "logged", "admin")
-	pigo.Get("/admin/shop/categories/create", &controllers.AdminController{}, "CreateCategory", "logged", "admin")
-	pigo.Post("/admin/shop/categories/create", &controllers.AdminController{}, "CreateCategoryProcess", "logged", "admin")
 	pigo.Get("/houses/list", &controllers.HouseController{}, "List")
 	pigo.Get("/houses/view/:name", &controllers.HouseController{}, "View")
 	pigo.Post("/houses/list", &controllers.HouseController{}, "ListName")
 	pigo.Get("/shop/overview", &controllers.ShopController{}, "ShopView")
+	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList")
+	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView")
+	pigo.Get("/community/overview", &controllers.CommunityController{}, "ServerOverview")
+	pigo.Get("/community/online", &controllers.CommunityController{}, "ServerOnline")
+	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView")
+	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild")
+	pigo.Get("/outfit/:name", &controllers.CommunityController{}, "OutfitView")
+	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter")
 }
 
 func registerLUARoutes() {
@@ -98,6 +279,29 @@ func main() {
 		if c.Session.GetString("key") == "" {
 			http.Redirect(w, req, "/account/login", 301)
 			return false
+		}
+		return true
+	})
+	pigo.Filter("csrfToken", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		token := uniuri.New()
+		c.Session.Set("csrfToken", token)
+		c.Data("csrfToken", token)
+		return true
+	})
+	pigo.Filter("csrfValidation", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
+		token, ok := c.Session.Get("csrfToken").(string)
+		if !ok {
+			return false
+		}
+		switch req.Method {
+		case http.MethodGet:
+			if token != ps.ByName("token") {
+				return false
+			}
+		case http.MethodPost:
+			if req.FormValue("_csrf") != token {
+				return false
+			}
 		}
 		return true
 	})
