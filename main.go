@@ -213,12 +213,14 @@ func registerRoutes() {
 			Controller: &controllers.AccountController{},
 			Call:       "AccountTwoFactor",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/account/manage/twofactor",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountSetTwoFactor",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/manage/delete/:name",
@@ -325,7 +327,6 @@ func main() {
 				return false
 			}
 		case http.MethodPost:
-			log.Println(token, req.FormValue("_csrf"))
 			if req.FormValue("_csrf") != token {
 				return false
 			}
