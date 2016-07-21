@@ -146,7 +146,7 @@ func main() {
 	pigo.ControllerHook("account", func(c *pigo.Controller) {
 		account := models.GetAccountByToken(c.Session.GetString("key"))
 		c.Hook["account"] = account
-		c.Data["logged"] = account != nil
+		c.Data("logged", account != nil)
 	})
 	fmt.Println(`
 

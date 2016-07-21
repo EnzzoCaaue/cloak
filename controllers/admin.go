@@ -25,20 +25,20 @@ func (base *AdminController) Dashboard(w http.ResponseWriter, req *http.Request,
 		base.Error = "Error while trying to get online records"
 		return
 	}
-	base.Data["Records"] = onlineRecords
-	base.Data["Memstats"] = m
-	base.Data["Goversion"] = runtime.Version()
-	base.Data["Numcpu"] = runtime.NumCPU()
-	base.Data["Numroutine"] = runtime.NumGoroutine()
-	base.Data["Numcgo"] = runtime.NumCgoCall()
-	base.Data["AccountTotal"] = adminInfo.Accounts
-	base.Data["PlayerTotal"] = adminInfo.Players
-	base.Data["MaleTotal"] = adminInfo.Males
-	base.Data["FemaleTotal"] = adminInfo.Females
-	base.Data["SorcererTotal"] = adminInfo.Sorcerers
-	base.Data["DruidTotal"] = adminInfo.Druids
-	base.Data["PaladinTotal"] = adminInfo.Paladins
-	base.Data["KnightTotal"] = adminInfo.Knights
+	base.Data("Records", onlineRecords)
+	base.Data("Memstats", m)
+	base.Data("Goversion", runtime.Version())
+	base.Data("Numcpu", runtime.NumCPU())
+	base.Data("Numroutine", runtime.NumGoroutine())
+	base.Data("Numcgo", runtime.NumCgoCall())
+	base.Data("AccountTotal", adminInfo.Accounts)
+	base.Data("PlayerTotal", adminInfo.Players)
+	base.Data("MaleTotal", adminInfo.Males)
+	base.Data("FemaleTotal", adminInfo.Females)
+	base.Data("SorcererTotal", adminInfo.Sorcerers)
+	base.Data("DruidTotal", adminInfo.Druids)
+	base.Data("PaladinTotal", adminInfo.Paladins)
+	base.Data("KnightTotal", adminInfo.Knights)
 	base.Template = "admin.html"
 }
 
@@ -54,8 +54,8 @@ func (base *AdminController) ArticleList(w http.ResponseWriter, req *http.Reques
 		base.Error = err.Error()
 		return
 	}
-	base.Data["Success"] = base.Session.GetFlashes("success")
-	base.Data["News"] = articles
+	base.Data("Success", base.Session.GetFlashes("success"))
+	base.Data("News", articles)
 	base.Template = "admin_news.html"
 }
 
@@ -71,7 +71,7 @@ func (base *AdminController) ArticleEdit(w http.ResponseWriter, req *http.Reques
 		base.Redirect = "/admin/news"
 		return
 	}
-	base.Data["Article"] = article
+	base.Data("Article", article)
 	base.Template = "admin_news_edit.html"
 
 }
@@ -145,9 +145,9 @@ func (base *AdminController) ShopCategories(w http.ResponseWriter, req *http.Req
 		base.Error = err.Error()
 		return
 	}
-	base.Data["Success"] = base.Session.GetFlashes("success")
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Categories"] = categories
+	base.Data("Success", base.Session.GetFlashes("success"))
+	base.Data("Errors", base.Session.GetFlashes("errors"))
+	base.Data("Categories", categories)
 	base.Template = "admin_shop_categories.html"
 }
 

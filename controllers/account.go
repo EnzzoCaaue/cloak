@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/sha1"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -40,17 +39,16 @@ type passwordLostForm struct {
 
 // AccountLost shows the recover account form
 func (base *AccountController) AccountLost(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data["ErrorsPassword"] = base.Session.GetFlashes("errorsPassword")
-	base.Data["SuccessPassword"] = base.Session.GetFlashes("successPassword")
-	base.Data["ErrorsName"] = base.Session.GetFlashes("errorsName")
-	base.Data["SuccessName"] = base.Session.GetFlashes("successName")
+	base.Data("ErrorsPassword", base.Session.GetFlashes("errorsPassword"))
+	base.Data("SuccessPassword", base.Session.GetFlashes("successPassword"))
+	base.Data("ErrorsName", base.Session.GetFlashes("errorsName"))
+	base.Data("SuccessName", base.Session.GetFlashes("successName"))
 	base.Template = "account_lost.html"
 }
 
 // AccountLostName recovers an account name using the recovery key and the password
 func (base *AccountController) AccountLostName(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	passwordSha1 := fmt.Sprintf("%x", sha1.Sum([]byte(req.FormValue("password"))))
-	log.Println(req.FormValue("key"))
 	name := models.RecoverAccountName(req.FormValue("key"), passwordSha1)
 	if name == "" {
 		base.Session.AddFlash("Wrong account password or recovery key", "errorsName")
@@ -95,9 +93,9 @@ func (base *AccountController) AccountManage(w http.ResponseWriter, req *http.Re
 		base.Error = "Error while getting your character list"
 		return
 	}
-	base.Data["Success"] = base.Session.GetFlashes("success")
-	base.Data["Characters"] = characters
-	base.Data["Account"] = base.Hook["account"].(*models.CloakaAccount)
+	base.Data("Success", base.Session.GetFlashes("success"))
+	base.Data("Characters", characters)
+	base.Data("Account", base.Hook["account"].(*models.CloakaAccount))
 	base.Template = "manage.html"
 }
 
@@ -130,8 +128,8 @@ func (base *AccountController) AccountTwoFactor(w http.ResponseWriter, req *http
 	}
 	secretKey := uniuri.NewLenChars(16, []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"))
 	codeURL := fmt.Sprintf("otpauth://totp/%v:%v?secret=%v&issuer=%v", "MyServer", base.Hook["account"].(*models.CloakaAccount).Account.Name, secretKey, "MyServer")
-	base.Data["QR"] = "http://chart.apis.google.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=" + codeURL
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data("QR", "http://chart.apis.google.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl="+codeURL)
+	base.Data("Errors", base.Session.GetFlashes("errors"))
 	base.Session.Set("secret", secretKey)
 	base.Template = "account_twofactor.html"
 }
@@ -178,8 +176,8 @@ func (base *AccountController) AccountDeleteCharacter(w http.ResponseWriter, req
 	if player.Cloaka.Deleted == 1 {
 		base.Redirect = "/account/manage"
 	}
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Name"] = player.Name
+	base.Data("Errors", base.Session.GetFlashes("errors"))
+	base.Data("Name", player.Name)
 	base.Template = "delete_character.html"
 }
 
@@ -229,8 +227,8 @@ func (base *AccountController) DeleteCharacter(w http.ResponseWriter, req *http.
 
 // AccountCreateCharacter shows the form to create an account character
 func (base *AccountController) AccountCreateCharacter(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Towns"] = util.Towns.GetList()
+	base.Data("Errors", base.Session.GetFlashes("errors"))
+	base.Data("Towns", util.Towns.GetList())
 	base.Template = "create_character.html"
 }
 

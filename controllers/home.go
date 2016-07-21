@@ -34,9 +34,9 @@ func (base *HomeController) Home(w http.ResponseWriter, req *http.Request, _ htt
 			return
 		}
 		pigo.Cache.Put("articles", time.Minute, articles)
-		base.Data["Articles"] = articles
+		base.Data("Articles", articles)
 	} else {
-		base.Data["Articles"] = pigo.Cache.Get("articles").([]*models.Article)
+		base.Data("Articles", pigo.Cache.Get("articles").([]*models.Article))
 	}
 	base.Session.AddFlash("test", "test")
 	base.Template = "home.html"
@@ -63,9 +63,9 @@ func (base *HomeController) Credits(w http.ResponseWriter, req *http.Request, _ 
 			return
 		}
 		pigo.Cache.Put("credits", 10*time.Minute, collaborators)
-		base.Data["Contributors"] = collaborators
+		base.Data("Contributors", collaborators)
 	} else {
-		base.Data["Contributors"] = pigo.Cache.Get("credits").([]*githubCollaborator)
+		base.Data("Contributors", pigo.Cache.Get("credits").([]*githubCollaborator))
 	}
 	base.Template = "credits.html"
 }

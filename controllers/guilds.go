@@ -64,23 +64,23 @@ func (base *GuildController) ViewGuild(w http.ResponseWriter, req *http.Request,
 		base.Error = "Error while getting guild data"
 		return
 	}
-	base.Data["Owner"] = false
-	if base.Data["logged"].(bool) {
+	base.Data("Owner", false)
+	if base.GetData("logged").(bool) {
 		characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
 		if err != nil {
 			base.Error = "Error getting your character list"
 		}
 		for i := range characters {
 			if characters[i].ID == guild.Owner.ID {
-				base.Data["Owner"] = true
+				base.Data("Owner", true)
 				break
 			}
 		}
 	}
-	base.Data["Token"] = 12
-	base.Data["Guild"] = guild
-	base.Data["Errors"] = base.Session.GetFlashes("Errors")
-	base.Data["Success"] = base.Session.GetFlashes("Success")
+	base.Data("Token", 12)
+	base.Data("Guild", guild)
+	base.Data("Errors", base.Session.GetFlashes("Errors"))
+	base.Data("Success", base.Session.GetFlashes("Success"))
 	base.Template = "view_guild.html"
 }
 
@@ -217,22 +217,22 @@ func (base *GuildController) GuildInvite(w http.ResponseWriter, req *http.Reques
 
 // GuildList shows a list of guilds
 func (base *GuildController) GuildList(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data["Characters"] = nil
-	if base.Data["logged"].(bool) {
+	base.Data("Characters", nil)
+	if base.GetData("logged").(bool) {
 		characters, err := base.Hook["account"].(*models.CloakaAccount).GetCharacters()
 		if err != nil {
 			base.Error = "Error while getting your character list"
 			return
 		}
-		base.Data["Characters"] = characters
+		base.Data("Characters", characters)
 	}
 	guildList, err := models.GetGuildList()
 	if err != nil {
 		base.Error = "Error while getting guild list"
 		return
 	}
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Guilds"] = guildList
+	base.Data("Errors", base.Session.GetFlashes("errors"))
+	base.Data("Guilds", guildList)
 	base.Template = "guilds.html"
 }
 

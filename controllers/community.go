@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,8 +11,6 @@ import (
 
 	"github.com/Cloakaac/cloak/models"
 	"github.com/spf13/viper"
-
-	"fmt"
 
 	"github.com/Cloakaac/cloak/util"
 	"github.com/julienschmidt/httprouter"
@@ -46,18 +44,18 @@ func (base *CommunityController) Highscores(w http.ResponseWriter, req *http.Req
 			return
 		}
 		pigo.Cache.Put("highscore"+name, 5*time.Minute, list)
-		base.Data["List"] = list
+		base.Data("List", list)
 	} else {
 		list := pigo.Cache.Get("highscore" + name).([]*models.HighscorePlayer)
-		base.Data["List"] = list
+		base.Data("List", list)
 	}
-	base.Data["PageNext"] = page + 1
-	base.Data["PageOld"] = page - 1
-	base.Data["SkillName"] = name
-	base.Data["Skill"] = highscoreType
-	base.Data["CurrentRank"] = pageIndex
-	base.Data["OldRank"] = pageIndex - 10
-	base.Data["NextRank"] = pageIndex + 10
+	base.Data("PageNext", page+1)
+	base.Data("PageOld", page-1)
+	base.Data("SkillName", name)
+	base.Data("Skill", highscoreType)
+	base.Data("CurrentRank", pageIndex)
+	base.Data("OldRank", pageIndex-10)
+	base.Data("NextRank", pageIndex+10)
 	base.Template = "highscores.html"
 }
 
@@ -79,8 +77,8 @@ func (base *CommunityController) CharacterView(w http.ResponseWriter, req *http.
 		base.Error = "Error while getting character deaths"
 		return
 	}
-	base.Data["Info"] = player
-	base.Data["Deaths"] = deaths
+	base.Data("Info", player)
+	base.Data("Deaths", deaths)
 	base.Template = "character_view.html"
 }
 
@@ -139,8 +137,8 @@ func (base *CommunityController) SearchCharacter(w http.ResponseWriter, req *htt
 		base.Error = "Error while searching for players"
 		return
 	}
-	base.Data["Current"] = req.FormValue("name")
-	base.Data["Characters"] = players
+	base.Data("Current", req.FormValue("name"))
+	base.Data("Characters", players)
 	base.Template = "character_search.html"
 }
 
@@ -151,7 +149,6 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 	if player == nil {
 		return
 	}
-	log.Println(player.LookBody)
 	outfit, err := util.Outfit(viper.GetString("template"), player.LookType, player.LookHead, player.LookBody, player.LookLegs, player.LookFeet, player.LookAddons)
 	if err != nil {
 		base.Error = err.Error()
@@ -164,20 +161,20 @@ func (base *CommunityController) OutfitView(w http.ResponseWriter, req *http.Req
 // ServerOverview shows all the server information
 func (base *CommunityController) ServerOverview(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Template = "server_overview.html"
-	base.Data["Name"] = util.Config.String("serverName")
-	base.Data["WorldType"] = util.Config.String("worldType")
-	base.Data["ProtectionLevel"] = util.Config.Int("protectionLevel")
-	base.Data["RedSkull"] = util.Config.Int("killsToRedSkull")
-	base.Data["BlackSkull"] = util.Config.Int("killsToBlackSkull")
-	base.Data["InfiniteRunes"] = util.Config.Bool("removeChargesFromRunes")
-	base.Data["MagicRate"] = util.Config.Int("rateMagic")
-	base.Data["LootRate"] = util.Config.Int("rateLoot")
-	base.Data["SkillRate"] = util.Config.Int("rateSkill")
-	base.Data["SpawnRate"] = util.Config.Int("rateSpawn")
-	base.Data["Motd"] = util.Config.String("motd")
-	base.Data["FreePremium"] = util.Config.Bool("freePremium")
-	base.Data["StagesEnabled"] = util.Stages.IsEnabled()
-	base.Data["Stages"] = util.Stages.GetAll()
+	base.Data("Name", util.Config.String("serverName"))
+	base.Data("WorldType", util.Config.String("worldType"))
+	base.Data("ProtectionLevel", util.Config.Int("protectionLevel"))
+	base.Data("RedSkull", util.Config.Int("killsToRedSkull"))
+	base.Data("BlackSkull", util.Config.Int("killsToBlackSkull"))
+	base.Data("InfiniteRunes", util.Config.Bool("removeChargesFromRunes"))
+	base.Data("MagicRate", util.Config.Int("rateMagic"))
+	base.Data("LootRate", util.Config.Int("rateLoot"))
+	base.Data("SkillRate", util.Config.Int("rateSkill"))
+	base.Data("SpawnRate", util.Config.Int("rateSpawn"))
+	base.Data("Motd", util.Config.String("motd"))
+	base.Data("FreePremium", util.Config.Bool("freePremium"))
+	base.Data("StagesEnabled", util.Stages.IsEnabled())
+	base.Data("Stages", util.Stages.GetAll())
 }
 
 // ServerOnline shows online players
@@ -187,6 +184,6 @@ func (base *CommunityController) ServerOnline(w http.ResponseWriter, req *http.R
 		base.Error = err.Error()
 		return
 	}
-	base.Data["List"] = list
+	base.Data("List", list)
 	base.Template = "online.html"
 }

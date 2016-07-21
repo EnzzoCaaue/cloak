@@ -18,9 +18,9 @@ type HouseController struct {
 func (base *HouseController) List(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	town := util.Towns.GetRandom()
 	houses := util.Houses.GetList(town.ID)
-	base.Data["Houses"] = houses
-	base.Data["Town"] = town
-	base.Data["Towns"] = util.Towns.GetList()
+	base.Data("Houses", houses)
+	base.Data("Town", town)
+	base.Data("Towns", util.Towns.GetList())
 	base.Template = "houses.html"
 }
 
@@ -32,9 +32,9 @@ func (base *HouseController) ListName(w http.ResponseWriter, req *http.Request, 
 		return
 	}
 	houses := util.Houses.GetList(town.ID)
-	base.Data["Houses"] = houses
-	base.Data["Town"] = town
-	base.Data["Towns"] = util.Towns.GetList()
+	base.Data("Houses", houses)
+	base.Data("Town", town)
+	base.Data("Towns", util.Towns.GetList())
 	base.Template = "houses.html"
 }
 
@@ -50,7 +50,7 @@ func (base *HouseController) View(w http.ResponseWriter, req *http.Request, ps h
 		base.Redirect = "/"
 		return
 	}
-	base.Data["Info"] = house
-	base.Data["Town"] = util.Towns.GetByID(house.TownID)
+	base.Data("Info", house)
+	base.Data("Town", util.Towns.GetByID(house.TownID))
 	base.Template = "house_view.html"
 }

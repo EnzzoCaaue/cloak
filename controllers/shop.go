@@ -52,12 +52,12 @@ func init() {
 
 // Paypal shows the paypal buypoints page
 func (base *ShopController) Paypal(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
-	base.Data["Success"] = base.Session.GetFlashes("success")
-	base.Data["Points"] = viper.GetInt("paypal.payment.points")
-	base.Data["Min"] = viper.GetInt("paypal.payment.min")
-	base.Data["Max"] = viper.GetInt("paypal.payment.max")
-	base.Data["Promo"] = viper.GetInt("paypal.promo")
+	base.Data("Errors", base.Session.GetFlashes("errors"))
+	base.Data("Success", base.Session.GetFlashes("success"))
+	base.Data("Points", viper.GetInt("paypal.payment.points"))
+	base.Data("Min", viper.GetInt("paypal.payment.min"))
+	base.Data("Max", viper.GetInt("paypal.payment.max"))
+	base.Data("Promo", viper.GetInt("paypal.promo"))
 	base.Template = "paypal.html"
 }
 
@@ -187,7 +187,7 @@ func (base *ShopController) PaypalProcess(w http.ResponseWriter, req *http.Reque
 
 // ShopView loads and shows the "donation" shop
 func (base *ShopController) ShopView(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data["Errors"] = base.Session.GetFlashes("errors")
+	base.Data("Errors", base.Session.GetFlashes("errors"))
 	categories, err := models.GetCategories()
 	if err != nil {
 		base.Error = err.Error()
@@ -200,7 +200,7 @@ func (base *ShopController) ShopView(w http.ResponseWriter, req *http.Request, _
 		base.Error = err.Error()
 		return
 	}
-	base.Data["Offers"] = offers
-	base.Data["Categories"] = categories
+	base.Data("Offers", offers)
+	base.Data("Categories", categories)
 	base.Template = "shop.html"
 }
