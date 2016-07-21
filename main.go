@@ -43,30 +43,35 @@ func registerRoutes() {
 			Controller: &controllers.RegisterController{},
 			Call:       "CreateAccount",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/create",
 			Controller: &controllers.RegisterController{},
 			Call:       "Register",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/account/lost",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountLost",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/account/lost/password",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountLostPassword",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/lost/name",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountLostName",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 	)
 	pigo.Group([]string{"logged", "admin"},
@@ -81,36 +86,42 @@ func registerRoutes() {
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleList",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/admin/news/edit/:id",
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleEdit",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/admin/news/edit/:id",
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleEditProcess",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/admin/news/create",
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleCreate",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/admin/news/create",
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleCreateProcess",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
-			Path:       "/admin/news/delete/:id",
+			Path:       "/admin/news/delete/:id/:token",
 			Controller: &controllers.AdminController{},
 			Call:       "ArticleDelete",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/admin/shop/categories",
@@ -123,12 +134,14 @@ func registerRoutes() {
 			Controller: &controllers.AdminController{},
 			Call:       "CreateCategory",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/admin/shop/categories/create",
 			Controller: &controllers.AdminController{},
 			Call:       "CreateCategoryProcess",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 	)
 	pigo.Group([]string{"logged", "guildOwner"},
@@ -137,24 +150,28 @@ func registerRoutes() {
 			Controller: &controllers.GuildController{},
 			Call:       "GuildLogo",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/guilds/motd/:name",
 			Controller: &controllers.GuildController{},
 			Call:       "GuildMotd",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/guilds/ranks/:name",
 			Controller: &controllers.GuildController{},
 			Call:       "GuildRanks",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/guilds/invite/:name",
 			Controller: &controllers.GuildController{},
 			Call:       "GuildInvite",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 	)
 	pigo.Group([]string{"logged"},
@@ -163,18 +180,21 @@ func registerRoutes() {
 			Controller: &controllers.GuildController{},
 			Call:       "CreateGuild",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/manage",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountManage",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
-			Path:       "/account/logout",
+			Path:       "/account/logout/:token",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountLogout",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/lost/password",
@@ -205,36 +225,42 @@ func registerRoutes() {
 			Controller: &controllers.AccountController{},
 			Call:       "AccountDeleteCharacter",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/account/manage/delete/:name",
 			Controller: &controllers.AccountController{},
 			Call:       "DeleteCharacter",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/account/manage/create",
 			Controller: &controllers.AccountController{},
 			Call:       "AccountCreateCharacter",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/account/manage/create",
 			Controller: &controllers.AccountController{},
 			Call:       "CreateCharacter",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/buypoints/paypal",
 			Controller: &controllers.ShopController{},
 			Call:       "Paypal",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/buypoints/paypal",
 			Controller: &controllers.ShopController{},
 			Call:       "PaypalPay",
 			Method:     http.MethodPost,
+			Filters:    []string{"csrfValidation"},
 		},
 	)
 	pigo.Get("/credits", &controllers.HomeController{}, "Credits")
@@ -245,12 +271,12 @@ func registerRoutes() {
 	pigo.Get("/houses/view/:name", &controllers.HouseController{}, "View")
 	pigo.Post("/houses/list", &controllers.HouseController{}, "ListName")
 	pigo.Get("/shop/overview", &controllers.ShopController{}, "ShopView")
-	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList")
+	pigo.Get("/guilds/list", &controllers.GuildController{}, "GuildList", "csrfToken")
 	pigo.Get("/character/view/:name", &controllers.CommunityController{}, "CharacterView")
 	pigo.Get("/community/overview", &controllers.CommunityController{}, "ServerOverview")
 	pigo.Get("/community/online", &controllers.CommunityController{}, "ServerOnline")
 	pigo.Get("/character/signature/:name", &controllers.CommunityController{}, "SignatureView")
-	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild")
+	pigo.Get("/guilds/view/:name", &controllers.GuildController{}, "ViewGuild", "csrfToken")
 	pigo.Get("/outfit/:name", &controllers.CommunityController{}, "OutfitView")
 	pigo.Post("/character/search", &controllers.CommunityController{}, "SearchCharacter")
 }
@@ -299,6 +325,7 @@ func main() {
 				return false
 			}
 		case http.MethodPost:
+			log.Println(token, req.FormValue("_csrf"))
 			if req.FormValue("_csrf") != token {
 				return false
 			}

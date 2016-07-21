@@ -27,7 +27,6 @@ type LoginForm struct {
 
 // Login shows the login form
 func (base *LoginController) Login(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data("csrfToken", uniuri.New())
 	base.Data("Errors", base.Session.GetFlashes("errors"))
 	base.Template = "login.html"
 }

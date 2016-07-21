@@ -33,7 +33,6 @@ type RegisterForm struct {
 func (base *RegisterController) Register(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	base.Data("Errors", base.Session.GetFlashes("errors"))
 	base.Data("Towns", util.Towns.GetList())
-	base.Data("csrfToken", uniuri.New())
 	base.Template = "register.html"
 }
 
