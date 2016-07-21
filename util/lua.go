@@ -28,17 +28,17 @@ func TableToMap(r *lua.LTable) map[string]interface{} {
 		case lua.LTString:
 			resultMap[i.String()] = v.String()
 		case lua.LTNumber:
-			n, err := strconv.Atoi(v.String())
-			if err != nil {
+			if n, err := strconv.Atoi(v.String()); err != nil {
 				log.Fatal(err)
+			} else {
+				resultMap[i.String()] = n
 			}
-			resultMap[i.String()] = n
 		case lua.LTBool:
-			b, err := strconv.ParseBool(v.String())
-			if err != nil {
+			if b, err := strconv.ParseBool(v.String()); err != nil {
 				log.Fatal(err)
+			} else {
+				resultMap[i.String()] = b
 			}
-			resultMap[i.String()] = b
 		case lua.LTTable:
 			r := TableToMap(v.(*lua.LTable))
 			resultMap[i.String()] = r

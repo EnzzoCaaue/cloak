@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -58,7 +57,6 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		return
 	}
 	newData := util.TableToMap(luaVM.GetGlobal("data").(*lua.LTable))
-	log.Println(newData)
 	for i, v := range base.Base.Data {
 		newData[i] = v
 	}
