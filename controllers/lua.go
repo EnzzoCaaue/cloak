@@ -56,10 +56,10 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 		base.Base.Error = err.Error()
 		return
 	}
-	//newData := util.TableToMap(luaVM.GetGlobal("data").(*lua.LTable))
-	/*for i, v := range base.Base.Data {
-		newData[i] = v
-	}*/
+	newData := util.TableToMap(luaVM.GetGlobal("data").(*lua.LTable))
+	for i, v := range newData {
+		base.Base.Data(i, v)
+	}
 	json, err := strconv.ParseBool(luaVM.GetGlobal("json").String())
 	if err != nil {
 		base.Base.Error = err.Error()
@@ -69,7 +69,6 @@ func (base *LuaController) LuaPage(w http.ResponseWriter, req *http.Request, par
 	base.Base.Template = luaVM.GetGlobal("template").String()
 	base.Base.Error = luaVM.GetGlobal("redirect").String()
 	base.Base.Redirect = luaVM.GetGlobal("redirect").String()
-	//base.Base.Data = newData
 }
 
 func (l *LuaVM) urlParam(luaVM *lua.LState) int {
