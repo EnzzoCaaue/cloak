@@ -59,3 +59,9 @@ func (a *Article) Insert() error {
 	_, err := pigo.Database.Exec("INSERT INTO cloaka_news (text, title, created) VALUES (?, ?, ?)", a.Text, a.Title, a.Created)
 	return err
 }
+
+// Delete removes an article from the database
+func (a *Article) Delete() error {
+	_, err := pigo.Database.Exec("DELETE FROM cloaka_news WHERE id = ?", a.ID)
+	return err
+}

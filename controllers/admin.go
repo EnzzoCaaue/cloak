@@ -83,8 +83,11 @@ func (base *AdminController) ArticleEditProcess(w http.ResponseWriter, req *http
 		base.Error = err.Error()
 		return
 	}
-	article := models.NewArticle()
-	article.ID = articleID
+	article := models.GetArticle(articleID)
+	if article.ID == -1 {
+		base.Redirect = "/admin/news"
+		return
+	}
 	article.Text = req.FormValue("text")
 	article.Title = req.FormValue("title")
 	if err := article.Update(); err != nil {
@@ -111,5 +114,26 @@ func (base *AdminController) ArticleCreateProcess(w http.ResponseWriter, req *ht
 		return
 	}
 	base.Session.AddFlash("Article created successfully", "success")
+	base.Redirect = "/admin/news"
+}
+
+// ArticleDelete deletes the given article
+func (base *AdminController) ArticleDelete(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	articleID, err := strconv.ParseInt(ps.ByName("id"), 10, 64)
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	article := models.GetArticle(articleID)
+	if article.ID == -1 {
+		base.Redirect = "/admin/news"
+		return
+	}
+	err = article.Delete()
+	if err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Session.AddFlash("Article deleted successfully", "success")
 	base.Redirect = "/admin/news"
 }

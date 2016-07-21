@@ -1,8 +1,8 @@
-port = "1443"
-mode = "DEV"
-datapack = ""
-template =  ""
-static = "/public/"
+port = "1443" # Cloaka http port
+mode = "DEV" # Run mode (DEV for development. PROD for production)
+datapack = "" # Your datapack path
+template =  "" # Your template path
+static = "/public/" # Path to your static assets folder
 
 [https]
 enabled = false
@@ -20,9 +20,9 @@ file = "activity.lua"
 
 [paypal]
 currency = "EUR"
-mode = "sandbox"
-public = ""
-secret = ""
+mode = "sandbox" # Paypal mode (sandbox for testing. live for production)
+public = "" # Your public_key
+secret = "" # Your private_key
 promo = 10
 description = "Cloaka donation"
 
@@ -32,8 +32,8 @@ min = 10
 max = 100
 
 [captcha]
-public = ""
-secret = ""
+public = "" # Google reCAPTCHA public_key
+secret = "" # secret_key
 
 [register]
 experience = 4200

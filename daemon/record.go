@@ -1,15 +1,16 @@
 package daemon
 
 import (
-	"github.com/Cloakaac/cloak/models"
 	"log"
 	"time"
+
+	"github.com/Cloakaac/cloak/models"
 )
 
 type recordDaemon struct{}
 
 func init() {
-	daemons.Add("record", time.Minute, &recordDaemon{})
+	daemons.Add("record", 5*time.Minute, &recordDaemon{})
 }
 
 func (r *recordDaemon) tick() {
