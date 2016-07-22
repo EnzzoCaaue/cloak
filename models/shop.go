@@ -70,3 +70,9 @@ func (cat *Category) Insert() error {
 	_, err := pigo.Database.Exec("INSERT INTO cloaka_shop_categories (name, description) VALUES (?, ?)", cat.Name, cat.Description)
 	return err
 }
+
+// Delete deletes a category from the database
+func (cat *Category) Delete() error {
+	_, err := pigo.Database.Exec("DELETE FROM cloaka_shop_categories WHERE id = ?", cat.ID)
+	return err
+}

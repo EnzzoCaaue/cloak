@@ -128,6 +128,7 @@ func registerRoutes() {
 			Controller: &controllers.AdminController{},
 			Call:       "ShopCategories",
 			Method:     http.MethodGet,
+			Filters:    []string{"csrfToken"},
 		},
 		pigo.Route{
 			Path:       "/admin/shop/categories/create",
@@ -135,6 +136,13 @@ func registerRoutes() {
 			Call:       "CreateCategory",
 			Method:     http.MethodGet,
 			Filters:    []string{"csrfToken"},
+		},
+		pigo.Route{
+			Path:       "/admin/shop/categories/delete/:name/:token",
+			Controller: &controllers.AdminController{},
+			Call:       "DeleteCategory",
+			Method:     http.MethodGet,
+			Filters:    []string{"csrfValidation"},
 		},
 		pigo.Route{
 			Path:       "/admin/shop/categories/create",
@@ -195,12 +203,6 @@ func registerRoutes() {
 			Call:       "AccountLogout",
 			Method:     http.MethodGet,
 			Filters:    []string{"csrfValidation"},
-		},
-		pigo.Route{
-			Path:       "/account/lost/password",
-			Controller: &controllers.AccountController{},
-			Call:       "AccountSetRecovery",
-			Method:     http.MethodGet,
 		},
 		pigo.Route{
 			Path:       "/account/manage/recovery",

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"net/url"
 	"runtime"
 	"strconv"
 	"time"
@@ -172,5 +173,26 @@ func (base *AdminController) CreateCategoryProcess(w http.ResponseWriter, req *h
 		return
 	}
 	base.Session.AddFlash("Category created successfully", "success")
+	base.Redirect = "/admin/shop/categories"
+}
+
+// DeleteCategory deletes a shop category
+func (base *AdminController) DeleteCategory(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	categoryName, err := url.QueryUnescape(ps.ByName("name"))
+	if err != nil {
+		base.Error = "Error while reading guild name"
+		return
+	}
+	category := models.GetCategory(categoryName)
+	if category.ID == -1 {
+		base.Session.AddFlash("Category not found", "errors")
+		base.Redirect = "/admin/shop/categories"
+		return
+	}
+	if err := category.Delete(); err != nil {
+		base.Error = err.Error()
+		return
+	}
+	base.Session.AddFlash("Category deleted successfully", "success")
 	base.Redirect = "/admin/shop/categories"
 }
