@@ -313,6 +313,7 @@ func main() {
 	pigo.Filter("csrfToken", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params, c *pigo.Controller) bool {
 		token := uniuri.New()
 		c.Session.Set("csrfToken", token)
+		c.Session.Set("csrfRedirect", req.URL.String())
 		c.Data("csrfToken", token)
 		return true
 	})
@@ -321,13 +322,19 @@ func main() {
 		if !ok {
 			return false
 		}
+		redirectURL, ok := c.Session.Get("csrfRedirect").(string)
+		if !ok {
+			return false
+		}
 		switch req.Method {
 		case http.MethodGet:
 			if token != ps.ByName("token") {
+				http.Redirect(w, req, redirectURL, 301)
 				return false
 			}
 		case http.MethodPost:
 			if req.FormValue("_csrf") != token {
+				http.Redirect(w, req, redirectURL, 301)
 				return false
 			}
 		}
