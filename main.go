@@ -455,13 +455,13 @@ func main() {
 		waitGroup.Done()
 	}()
 	go func() {
-		defer timeTrack(time.Now(), "Sprite file loaded")
-		//util.ParseSpr("G:/Games/tibia1090/tibia.spr") // wip
+		if err := daemon.List.Add("record", time.Minute, &daemon.RecordDaemon{}); err != nil {
+			log.Fatal(err)
+		}
 		waitGroup.Done()
 	}()
 	waitGroup.Wait()
 	fmt.Printf("\r\n >> Cloak AAC running on port :%v \r\n\r\n", viper.GetString("port"))
-	go daemon.RunDaemons()
 	go command.ConsoleWatch()
 	pigo.Run()
 }

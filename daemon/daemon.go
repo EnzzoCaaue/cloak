@@ -2,12 +2,14 @@ package daemon
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 )
 
 var (
-	daemons = &cloakaDaemons{
+	// List holds all cloaka daemons
+	List = &cloakaDaemons{
 		make(map[string]*cloakaDaemon),
 		&sync.RWMutex{},
 	}
@@ -16,6 +18,7 @@ var (
 type cloakaDaemon struct {
 	dm       daemon
 	duration *time.Ticker
+	stop     chan bool
 }
 
 type cloakaDaemons struct {
@@ -27,34 +30,46 @@ type daemon interface {
 	tick()
 }
 
-// RunDaemons runs all daemon tickers
-func RunDaemons() {
-	daemons.rw.RLock()
-	defer daemons.rw.RUnlock()
-	for _, d := range daemons.list {
-		go runDaemon(d)
-	}
-}
-
 func (c *cloakaDaemons) Add(key string, duration time.Duration, dm daemon) error {
+	log.Println(key)
 	c.rw.Lock()
 	defer c.rw.Unlock()
 	if _, ok := c.list[key]; !ok {
-		c.list[key] = &cloakaDaemon{
+		daemon := &cloakaDaemon{
 			dm,
 			time.NewTicker(duration),
+			make(chan bool, 1),
 		}
+		c.list[key] = daemon
+		go runDaemon(daemon)
 		return nil
 	}
 	return errors.New("Daemon service already exists")
 }
 
+func (c *cloakaDaemons) Stop(key string) error {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+	if daemon, ok := c.list[key]; ok {
+		daemon.stop <- true
+		return nil
+	}
+	return errors.New("Daemon service not found")
+}
+
 func runDaemon(dm *cloakaDaemon) {
-	defer dm.duration.Stop()
+	defer func() {
+		dm.duration.Stop()
+		close(dm.stop)
+	}()
 	for {
 		select {
 		case <-dm.duration.C:
 			dm.dm.tick()
+		case s := <-dm.stop:
+			if s {
+				return
+			}
 		}
 	}
 }

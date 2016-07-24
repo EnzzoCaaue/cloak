@@ -72,10 +72,6 @@ var (
 		[]otmap.Town{},
 		&sync.RWMutex{},
 	}
-	// Spr contains the client spr file
-	Spr = &SpriteFile{
-		rw: &sync.RWMutex{},
-	}
 )
 
 // SetMode sets the AAC run mode DEBUG(0) RELEASE(1)

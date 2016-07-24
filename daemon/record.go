@@ -7,13 +7,9 @@ import (
 	"github.com/Cloakaac/cloak/models"
 )
 
-type recordDaemon struct{}
+type RecordDaemon struct{}
 
-func init() {
-	daemons.Add("record", 5*time.Minute, &recordDaemon{})
-}
-
-func (r *recordDaemon) tick() {
+func (r *RecordDaemon) tick() {
 	total := models.GetOnlineCount()
 	err := models.AddOnlineRecord(total, time.Now().Unix())
 	if err != nil {
