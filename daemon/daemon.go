@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"errors"
-	"log"
 	"sync"
 	"time"
 )
@@ -31,7 +30,6 @@ type daemon interface {
 }
 
 func (c *cloakaDaemons) Add(key string, duration time.Duration, dm daemon) error {
-	log.Println(key)
 	c.rw.Lock()
 	defer c.rw.Unlock()
 	if _, ok := c.list[key]; !ok {
