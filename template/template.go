@@ -8,15 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Cloakaac/cloak/models"
 	"github.com/Cloakaac/cloak/util"
-	"github.com/raggaer/pigo"
-	"github.com/spf13/viper"
+	"github.com/yaimko/yaimko"
 )
 
 // Load loads the AAC template
 func Load() {
-	pigo.LoadTemplate("[[", "]]", template.FuncMap{
+	yaimko.Template.Delims("[[", "]]")
+	m := template.FuncMap{
 		"gender": func(gender int) string {
 			return util.GetGender(gender)
 		},
@@ -92,7 +91,7 @@ func Load() {
 			return current != name
 		},
 		"getCaptchaKey": func() string {
-			return viper.GetString("captcha.public")
+			return yaimko.Config.String("captcha.public")
 		},
 		"parseComment": func(comment string) []string {
 			return strings.Split(comment, "\n")
@@ -106,16 +105,8 @@ func Load() {
 			}
 			return msg
 		},
-		"getTopPlayers": func(limit int) []*models.Player {
-			if pigo.Cache.IsExpired("topPlayers") {
-				players, err := models.GetTopPlayers(limit)
-				if err != nil {
-					return nil
-				}
-				pigo.Cache.Put("topPlayers", time.Minute, players)
-				return players
-			}
-			return pigo.Cache.Get("topPlayers").([]*models.Player)
+		"getTopPlayers": func(limit int) string {
+			return ""
 		},
 		"coolIndex": func(index int) int {
 			return index + 1
@@ -134,5 +125,9 @@ func Load() {
 		"csrfField": func(token string) template.HTML {
 			return template.HTML(fmt.Sprintf("<input type='hidden' name='_csrf' value = '%v'>", token))
 		},
-	})
+	}
+	yaimko.Template.Funcs(m)
+	if err := yaimko.LoadTemplateFiles(); err != nil {
+		yaimko.ERROR.Fatal(err)
+	}
 }
