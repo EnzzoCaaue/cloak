@@ -14,7 +14,7 @@ import (
 	"strconv"
 
 	"github.com/golang/freetype"
-	"github.com/spf13/viper"
+	"github.com/yaimko/yaimko"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 
 // CreateSignature creates a player signature image
 func CreateSignature(name string, gender, vocation, level int, lastlogin int64) ([]byte, error) {
-	background, err := os.Open(fmt.Sprintf("%v/%v/%v.%v", viper.GetString("template"), signaturePath, defaultSignature, signatureExtension))
+	background, err := os.Open(fmt.Sprintf("%v/%v/%v.%v", yaimko.Config.String("template.dir"), signaturePath, defaultSignature, signatureExtension))
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 		return nil, err
 	}
 	draw.Draw(backgroundRGBA, backgroundRGBA.Bounds(), backgroundDecoded, image.ZP, draw.Src)
-	fontBytes, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", viper.GetString("template"), fontsPath, defaultFont, fontsExtension))
+	fontBytes, err := ioutil.ReadFile(fmt.Sprintf("%v/%v/%v.%v", yaimko.Config.String("template.dir"), fontsPath, defaultFont, fontsExtension))
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func CreateSignature(name string, gender, vocation, level int, lastlogin int64) 
 	if err != nil {
 		return nil, err
 	}
-	signatureFile, err := os.Create(fmt.Sprintf("%v/%v/%v.%v", viper.GetString("template"), signaturePath, name, signatureExtension))
+	signatureFile, err := os.Create(fmt.Sprintf("%v/%v/%v.%v", yaimko.Config.String("template.dir"), signaturePath, name, signatureExtension))
 	defer signatureFile.Close()
 	signatureFile.Write(buffer.Bytes())
 	return buffer.Bytes(), nil

@@ -7,47 +7,30 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Cloakaac/cloak/models"
-	"github.com/Cloakaac/cloak/util"
+	"github.com/Cloakaac/cloak/app/models"
+	"github.com/Cloakaac/cloak/app/util"
 	"github.com/dchest/uniuri"
 	"github.com/dgryski/dgoogauth"
 	"github.com/julienschmidt/httprouter"
-	"github.com/raggaer/pigo"
 	"github.com/spf13/viper"
+	"github.com/yaimko/yaimko"
 )
 
 type AccountController struct {
-	*pigo.Controller
-}
-
-type deletionForm struct {
-	Password string
-	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
-}
-
-type creationForm struct {
-	Name     string `validate:"regexp=^[A-Z a-z]+$, max=14" alias:"Character name"`
-	Town     string
-	Gender   string `validate:"validGender" alias:"Character Gender"`
-	Vocation string `validate:"validVocation" alias:"Character Vocation"`
-	Captcha  string `validate:"validCaptcha" alias:"Captcha check"`
-}
-
-type passwordLostForm struct {
-	Password string `validate:"min=8, max=30" alias:"Account password"`
+	*yaimko.Controller
 }
 
 // AccountLost shows the recover account form
-func (base *AccountController) AccountLost(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	base.Data("ErrorsPassword", base.Session.GetFlashes("errorsPassword"))
-	base.Data("SuccessPassword", base.Session.GetFlashes("successPassword"))
-	base.Data("ErrorsName", base.Session.GetFlashes("errorsName"))
-	base.Data("SuccessName", base.Session.GetFlashes("successName"))
-	base.Template = "account_lost.html"
+func (base AccountController) AccountLost() *yaimko.Result {
+	base.Data["ErrorsPassword"] = session.GetFlash("errorsPassword")
+	base.Data["SuccessPassword"] = session.GetFlash("successPassword")
+	base.Data["ErrorsName"] = session.GetFlash("errorsName")
+	base.Data["SuccessName"] = session.GetFlash("successName")
+	return base.Render("account_lost.html")
 }
 
 // AccountLostName recovers an account name using the recovery key and the password
-func (base *AccountController) AccountLostName(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (base AccountController) AccountLostName(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	passwordSha1 := fmt.Sprintf("%x", sha1.Sum([]byte(req.FormValue("password"))))
 	name := models.RecoverAccountName(req.FormValue("key"), passwordSha1)
 	if name == "" {
